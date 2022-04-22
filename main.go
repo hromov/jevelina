@@ -8,42 +8,26 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb"
+	"github.com/hromov/jevelina/api"
 )
 
-// func create_users() {
-
-// 	role := cdb.Role{
-// 		Name: "User",
-// 	}
-// 	if r_role, err := cdb.Create(&role); err != nil {
-// 		log.Println(r_role)
-// 	}
-// 	user := cdb.User{
-// 		Name:  "Vasya A",
-// 		Email: "vasya2@gmail.com",
-// 	}
-// 	if r_user, err := cdb.Create(&user); err != nil {
-// 		log.Println(r_user)
-// 	}
-// }
+const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
 func newREST() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/contacts", contacts.contactsHandler).Methods("GET")
+	r.HandleFunc("/contacts", api.ContactsHandler).Methods("GET")
 	// r.HandleFunc("/banks", newBankHandler).Methods("POST")
 	// r.HandleFunc("/banks/{id}", bankChangeHandler).Methods("PUT", "DELETE")
 	return r
 }
 
 func main() {
-	dsn := "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 	if err := cdb.Init(dsn); err != nil {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
-
 	// testdata.Fill()
 
-	// if err := amo.Push_Contacts("../backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
+	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
 	// 	log.Println(err)
 	// }
 
