@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb"
+	amoimport "github.com/hromov/jevelina/amo_import"
 	"github.com/hromov/jevelina/api"
 )
 
@@ -31,6 +32,10 @@ func main() {
 	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
 	// 	log.Println(err)
 	// }
+
+	if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv"); err != nil {
+		log.Println(err)
+	}
 
 	// create_users()
 	router := newREST()
