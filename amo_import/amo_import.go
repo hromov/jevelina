@@ -11,8 +11,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/go-sql-driver/mysql"
 	"github.com/hromov/cdb"
 )
+
+var mysqlErr *mysql.MySQLError
 
 func Push_Contacts(path string) error {
 	f, err := os.Open(path)
@@ -22,7 +25,7 @@ func Push_Contacts(path string) error {
 	defer f.Close()
 
 	r := csv.NewReader(f)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 100000; i++ {
 		record, err := r.Read()
 		// Stop at EOF.
 		if err == io.EOF {
@@ -43,7 +46,9 @@ func Push_Contacts(path string) error {
 		// }
 		if contact := recordToContact(record); contact != nil {
 			if c, err := cdb.Create(contact); err != nil {
-				log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
+				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+					log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
+				}
 			} else {
 				log.Printf("contacts for record # = %d created: %+v", i, c)
 			}

@@ -1,15 +1,10 @@
 package main
 
 import (
-	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
-	amo "./pkg/amo_import"
-
-	testdata "./pkg/test_data"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb"
@@ -32,31 +27,9 @@ import (
 // 	}
 // }
 
-func contactsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/contacts" {
-		http.NotFound(w, r)
-		return
-	}
-	contacts, err := cdb.Contacts()
-	if err != nil {
-		log.Println("Can't get contacts error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(contacts)
-	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	fmt.Fprintf(w, string(b))
-}
-
 func newREST() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/contacts", contactsHandler).Methods("GET")
+	r.HandleFunc("/contacts", contacts.contactsHandler).Methods("GET")
 	// r.HandleFunc("/banks", newBankHandler).Methods("POST")
 	// r.HandleFunc("/banks/{id}", bankChangeHandler).Methods("PUT", "DELETE")
 	return r
@@ -68,11 +41,12 @@ func main() {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
 
-	testdata.Fill()
+	// testdata.Fill()
 
-	if err := amo.Push_Contacts("../backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
-		log.Println(err)
-	}
+	// if err := amo.Push_Contacts("../backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
+	// 	log.Println(err)
+	// }
+
 	// create_users()
 	router := newREST()
 	credentials := handlers.AllowCredentials()
