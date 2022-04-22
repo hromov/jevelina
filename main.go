@@ -8,7 +8,6 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb"
-	amoimport "github.com/hromov/jevelina/amo_import"
 	"github.com/hromov/jevelina/api"
 )
 
@@ -18,6 +17,8 @@ func newREST() *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/contacts", api.ContactsHandler).Methods("GET")
 	r.HandleFunc("/contacts/{id}", api.ContactHandler).Methods("GET")
+	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET")
+	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET")
 	// r.HandleFunc("/banks", newBankHandler).Methods("POST")
 	// r.HandleFunc("/banks/{id}", bankChangeHandler).Methods("PUT", "DELETE")
 	return r
@@ -33,9 +34,9 @@ func main() {
 	// 	log.Println(err)
 	// }
 
-	if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv"); err != nil {
-		log.Println(err)
-	}
+	// if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv"); err != nil {
+	// 	log.Println(err)
+	// }
 
 	// create_users()
 	router := newREST()

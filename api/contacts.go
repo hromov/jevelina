@@ -11,7 +11,7 @@ import (
 	"github.com/hromov/cdb"
 )
 
-const pageSize = 50
+const contactsPageSize = 50
 
 func ContactHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -43,11 +43,11 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	page := r.URL.Query().Get("page")
-	limit, offset := pageSize, 0
+	limit, offset := contactsPageSize, 0
 	if page != "" {
 		p, err := strconv.Atoi(page)
 		if err == nil {
-			limit = pageSize
+			limit = contactsPageSize
 			offset = p * limit
 		}
 	}

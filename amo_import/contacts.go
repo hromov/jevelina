@@ -1,6 +1,7 @@
 package amoimport
 
 import (
+	"crypto/sha1"
 	"encoding/csv"
 	"errors"
 	"io"
@@ -17,6 +18,16 @@ import (
 
 var mysqlErr *mysql.MySQLError
 
+//key = hash, val = id
+var contactsMap map[string]uint = map[string]uint{}
+
+func hashIt(s string) string {
+	h := sha1.New()
+	h.Write([]byte(s))
+	bs := h.Sum(nil)
+	return string(bs)
+}
+
 func Push_Contacts(path string) error {
 	f, err := os.Open(path)
 	if err != nil {
@@ -25,7 +36,7 @@ func Push_Contacts(path string) error {
 	defer f.Close()
 
 	r := csv.NewReader(f)
-	for i := 0; i < 100000; i++ {
+	for i := 0; i < 10000; i++ {
 		record, err := r.Read()
 		// Stop at EOF.
 		if err == io.EOF {
@@ -45,12 +56,24 @@ func Push_Contacts(path string) error {
 		// 	fmt.Printf(" %d = %v\n", value, record[value])
 		// }
 		if contact := recordToContact(record); contact != nil {
-			if c, err := cdb.Create(contact); err != nil {
+			if _, err := cdb.Create(contact); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
 				}
+			}
+
+			// } else {
+			// 	log.Printf("contacts for record # = %d created: %+v", i, c)
+			// }
+			//notices 1-5, fullname, contact responsible, records[21:30], records[30:44]
+			str := record[2] + record[6] + strings.Join(record[18:27], ",") + strings.Join(record[29:43], ",")
+			// log.Println(str)
+			hashed := hashIt(str)
+			if _, exist := contactsMap[hashed]; exist {
+				log.Println("WTF!!!!!!! contact exist with hash = ", hashed)
+				log.Println(contact)
 			} else {
-				log.Printf("contacts for record # = %d created: %+v", i, c)
+				contactsMap[hashed] = contact.ID
 			}
 		}
 
@@ -148,7 +171,7 @@ func recordToContact(record []string) *cdb.Contact {
 	contact.Analytics.UID = record[41]
 	contact.Analytics.TID = record[42]
 
-	log.Printf("all ok: %+v", contact)
+	// log.Printf("all ok: %+v", contact)
 	return contact
 }
 
@@ -195,3 +218,27 @@ func recordToContact(record []string) *cdb.Contact {
 //  40 = cid
 //  41 = uid
 //  42 = tid
+
+//  21 = Рабочий телефон
+//  22 = Рабочий прямой телефон
+//  23 = Мобильный телефон
+//  24 = Факс
+//  25 = Домашний телефон
+//  26 = Другой телефон
+//  27 = Рабочий email
+//  28 = Личный email
+//  29 = Другой email
+//  30 = Город
+//  31 = Источник
+//  32 = Должность
+//  33 = Товар
+//  34 = Skype
+//  35 = ICQ
+//  36 = Jabber
+//  37 = Google Talk
+//  38 = MSN
+//  39 = Другой IM
+//  40 = Пользовательское соглашение
+//  41 = cid
+//  42 = uid
+//  43 = tid

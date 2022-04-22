@@ -7,10 +7,24 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hromov/cdb"
 )
+
+func Get_Contact_ID(record []string) *uint {
+	//notices 1-5, fullname, contact responsible, records[21:30], records[30:44]
+	str := record[17] + record[19] + strings.Join(record[21:30], ",") + strings.Join(record[30:44], ",")
+	// log.Println(str)
+	hashed := hashIt(str)
+	if _, exist := contactsMap[hashed]; !exist {
+		log.Println("WTF!!!!!!! can'f find contact for lead = ", str)
+		return nil
+	}
+	r := contactsMap[hashed]
+	return &r
+}
 
 func Push_Leads(path string) error {
 	f, err := os.Open(path)
@@ -20,7 +34,7 @@ func Push_Leads(path string) error {
 	defer f.Close()
 
 	r := csv.NewReader(f)
-	for i := 0; i < 10; i++ {
+	for i := 0; i < 10000; i++ {
 		record, err := r.Read()
 		// Stop at EOF.
 		if err == io.EOF {
@@ -41,15 +55,16 @@ func Push_Leads(path string) error {
 		// }
 
 		if lead := recordToLead(record); lead != nil {
-			if c, err := cdb.Create(lead); err != nil {
+			if _, err := cdb.Create(lead); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
-					log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
+					log.Printf("Can't create lead for record # = %d error: %s", i, err.Error())
 				} else {
 					log.Println(err)
 				}
-			} else {
-				log.Printf("lead for record # = %d created: %+v", i, c)
 			}
+			// } else {
+			// 	log.Printf("lead for record # = %d created: %+v", i, c)
+			// }
 		}
 
 	}
@@ -85,6 +100,8 @@ func recordToLead(record []string) *cdb.Lead {
 	if err == nil {
 		lead.Budget = uint32(budget)
 	}
+	lead.ContactID = Get_Contact_ID(record)
+	// lead.ContactID = nil
 
 	//responsible and created from contacts goes here
 	//implement real user by get func
@@ -112,7 +129,7 @@ func recordToLead(record []string) *cdb.Lead {
 	// contact.SourceID = nil
 	lead.Analytics.Domain = record[75]
 
-	log.Printf("all ok: %+v", lead)
+	// log.Printf("all ok: %+v", lead)
 	return lead
 }
 
