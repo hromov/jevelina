@@ -2,12 +2,14 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"gorm.io/gorm"
 
 	"github.com/hromov/cdb"
 	"github.com/hromov/jevelina/base"
@@ -22,21 +24,68 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
+	// l := base.Leads()
+	// lead, err := l.ByID(ID)
+	// if err != nil {
+	// 	log.Println("Can't get lead error: " + err.Error())
+	// 	http.Error(w, http.StatusText(http.StatusInternalServerError),
+	// 		http.StatusInternalServerError)
+	// }
+	// b, err := json.Marshal(lead)
+	// if err != nil {
+	// 	log.Println("Can't json.Marchal(contatct) error: " + err.Error())
+	// 	http.Error(w, http.StatusText(http.StatusInternalServerError),
+	// 		http.StatusInternalServerError)
+	// 	return
+	// }
+	// fmt.Fprintf(w, string(b))
 	l := base.Leads()
-	lead, err := l.ByID(ID)
-	if err != nil {
-		log.Println("Can't get lead error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	b, err := json.Marshal(lead)
-	if err != nil {
-		log.Println("Can't json.Marchal(contatct) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
+	lead := new(cdb.Lead)
+	switch r.Method {
+	case "GET":
+		lead, err = l.ByID(ID)
+		if err != nil {
+			log.Println("Can't get lead error: " + err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				http.NotFound(w, r)
+			} else {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		}
+		b, err := json.Marshal(lead)
+		if err != nil {
+			log.Println("Can't json.Marshal(lead) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, string(b))
+	case "PUT":
+		if err = json.NewDecoder(r.Body).Decode(&lead); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		//channge to base.DB?
+		if err = l.DB.Save(lead).Error; err != nil {
+			log.Printf("Can't update lead with ID = %d. Error: %s", ID, err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
+		// w.WriteHeader(http.StatusOK)
+		return
+	case "DELETE":
+
+		if err = l.DB.Delete(&cdb.Lead{ID: uint(ID)}).Error; err != nil {
+			log.Printf("Can't delete lead with ID = %d. Error: %s", ID, err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
+		// w.WriteHeader(http.StatusOK)
 		return
 	}
-	fmt.Fprintf(w, string(b))
 }
 
 func LeadsHandler(w http.ResponseWriter, r *http.Request) {
@@ -45,6 +94,32 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 
 	if r.URL.Path != "/leads" {
 		http.NotFound(w, r)
+		return
+	}
+
+	if r.Method == "POST" {
+		lead := new(cdb.Lead)
+		if err := json.NewDecoder(r.Body).Decode(&lead); err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		c := base.GetDB()
+
+		if err := c.DB.Create(lead).Error; err != nil {
+			log.Printf("Can't create lead. Error: %s", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
+
+		//it actually was created ......
+		b, err := json.Marshal(lead)
+		if err != nil {
+			log.Println("Can't json.Marchal(lead) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, string(b))
 		return
 	}
 

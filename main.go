@@ -15,10 +15,10 @@ const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTi
 
 func newREST() *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/contacts", api.ContactsHandler).Methods("GET")
-	r.HandleFunc("/contacts/{id}", api.ContactHandler).Methods("GET")
-	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET")
-	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET")
+	r.HandleFunc("/contacts", api.ContactsHandler).Methods("GET", "POST")
+	r.HandleFunc("/contacts/{id}", api.ContactHandler).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET", "POST")
+	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET", "PUT", "DELETE")
 	// r.HandleFunc("/banks", newBankHandler).Methods("POST")
 	// r.HandleFunc("/banks/{id}", bankChangeHandler).Methods("PUT", "DELETE")
 	return r
