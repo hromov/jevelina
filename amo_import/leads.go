@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 )
 
@@ -82,7 +82,7 @@ func Push_Leads(path string) error {
 	// return records
 }
 
-func recordToLead(record []string) *cdb.Lead {
+func recordToLead(record []string) *models.Lead {
 	if len(record) == 0 {
 		return nil
 	}
@@ -91,7 +91,7 @@ func recordToLead(record []string) *cdb.Lead {
 		log.Println(record)
 		return nil
 	}
-	lead := &cdb.Lead{}
+	lead := &models.Lead{}
 	id, err := strconv.ParseUint(record[0], 10, 64)
 	if err != nil || id == 0 {
 		log.Println("ID parse error: " + err.Error())

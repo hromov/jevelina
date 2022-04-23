@@ -19,8 +19,7 @@ func newREST() *mux.Router {
 	r.HandleFunc("/contacts/{id}", api.ContactHandler).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET", "POST")
 	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET", "PUT", "DELETE")
-	// r.HandleFunc("/banks", newBankHandler).Methods("POST")
-	// r.HandleFunc("/banks/{id}", bankChangeHandler).Methods("PUT", "DELETE")
+
 	return r
 }
 

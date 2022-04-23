@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -26,7 +26,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := base.Contacts()
-	var contact *cdb.Contact
+	var contact interface{}
 
 	switch r.Method {
 	case "GET":
@@ -65,7 +65,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 
-		if err = c.DB.Delete(&cdb.Contact{ID: uint(ID)}).Error; err != nil {
+		if err = c.DB.Delete(&models.Contact{ID: uint(ID)}).Error; err != nil {
 			log.Printf("Can't delete contact with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -83,7 +83,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		contact := new(cdb.Contact)
+		contact := new(models.Contact)
 		if err := json.NewDecoder(r.Body).Decode(&contact); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

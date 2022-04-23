@@ -11,7 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 )
 
@@ -40,7 +40,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 	// }
 	// fmt.Fprintf(w, string(b))
 	l := base.Leads()
-	lead := new(cdb.Lead)
+	lead := new(models.Lead)
 	switch r.Method {
 	case "GET":
 		lead, err = l.ByID(ID)
@@ -78,7 +78,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 
-		if err = l.DB.Delete(&cdb.Lead{ID: uint(ID)}).Error; err != nil {
+		if err = l.DB.Delete(&models.Lead{ID: uint(ID)}).Error; err != nil {
 			log.Printf("Can't delete lead with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -89,7 +89,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LeadsHandler(w http.ResponseWriter, r *http.Request) {
-	leadsResponse := &cdb.LeadsResponse{}
+	leadsResponse := &models.LeadsResponse{}
 	var err error
 
 	if r.URL.Path != "/leads" {
@@ -98,7 +98,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		lead := new(cdb.Lead)
+		lead := new(models.Lead)
 		if err := json.NewDecoder(r.Body).Decode(&lead); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return

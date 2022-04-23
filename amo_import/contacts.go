@@ -13,7 +13,7 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 )
 
@@ -91,7 +91,7 @@ func Push_Contacts(path string) error {
 	// return records
 }
 
-func recordToContact(record []string) *cdb.Contact {
+func recordToContact(record []string) *models.Contact {
 	if len(record) == 0 {
 		return nil
 	}
@@ -100,7 +100,7 @@ func recordToContact(record []string) *cdb.Contact {
 		log.Println(record)
 		return nil
 	}
-	contact := &cdb.Contact{}
+	contact := &models.Contact{}
 	id, err := strconv.ParseUint(record[0], 10, 64)
 	if err != nil || id == 0 {
 		log.Println("ID parse error: " + err.Error())

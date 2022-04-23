@@ -4,17 +4,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 )
 
-var base_roles = []cdb.Role{
+var base_roles = []models.Role{
 	{Role: "Admin"},
 	{Role: "User"},
 }
 var r1 = uint8(1)
 var r2 = uint8(2)
-var test_users = []cdb.User{
+var test_users = []models.User{
 	{
 		Name:   "User 1",
 		Email:  "user_1@gmail.com",
@@ -27,7 +27,7 @@ var test_users = []cdb.User{
 	},
 }
 
-var test_sources = []cdb.Source{
+var test_sources = []models.Source{
 	{
 		Name: "Source 1",
 	},
@@ -87,7 +87,7 @@ func Fill() {
 	}
 }
 
-func Test(user *cdb.User) error {
+func Test(user *models.User) error {
 	db := base.GetDB()
 	r_user, err := db.Update(user)
 	if err != nil {
