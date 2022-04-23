@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/hromov/cdb/misc"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 )
@@ -58,7 +59,7 @@ func create_test_sources() {
 }
 
 func Fill() {
-	m := base.Misc()
+	m := &misc.Misc{DB: base.GetDB().DB}
 	roles, err := m.Roles()
 	if err != nil || len(roles) == 0 {
 		create_test_roles()

@@ -2,9 +2,6 @@ package base
 
 import (
 	"github.com/hromov/cdb"
-	"github.com/hromov/cdb/contacts"
-	"github.com/hromov/cdb/leads"
-	"github.com/hromov/cdb/misc"
 )
 
 var db *cdb.CDB
@@ -21,20 +18,20 @@ func GetDB() *cdb.CDB {
 	return db
 }
 
-func Contacts() *contacts.Contacts {
-	return &contacts.Contacts{
-		DB: db.DB,
-	}
-}
+// func Contacts() *contacts.Contacts {
+// 	return &contacts.Contacts{
+// 		DB: db.DB,
+// 	}
+// }
 
-func Leads() *leads.Leads {
-	return &leads.Leads{
-		DB: db.DB,
-	}
-}
+// func Leads() *leads.Leads {
+// 	return &leads.Leads{
+// 		DB: db.DB,
+// 	}
+// }
 
-func Misc() *misc.Misc {
-	return &misc.Misc{
-		DB: db.DB,
-	}
-}
+// func Misc() *misc.Misc {
+// 	return &misc.Misc{
+// 		DB: db.DB,
+// 	}
+// }

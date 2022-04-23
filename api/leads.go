@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
+	"github.com/hromov/cdb/leads"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 )
@@ -39,7 +40,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 	// 	return
 	// }
 	// fmt.Fprintf(w, string(b))
-	l := base.Leads()
+	l := &leads.Leads{DB: base.GetDB().DB}
 	lead := new(models.Lead)
 	switch r.Method {
 	case "GET":
@@ -134,7 +135,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	query := r.URL.Query().Get("query")
 	contactID := r.URL.Query().Get("contactID")
-	l := base.Leads()
+	l := &leads.Leads{DB: base.GetDB().DB}
 	if contactID != "" {
 		ID, err := strconv.ParseUint(contactID, 10, 32)
 		if err != nil {
