@@ -9,7 +9,6 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/cdb/contacts"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
 	"gorm.io/gorm"
@@ -26,8 +25,8 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := &contacts.Contacts{DB: base.GetDB().DB}
-	var contact interface{}
+	c := base.GetDB().Contacts()
+	var contact *models.Contact
 
 	switch r.Method {
 	case "GET":
@@ -121,7 +120,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	query := r.URL.Query().Get("query")
-	c := contacts.Contacts{DB: base.GetDB().DB}
+	c := base.GetDB().Contacts()
 	contactsResponse, err := c.List(limit, offset, query)
 	if err != nil {
 		log.Println("Can't get contacts error: " + err.Error())
