@@ -7,11 +7,9 @@ import (
 	"github.com/hromov/cdb/misc"
 )
 
-const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
-
 var db *cdb.CDB
 
-func Init() error {
+func Init(dsn string) error {
 	var err error
 	if db, err = cdb.Init(dsn); err != nil {
 		return err
@@ -24,13 +22,19 @@ func GetDB() *cdb.CDB {
 }
 
 func Contacts() *contacts.Contacts {
-	return db.Contacts()
+	return &contacts.Contacts{
+		DB: db.DB,
+	}
 }
 
 func Leads() *leads.Leads {
-	return db.Leads()
+	return &leads.Leads{
+		DB: db.DB,
+	}
 }
 
 func Misc() *misc.Misc {
-	return db.Misc()
+	return &misc.Misc{
+		DB: db.DB,
+	}
 }

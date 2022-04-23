@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/hromov/cdb/leads"
+	"github.com/hromov/cdb"
 	"github.com/hromov/jevelina/base"
 )
 
@@ -40,7 +40,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LeadsHandler(w http.ResponseWriter, r *http.Request) {
-	leadsResponse := &leads.LeadsResponse{}
+	leadsResponse := &cdb.LeadsResponse{}
 	var err error
 
 	if r.URL.Path != "/leads" {
