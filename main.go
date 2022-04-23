@@ -7,11 +7,11 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/hromov/cdb"
+	amoimport "github.com/hromov/jevelina/amo_import"
 	"github.com/hromov/jevelina/api"
+	"github.com/hromov/jevelina/base"
+	testdata "github.com/hromov/jevelina/test_data"
 )
-
-const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
 func newREST() *mux.Router {
 	r := mux.NewRouter()
@@ -25,18 +25,18 @@ func newREST() *mux.Router {
 }
 
 func main() {
-	if err := cdb.Init(dsn); err != nil {
+	if err := base.Init(); err != nil {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
-	// testdata.Fill()
+	testdata.Fill()
 
-	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
-	// 	log.Println(err)
-	// }
+	if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
+		log.Println(err)
+	}
 
-	// if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv"); err != nil {
-	// 	log.Println(err)
-	// }
+	if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv"); err != nil {
+		log.Println(err)
+	}
 
 	// create_users()
 	router := newREST()

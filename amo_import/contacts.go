@@ -13,7 +13,8 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/contacts"
+	"github.com/hromov/jevelina/base"
 )
 
 var mysqlErr *mysql.MySQLError
@@ -55,8 +56,9 @@ func Push_Contacts(path string) error {
 		// for value := range record {
 		// 	fmt.Printf(" %d = %v\n", value, record[value])
 		// }
+		db := base.GetDB()
 		if contact := recordToContact(record); contact != nil {
-			if _, err := cdb.Create(contact); err != nil {
+			if _, err := db.Create(contact); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
 				}
@@ -89,7 +91,7 @@ func Push_Contacts(path string) error {
 	// return records
 }
 
-func recordToContact(record []string) *cdb.Contact {
+func recordToContact(record []string) *contacts.Contact {
 	if len(record) == 0 {
 		return nil
 	}
@@ -98,7 +100,7 @@ func recordToContact(record []string) *cdb.Contact {
 		log.Println(record)
 		return nil
 	}
-	contact := &cdb.Contact{}
+	contact := &contacts.Contact{}
 	id, err := strconv.ParseUint(record[0], 10, 64)
 	if err != nil || id == 0 {
 		log.Println("ID parse error: " + err.Error())

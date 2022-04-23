@@ -8,7 +8,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/cdb"
+
+	"github.com/hromov/cdb/leads"
+	"github.com/hromov/jevelina/base"
 )
 
 const leadsPageSize = 50
@@ -20,7 +22,8 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	lead, err := cdb.LeadByID(ID)
+	l := base.Leads()
+	lead, err := l.ByID(ID)
 	if err != nil {
 		log.Println("Can't get lead error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -37,7 +40,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LeadsHandler(w http.ResponseWriter, r *http.Request) {
-	leadsResponse := &cdb.LeadsResponse{}
+	leadsResponse := &leads.LeadsResponse{}
 	var err error
 
 	if r.URL.Path != "/leads" {
@@ -56,20 +59,21 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	query := r.URL.Query().Get("query")
 	contactID := r.URL.Query().Get("contactID")
+	l := base.Leads()
 	if contactID != "" {
 		ID, err := strconv.ParseUint(contactID, 10, 32)
 		if err != nil {
 			http.Error(w, "clientID conversion error: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		leadsResponse, err = cdb.LeadsByContact(uint(ID))
+		leadsResponse, err = l.ByContact(uint(ID))
 		if err != nil {
 			log.Println("Can't get leads error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 	} else {
-		leadsResponse, err = cdb.Leads(limit, offset, query)
+		leadsResponse, err = l.List(limit, offset, query)
 		if err != nil {
 			log.Println("Can't get leads error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

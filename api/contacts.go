@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/cdb"
+	"github.com/hromov/jevelina/base"
 )
 
 const contactsPageSize = 50
@@ -20,7 +20,8 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	contact, err := cdb.ContactByID(ID)
+	c := base.Contacts()
+	contact, err := c.ByID(ID)
 	if err != nil {
 		log.Println("Can't get contact error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -52,8 +53,8 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	query := r.URL.Query().Get("query")
-
-	contactsResponse, err := cdb.Contacts(limit, offset, query)
+	c := base.Contacts()
+	contactsResponse, err := c.List(limit, offset, query)
 	if err != nil {
 		log.Println("Can't get contacts error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

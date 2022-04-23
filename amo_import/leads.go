@@ -10,7 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/leads"
+	"github.com/hromov/jevelina/base"
 )
 
 func Get_Contact_ID(record []string) *uint {
@@ -32,6 +33,8 @@ func Push_Leads(path string) error {
 		return errors.New("Unable to read input file " + path + ". Error: " + err.Error())
 	}
 	defer f.Close()
+
+	db := base.GetDB()
 
 	r := csv.NewReader(f)
 	for i := 0; i < 10000; i++ {
@@ -55,7 +58,7 @@ func Push_Leads(path string) error {
 		// }
 
 		if lead := recordToLead(record); lead != nil {
-			if _, err := cdb.Create(lead); err != nil {
+			if _, err := db.Create(lead); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create lead for record # = %d error: %s", i, err.Error())
 				} else {
@@ -79,7 +82,7 @@ func Push_Leads(path string) error {
 	// return records
 }
 
-func recordToLead(record []string) *cdb.Lead {
+func recordToLead(record []string) *leads.Lead {
 	if len(record) == 0 {
 		return nil
 	}
@@ -88,7 +91,7 @@ func recordToLead(record []string) *cdb.Lead {
 		log.Println(record)
 		return nil
 	}
-	lead := &cdb.Lead{}
+	lead := &leads.Lead{}
 	id, err := strconv.ParseUint(record[0], 10, 64)
 	if err != nil || id == 0 {
 		log.Println("ID parse error: " + err.Error())

@@ -4,16 +4,17 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/hromov/cdb"
+	"github.com/hromov/cdb/misc"
+	"github.com/hromov/jevelina/base"
 )
 
-var base_roles = []cdb.Role{
+var base_roles = []misc.Role{
 	{Role: "Admin"},
 	{Role: "User"},
 }
 var r1 = uint8(1)
 var r2 = uint8(2)
-var test_users = []cdb.User{
+var test_users = []misc.User{
 	{
 		Name:   "User 1",
 		Email:  "user_1@gmail.com",
@@ -26,7 +27,7 @@ var test_users = []cdb.User{
 	},
 }
 
-var test_sources = []cdb.Source{
+var test_sources = []misc.Source{
 	{
 		Name: "Source 1",
 	},
@@ -36,32 +37,36 @@ var test_sources = []cdb.Source{
 }
 
 func create_test_roles() {
+	db := base.GetDB()
 	for _, r := range base_roles {
-		cdb.Create(&r)
+		db.Create(&r)
 	}
 }
 
 func create_test_users() {
+	db := base.GetDB()
 	for _, u := range test_users {
-		cdb.Create(&u)
+		db.Create(&u)
 	}
 }
 
 func create_test_sources() {
+	db := base.GetDB()
 	for _, u := range test_sources {
-		cdb.Create(&u)
+		db.Create(&u)
 	}
 }
 
 func Fill() {
-	roles, err := cdb.Roles()
+	m := base.Misc()
+	roles, err := m.Roles()
 	if err != nil || len(roles) == 0 {
 		create_test_roles()
 	} else {
 		log.Println(roles)
 	}
 
-	if users, err := cdb.Users(); err != nil || len(users) == 0 {
+	if users, err := m.Users(); err != nil || len(users) == 0 {
 		create_test_users()
 	} else {
 		// log.Println(users)
@@ -74,7 +79,7 @@ func Fill() {
 		// log.Println(users[0].Role)
 	}
 
-	sources, err := cdb.Sources()
+	sources, err := m.Sources()
 	if err != nil || len(sources) == 0 {
 		create_test_sources()
 	} else {
@@ -82,8 +87,9 @@ func Fill() {
 	}
 }
 
-func Test(user *cdb.User) error {
-	r_user, err := cdb.Update(user)
+func Test(user *misc.User) error {
+	db := base.GetDB()
+	r_user, err := db.Update(user)
 	if err != nil {
 		return err
 	}
