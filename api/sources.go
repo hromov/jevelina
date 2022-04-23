@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -27,32 +29,36 @@ func SourceHandler(w http.ResponseWriter, r *http.Request) {
 	var source *models.Source
 
 	switch r.Method {
-	// case "GET":
-	// 	source, err = c.Source(ID)
-	// 	if err != nil {
-	// 		log.Println("Can't get source error: " + err.Error())
-	// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-	// 			http.NotFound(w, r)
-	// 		} else {
-	// 			http.Error(w, http.StatusText(http.StatusInternalServerError),
-	// 				http.StatusInternalServerError)
-	// 		}
-	// 		return
-	// 	}
-	// 	b, err := json.Marshal(source)
-	// 	if err != nil {
-	// 		log.Println("Can't json.Marchal(source) error: " + err.Error())
-	// 		http.Error(w, http.StatusText(http.StatusInternalServerError),
-	// 			http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	fmt.Fprintf(w, string(b))
+	case "GET":
+		source, err = c.Source(ID)
+		if err != nil {
+			log.Println("Can't get source error: " + err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				http.NotFound(w, r)
+			} else {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		}
+		b, err := json.Marshal(source)
+		if err != nil {
+			log.Println("Can't json.Marchal(source) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, string(b))
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&source); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
+		if uint64(source.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, source.ID), http.StatusBadRequest)
+			return
+		}
 		//channge to base.DB?
 		if err = c.DB.Save(source).Error; err != nil {
 			log.Printf("Can't update source with ID = %d. Error: %s", ID, err.Error())

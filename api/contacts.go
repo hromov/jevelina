@@ -55,6 +55,11 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		if uint64(contact.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, contact.ID), http.StatusBadRequest)
+			return
+		}
+
 		//channge to base.DB?
 		if err = c.DB.Omit(clause.Associations).Save(contact).Error; err != nil {
 			log.Printf("Can't update contact with ID = %d. Error: %s", ID, err.Error())

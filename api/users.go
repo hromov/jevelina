@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -27,29 +29,34 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 	var user *models.User
 
 	switch r.Method {
-	// case "GET":
-	// 	user, err = c.User(ID)
-	// 	if err != nil {
-	// 		log.Println("Can't get user error: " + err.Error())
-	// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-	// 			http.NotFound(w, r)
-	// 		} else {
-	// 			http.Error(w, http.StatusText(http.StatusInternalServerError),
-	// 				http.StatusInternalServerError)
-	// 		}
-	// 		return
-	// 	}
-	// 	b, err := json.Marshal(user)
-	// 	if err != nil {
-	// 		log.Println("Can't json.Marchal(user) error: " + err.Error())
-	// 		http.Error(w, http.StatusText(http.StatusInternalServerError),
-	// 			http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	fmt.Fprintf(w, string(b))
+	case "GET":
+		user, err = c.User(ID)
+		if err != nil {
+			log.Println("Can't get user error: " + err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				http.NotFound(w, r)
+			} else {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		}
+		b, err := json.Marshal(user)
+		if err != nil {
+			log.Println("Can't json.Marchal(user) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, string(b))
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if uint64(user.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, user.ID), http.StatusBadRequest)
 			return
 		}
 

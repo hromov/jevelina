@@ -69,6 +69,10 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//channge to base.DB?
+		if uint64(lead.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, lead.ID), http.StatusBadRequest)
+			return
+		}
 		if err = l.DB.Save(lead).Error; err != nil {
 			log.Printf("Can't update lead with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

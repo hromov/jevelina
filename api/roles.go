@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -10,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -27,26 +29,26 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 	var role *models.Role
 
 	switch r.Method {
-	// case "GET":
-	// 	role, err = c.Role(ID)
-	// 	if err != nil {
-	// 		log.Println("Can't get role error: " + err.Error())
-	// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-	// 			http.NotFound(w, r)
-	// 		} else {
-	// 			http.Error(w, http.StatusText(http.StatusInternalServerError),
-	// 				http.StatusInternalServerError)
-	// 		}
-	// 		return
-	// 	}
-	// 	b, err := json.Marshal(role)
-	// 	if err != nil {
-	// 		log.Println("Can't json.Marchal(role) error: " + err.Error())
-	// 		http.Error(w, http.StatusText(http.StatusInternalServerError),
-	// 			http.StatusInternalServerError)
-	// 		return
-	// 	}
-	// 	fmt.Fprintf(w, string(b))
+	case "GET":
+		role, err = c.Role(ID)
+		if err != nil {
+			log.Println("Can't get role error: " + err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				http.NotFound(w, r)
+			} else {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		}
+		b, err := json.Marshal(role)
+		if err != nil {
+			log.Println("Can't json.Marchal(role) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprintf(w, string(b))
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&role); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -54,6 +56,11 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//channge to base.DB?
+
+		if uint64(role.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, role.ID), http.StatusBadRequest)
+			return
+		}
 		if err = c.DB.Save(role).Error; err != nil {
 			log.Printf("Can't update role with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
