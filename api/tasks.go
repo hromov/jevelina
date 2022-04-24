@@ -57,8 +57,8 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, task.ID), http.StatusBadRequest)
 			return
 		}
-		if task.LeadID == 0 && task.ContactID == 0 {
-			http.Error(w, "task shoud have LeadID or ContactID", http.StatusBadRequest)
+		if task.ParentID == 0 {
+			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
 			return
 		}
 		//channge to base.DB?
@@ -71,7 +71,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 
-		if err = c.DB.Delete(&models.Task{ID: uint(ID)}).Error; err != nil {
+		if err = c.DB.Delete(&models.Task{ID: ID}).Error; err != nil {
 			log.Printf("Can't delete task with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -95,8 +95,8 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		if task.LeadID == 0 && task.ContactID == 0 {
-			http.Error(w, "task shoud have LeadID or ContactID", http.StatusBadRequest)
+		if task.ParentID == 0 {
+			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
 			return
 		}
 		c := base.GetDB()
@@ -123,39 +123,15 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	c := base.GetDB().Misc()
 
-	contactID := r.URL.Query().Get("contactID")
-	leadID := r.URL.Query().Get("leadID")
-
-	if contactID == "" && leadID == "" {
-		http.Error(w, "ContactID or LeadID is required to get tasks", http.StatusBadRequest)
-		return
-	}
-
-	tasks := []models.Task{}
-	if contactID != "" {
-		ID, err := strconv.ParseUint(contactID, 10, 64)
-		if err != nil {
-			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-		tasks, err = c.TasksByContact(uint(ID))
-	} else {
-		ID, err := strconv.ParseUint(contactID, 10, 64)
-		if err != nil {
-			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-			return
-		}
-		tasks, err = c.TasksByLead(uint(ID))
-	}
+	tasksResponse, err := c.Tasks(filterFromQuery(r.URL.Query()))
 	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(tasks)
+	b, err := json.Marshal(tasksResponse.Tasks)
 	if err != nil {
-		log.Println("Can't json.Marchal(tasks) error: " + err.Error())
+		log.Println("Can't json.Marshal(tasks) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-	total := strconv.Itoa(len(tasks))
-	w.Header().Set("X-Total-Count", total)
+	w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
 	fmt.Fprintf(w, string(b))
 }

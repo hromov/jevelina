@@ -15,7 +15,7 @@ import (
 )
 
 var sMap = map[string]uint8{}
-var uMap = map[string]uint{}
+var uMap = map[string]uint64{}
 var pMap = map[string]uint32{}
 var mMap = map[string]uint16{}
 var stepsMap = map[string]uint8{}

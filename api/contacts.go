@@ -15,8 +15,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-const contactsPageSize = 50
-
 func ContactHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -70,7 +68,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 
-		if err = c.DB.Delete(&models.Contact{ID: uint(ID)}).Error; err != nil {
+		if err = c.DB.Delete(&models.Contact{ID: ID}).Error; err != nil {
 			log.Printf("Can't delete contact with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -115,18 +113,8 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	page := r.URL.Query().Get("page")
-	limit, offset := contactsPageSize, 0
-	if page != "" {
-		p, err := strconv.Atoi(page)
-		if err == nil {
-			limit = contactsPageSize
-			offset = p * limit
-		}
-	}
-	query := r.URL.Query().Get("query")
 	c := base.GetDB().Contacts()
-	contactsResponse, err := c.List(limit, offset, query)
+	contactsResponse, err := c.List(filterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get contacts error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

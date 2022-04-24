@@ -6,7 +6,7 @@ require (
 	github.com/go-sql-driver/mysql v1.6.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
-	github.com/hromov/cdb v0.0.0-20220424122827-613f19bd3f4f
+	github.com/hromov/cdb v0.0.0-20220424160607-a361f24df19b
 	gorm.io/gorm v1.23.4
 )
 

@@ -14,7 +14,7 @@ import (
 	"github.com/hromov/jevelina/base"
 )
 
-func Get_Contact_ID(record []string) *uint {
+func Get_Contact_ID(record []string) *uint64 {
 	//notices 1-5, fullname, contact responsible, records[21:30], records[30:44]
 	str := record[17] + record[19] + strings.Join(record[21:30], ",") + strings.Join(record[30:44], ",")
 	// log.Println(str)
@@ -138,7 +138,7 @@ func recordToLead(record []string) *models.Lead {
 		log.Println("ID parse error: " + err.Error())
 		return nil
 	}
-	lead.ID = uint(id)
+	lead.ID = id
 	lead.Name = record[1]
 	budget, err := strconv.ParseUint(record[2], 10, 32)
 	if err == nil {
@@ -154,10 +154,16 @@ func recordToLead(record []string) *models.Lead {
 
 	const timeForm = "02-01-2006 15:04:05"
 	lead.CreatedAt, _ = time.Parse(timeForm, record[4])
+	// if closed, err := time.Parse(timeForm, record[8]); err == nil {
+	// 	lead.ClosedAt = closed
+	// } else {
+	// 	lead.ClosedAt = nil
+	// }
 	if closed, err := time.Parse(timeForm, record[8]); err == nil {
-		lead.ClosedAt = &closed
+		lead.ClosedAt.Time = closed
+		lead.ClosedAt.Valid = true
 	} else {
-		lead.ClosedAt = nil
+		lead.ClosedAt.Valid = false
 	}
 
 	//tags record[9]

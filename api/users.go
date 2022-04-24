@@ -67,8 +67,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		// w.WriteHeader(http.StatusOK)
 		return
 	case "DELETE":
-
-		if err = c.DB.Delete(&models.User{ID: uint(ID)}).Error; err != nil {
+		if err = c.DB.Delete(&models.User{ID: ID}).Error; err != nil {
 			log.Printf("Can't delete user with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)

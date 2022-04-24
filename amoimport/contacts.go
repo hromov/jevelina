@@ -20,7 +20,7 @@ import (
 var mysqlErr *mysql.MySQLError
 
 //key = hash, val = id
-var contactsMap map[string]uint = map[string]uint{}
+var contactsMap map[string]uint64 = map[string]uint64{}
 
 func hashIt(s string) string {
 	h := sha1.New()
@@ -134,7 +134,7 @@ func recordToContact(record []string) *models.Contact {
 		log.Println("ID parse error: " + err.Error())
 		return nil
 	}
-	contact.ID = uint(id)
+	contact.ID = id
 	if record[1] == "контакт" {
 		contact.IsPerson = true
 	}
