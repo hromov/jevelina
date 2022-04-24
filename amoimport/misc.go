@@ -64,7 +64,7 @@ func Push_Misc(path string, n int) error {
 		// 	fmt.Printf(" %d = %v\n", value, record[value])
 		// }
 
-		if _, exist := misc[record[3]]; !exist {
+		if _, exist := misc[record[3]]; !exist && record[3] != "" {
 			misc[record[3]] = -1
 			if err := db.Omit(clause.Associations).Create(&models.User{Name: record[3], Email: fmt.Sprintf("email_%d@gmail.com", i), RoleID: &role.ID}).Error; err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
@@ -72,7 +72,7 @@ func Push_Misc(path string, n int) error {
 				}
 			}
 		}
-		if _, exist := misc[record[15]]; !exist {
+		if _, exist := misc[record[15]]; !exist && record[15] != "" {
 			misc[record[15]] = -1
 			if _, err := db.Create(&models.Step{Name: record[15]}); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
@@ -80,7 +80,7 @@ func Push_Misc(path string, n int) error {
 				}
 			}
 		}
-		if _, exist := misc[record[69]]; !exist {
+		if _, exist := misc[record[69]]; !exist && record[69] != "" {
 			misc[record[69]] = -1
 			if _, err := db.Create(&models.Product{Name: record[69]}); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
@@ -88,7 +88,7 @@ func Push_Misc(path string, n int) error {
 				}
 			}
 		}
-		if _, exist := misc[record[70]]; !exist {
+		if _, exist := misc[record[70]]; !exist && record[70] != "" {
 			misc[record[70]] = -1
 			if _, err := db.Create(&models.Manufacturer{Name: record[70]}); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
@@ -96,7 +96,7 @@ func Push_Misc(path string, n int) error {
 				}
 			}
 		}
-		if _, exist := misc[record[31]]; !exist {
+		if _, exist := misc[record[31]]; !exist && record[31] != "" {
 			misc[record[31]] = -1
 			if _, err := db.Create(&models.Source{Name: record[31]}); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
@@ -105,7 +105,7 @@ func Push_Misc(path string, n int) error {
 			}
 		}
 		for _, tag := range strings.Split(record[9], ",") {
-			if _, exist := misc[tag]; !exist {
+			if _, exist := misc[tag]; !exist && tag != "" {
 				misc[tag] = -1
 				if _, err := db.Create(&models.Tag{Name: tag}); err != nil {
 					if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {

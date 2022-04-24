@@ -154,16 +154,10 @@ func recordToLead(record []string) *models.Lead {
 
 	const timeForm = "02-01-2006 15:04:05"
 	lead.CreatedAt, _ = time.Parse(timeForm, record[4])
-	// if closed, err := time.Parse(timeForm, record[8]); err == nil {
-	// 	lead.ClosedAt = closed
-	// } else {
-	// 	lead.ClosedAt = nil
-	// }
 	if closed, err := time.Parse(timeForm, record[8]); err == nil {
-		lead.ClosedAt.Time = closed
-		lead.ClosedAt.Valid = true
+		lead.ClosedAt = &closed
 	} else {
-		lead.ClosedAt.Valid = false
+		lead.ClosedAt = nil
 	}
 
 	//tags record[9]
