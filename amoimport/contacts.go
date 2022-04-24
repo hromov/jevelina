@@ -15,7 +15,6 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
-	"gorm.io/gorm/clause"
 )
 
 var mysqlErr *mysql.MySQLError
@@ -76,7 +75,17 @@ func Push_Contacts(path string, n int) error {
 			if source != 0 {
 				contact.SourceID = &source
 			}
-			if err := db.Omit(clause.Associations).Create(contact).Error; err != nil {
+			tags := []models.Tag{}
+			for _, tag := range strings.Split(record[12], ",") {
+				if _, exist := tagsMap[tag]; exist {
+					tags = append(tags, models.Tag{ID: tagsMap[tag]})
+				}
+			}
+			if len(tags) != 0 {
+				contact.Tags = tags
+			}
+			// .Omit(clause.Associations)
+			if _, err := db.Create(contact); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
 				} else {

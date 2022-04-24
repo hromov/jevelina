@@ -7,6 +7,7 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
@@ -18,6 +19,7 @@ var uMap = map[string]uint{}
 var pMap = map[string]uint32{}
 var mMap = map[string]uint16{}
 var stepsMap = map[string]uint8{}
+var tagsMap = map[string]uint8{}
 
 func Push_Misc(path string, n int) error {
 	f, err := os.Open(path)
@@ -102,6 +104,17 @@ func Push_Misc(path string, n int) error {
 				}
 			}
 		}
+		for _, tag := range strings.Split(record[9], ",") {
+			if _, exist := misc[tag]; !exist {
+				misc[tag] = -1
+				if _, err := db.Create(&models.Tag{Name: tag}); err != nil {
+					if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+						log.Printf("Can't create source for record # = %d error: %s", i, err.Error())
+					}
+				}
+			}
+		}
+
 	}
 	sources, err := db.Misc().Sources()
 	if err != nil {
@@ -156,6 +169,17 @@ func Push_Misc(path string, n int) error {
 	}
 	for _, item := range steps {
 		stepsMap[item.Name] = item.ID
+	}
+
+	tags, err := db.Misc().Tags()
+	if err != nil {
+		return errors.New("Can't get steps")
+	}
+	if len(tags) == 0 {
+		log.Println("No steps were found")
+	}
+	for _, item := range tags {
+		tagsMap[item.Name] = item.ID
 	}
 
 	return nil

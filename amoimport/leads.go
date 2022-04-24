@@ -89,6 +89,15 @@ func Push_Leads(path string, n int) error {
 			if step != 0 {
 				lead.StepID = &step
 			}
+			tags := []models.Tag{}
+			for _, tag := range strings.Split(record[9], ",") {
+				if _, exist := tagsMap[tag]; exist {
+					tags = append(tags, models.Tag{ID: tagsMap[tag]})
+				}
+			}
+			if len(tags) != 0 {
+				lead.Tags = tags
+			}
 
 			if _, err := db.Create(lead); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
