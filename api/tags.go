@@ -128,6 +128,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := strconv.Itoa(len(tagsResponse))
+	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprintf(w, string(b))
 }

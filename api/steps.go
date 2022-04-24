@@ -129,6 +129,7 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := strconv.Itoa(len(stepsResponse))
+	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprintf(w, string(b))
 }

@@ -127,6 +127,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
+	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", strconv.FormatInt(leadsResponse.Total, 10))
 	fmt.Fprintf(w, string(b))
 }

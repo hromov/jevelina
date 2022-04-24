@@ -128,6 +128,7 @@ func TaskTypesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := strconv.Itoa(len(tasktypesResponse))
+	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprintf(w, string(b))
 }

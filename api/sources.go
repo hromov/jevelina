@@ -128,6 +128,7 @@ func SourcesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	total := strconv.Itoa(len(sourcesResponse))
+	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprintf(w, string(b))
 }
