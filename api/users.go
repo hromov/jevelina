@@ -15,8 +15,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-const usersPageSize = 25
-
 func UserHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -30,7 +28,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		user, err = c.User(ID)
+		user, err = c.User(uint(ID))
 		if err != nil {
 			log.Println("Can't get user error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {

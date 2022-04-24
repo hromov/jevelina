@@ -15,6 +15,7 @@ import (
 	"github.com/go-sql-driver/mysql"
 	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"gorm.io/gorm/clause"
 )
 
 var mysqlErr *mysql.MySQLError
@@ -29,15 +30,16 @@ func hashIt(s string) string {
 	return string(bs)
 }
 
-func Push_Contacts(path string) error {
+func Push_Contacts(path string, n int) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return errors.New("Unable to read input file " + path + ". Error: " + err.Error())
 	}
 	defer f.Close()
-
 	r := csv.NewReader(f)
-	for i := 0; i < 10000; i++ {
+	db := base.GetDB()
+
+	for i := 0; i < n; i++ {
 		record, err := r.Read()
 		// Stop at EOF.
 		if err == io.EOF {
@@ -46,6 +48,10 @@ func Push_Contacts(path string) error {
 
 		if err != nil {
 			panic(err)
+		}
+
+		if i == 0 {
+			continue
 		}
 		// Display record.
 		// ... Display record length.
@@ -56,14 +62,27 @@ func Push_Contacts(path string) error {
 		// for value := range record {
 		// 	fmt.Printf(" %d = %v\n", value, record[value])
 		// }
-		db := base.GetDB()
+
 		if contact := recordToContact(record); contact != nil {
-			if _, err := db.Create(contact); err != nil {
+			responsible := uMap[record[6]]
+			created := uMap[record[8]]
+			source := sMap[record[30]]
+			if responsible != 0 {
+				contact.ResponsibleID = &responsible
+			}
+			if created != 0 {
+				contact.CreatedID = &created
+			}
+			if source != 0 {
+				contact.SourceID = &source
+			}
+			if err := db.Omit(clause.Associations).Create(contact).Error; err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create contact for record # = %d error: %s", i, err.Error())
+				} else {
+					log.Printf("Can't create contact. Respoonsible = %d, (%+v), created = %d (%+v), source = %d (%+v)", responsible, uMap, created, uMap, source, sMap)
 				}
 			}
-
 			// } else {
 			// 	log.Printf("contacts for record # = %d created: %+v", i, c)
 			// }

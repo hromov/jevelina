@@ -25,6 +25,12 @@ func newREST() *mux.Router {
 	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/roles", api.RolesHandler).Methods("GET", "POST")
 	r.HandleFunc("/roles/{id}", api.RoleHandler).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/steps", api.StepsHandler).Methods("GET", "POST")
+	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/products", api.ProductsHandler).Methods("GET", "POST")
+	r.HandleFunc("/products/{id}", api.ProductHandler).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/manufacturers", api.ManufacturersHandler).Methods("GET", "POST")
+	r.HandleFunc("/manufacturers/{id}", api.ManufacturerHandler).Methods("GET", "PUT", "DELETE")
 
 	return r
 }
@@ -35,11 +41,17 @@ func main() {
 	}
 	// testdata.Fill()
 
-	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv"); err != nil {
+	// n := 1000
+
+	// if err := amoimport.Push_Misc("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
 	// }
 
-	// if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv"); err != nil {
+	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv", n); err != nil {
+	// 	log.Println(err)
+	// }
+
+	// if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
 	// }
 

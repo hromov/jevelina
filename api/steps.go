@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func SourceHandler(w http.ResponseWriter, r *http.Request) {
+func StepHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
@@ -24,13 +24,13 @@ func SourceHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := base.GetDB().Misc()
-	var source *models.Source
+	var step *models.Step
 
 	switch r.Method {
 	case "GET":
-		source, err = c.Source(uint8(ID))
+		step, err = c.Step(uint8(ID))
 		if err != nil {
-			log.Println("Can't get source error: " + err.Error())
+			log.Println("Can't get step error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				http.NotFound(w, r)
 			} else {
@@ -39,27 +39,28 @@ func SourceHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-		b, err := json.Marshal(source)
+		b, err := json.Marshal(step)
 		if err != nil {
-			log.Println("Can't json.Marchal(source) error: " + err.Error())
+			log.Println("Can't json.Marchal(step) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
 		fmt.Fprintf(w, string(b))
 	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&source); err != nil {
+		if err = json.NewDecoder(r.Body).Decode(&step); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if uint64(source.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, source.ID), http.StatusBadRequest)
+		if uint64(step.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, step.ID), http.StatusBadRequest)
 			return
 		}
+
 		//channge to base.DB?
-		if err = c.DB.Save(source).Error; err != nil {
-			log.Printf("Can't update source with ID = %d. Error: %s", ID, err.Error())
+		if err = c.DB.Omit(clause.Associations).Save(step).Error; err != nil {
+			log.Printf("Can't update step with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
@@ -67,8 +68,8 @@ func SourceHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 
-		if err = c.DB.Delete(&models.Source{ID: uint8(ID)}).Error; err != nil {
-			log.Printf("Can't delete source with ID = %d. Error: %s", ID, err.Error())
+		if err = c.DB.Delete(&models.Step{ID: uint8(ID)}).Error; err != nil {
+			log.Printf("Can't delete step with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
@@ -78,30 +79,30 @@ func SourceHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func SourcesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/sources" {
+func StepsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/steps" {
 		http.NotFound(w, r)
 		return
 	}
 
 	if r.Method == "POST" {
-		source := new(models.Source)
-		if err := json.NewDecoder(r.Body).Decode(&source); err != nil {
+		step := new(models.Step)
+		if err := json.NewDecoder(r.Body).Decode(&step); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		c := base.GetDB()
 		//channge to base.DB?
-		if err := c.DB.Omit(clause.Associations).Create(source).Error; err != nil {
-			log.Printf("Can't create source. Error: %s", err.Error())
+		if err := c.DB.Omit(clause.Associations).Create(step).Error; err != nil {
+			log.Printf("Can't create step. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
 		//it actually was created ......
-		b, err := json.Marshal(source)
+		b, err := json.Marshal(step)
 		if err != nil {
-			log.Println("Can't json.Marchal(source) error: " + err.Error())
+			log.Println("Can't json.Marchal(step) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -113,21 +114,21 @@ func SourcesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := base.GetDB().Misc()
-	sourcesResponse, err := c.Sources()
+	stepsResponse, err := c.Steps()
 	if err != nil {
-		log.Println("Can't get sources error: " + err.Error())
+		log.Println("Can't get steps error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 	}
 	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(sourcesResponse)
+	b, err := json.Marshal(stepsResponse)
 	if err != nil {
 		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-	total := strconv.Itoa(len(sourcesResponse))
+	total := strconv.Itoa(len(stepsResponse))
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprintf(w, string(b))
 }

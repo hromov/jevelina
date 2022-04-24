@@ -27,7 +27,7 @@ func Get_Contact_ID(record []string) *uint {
 	return &r
 }
 
-func Push_Leads(path string) error {
+func Push_Leads(path string, n int) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return errors.New("Unable to read input file " + path + ". Error: " + err.Error())
@@ -37,7 +37,8 @@ func Push_Leads(path string) error {
 	db := base.GetDB()
 
 	r := csv.NewReader(f)
-	for i := 0; i < 10000; i++ {
+	for i := 0; i < n; i++ {
+
 		record, err := r.Read()
 		// Stop at EOF.
 		if err == io.EOF {
@@ -46,6 +47,10 @@ func Push_Leads(path string) error {
 
 		if err != nil {
 			panic(err)
+		}
+
+		if i == 0 {
+			continue
 		}
 		// Display record.
 		// ... Display record length.
@@ -58,6 +63,33 @@ func Push_Leads(path string) error {
 		// }
 
 		if lead := recordToLead(record); lead != nil {
+
+			responsible := uMap[record[3]]
+			created := uMap[record[5]]
+			source := sMap[record[31]]
+
+			prod := pMap[record[69]]
+			manuf := mMap[record[70]]
+			step := stepsMap[record[15]]
+			if responsible != 0 {
+				lead.ResponsibleID = &responsible
+			}
+			if created != 0 {
+				lead.CreatedID = &created
+			}
+			if source != 0 {
+				lead.SourceID = &source
+			}
+			if prod != 0 {
+				lead.ProductID = &prod
+			}
+			if manuf != 0 {
+				lead.ManufacturerID = &manuf
+			}
+			if step != 0 {
+				lead.StepID = &step
+			}
+
 			if _, err := db.Create(lead); err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create lead for record # = %d error: %s", i, err.Error())

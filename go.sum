@@ -13,6 +13,8 @@ github.com/hromov/cdb v0.0.0-20220423220206-5d9375f06906 h1:dE1uEqa6gdkBWJfDrA4h
 github.com/hromov/cdb v0.0.0-20220423220206-5d9375f06906/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
 github.com/hromov/cdb v0.0.0-20220423221335-5e77afb5a784 h1:0+vYPfr0NzomNvx63JM9NdJlyTMCmkXu4lMIy2mCSgE=
 github.com/hromov/cdb v0.0.0-20220423221335-5e77afb5a784/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220424090724-cb980c52a111 h1:Rr1am+x5BnSK+t3o7OlwzNzyH8BvLL4tUpx2Sh4XX/c=
+github.com/hromov/cdb v0.0.0-20220424090724-cb980c52a111/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.4/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=

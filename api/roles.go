@@ -15,8 +15,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-const rolesPageSize = 25
-
 func RoleHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -30,7 +28,7 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		role, err = c.Role(ID)
+		role, err = c.Role(uint8(ID))
 		if err != nil {
 			log.Println("Can't get role error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
