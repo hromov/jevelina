@@ -92,6 +92,13 @@ func Push_Contacts(path string, n int) error {
 					log.Printf("Can't create contact. Respoonsible = %d, (%+v), created = %d (%+v), source = %d (%+v)", responsible, uMap, created, uMap, source, sMap)
 				}
 			}
+
+			for _, r := range record[13:18] {
+				if r != "" {
+					notice := &models.Task{ParentID: contact.ID, Description: strings.Trim(r, "")}
+					_, _ = db.Create(notice)
+				}
+			}
 			// } else {
 			// 	log.Printf("contacts for record # = %d created: %+v", i, c)
 			// }

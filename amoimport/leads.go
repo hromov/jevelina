@@ -106,6 +106,13 @@ func Push_Leads(path string, n int) error {
 					log.Println(err)
 				}
 			}
+
+			for _, r := range record[10:15] {
+				if r != "" {
+					notice := &models.Task{ParentID: lead.ID, Description: strings.Trim(r, "")}
+					_, _ = db.Create(notice)
+				}
+			}
 			// } else {
 			// 	log.Printf("lead for record # = %d created: %+v", i, c)
 			// }
