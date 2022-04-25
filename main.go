@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/hromov/jevelina/amoimport"
 	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/base"
 )
@@ -47,19 +48,19 @@ func main() {
 	}
 	// testdata.Fill()
 
-	// n := 1000
+	n := 1000
 
-	// if err := amoimport.Push_Misc("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
-	// 	log.Println(err)
-	// }
+	if err := amoimport.Push_Misc("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
+		log.Println(err)
+	}
 
-	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv", n); err != nil {
-	// 	log.Println(err)
-	// }
+	if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv", n); err != nil {
+		log.Println(err)
+	}
 
-	// if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
-	// 	log.Println(err)
-	// }
+	if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
+		log.Println(err)
+	}
 
 	// create_users()
 	router := newREST()

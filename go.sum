@@ -27,6 +27,14 @@ github.com/hromov/cdb v0.0.0-20220424160607-a361f24df19b h1:jP8W/d6A4WjLcLl1pZoT
 github.com/hromov/cdb v0.0.0-20220424160607-a361f24df19b/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
 github.com/hromov/cdb v0.0.0-20220424171752-760b511d2c74 h1:Mp7UkEJR584RTxFweu99xccXER6iG6hKyRhZhS0KsZo=
 github.com/hromov/cdb v0.0.0-20220424171752-760b511d2c74/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220425111427-0f803cd4baf3 h1:lUkZdlimUdBURFSOyK9LkNr2YwekhRGcKHLuPCIchf8=
+github.com/hromov/cdb v0.0.0-20220425111427-0f803cd4baf3/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220425155930-8c0e56dc046f h1:WAdDJCyQRMaAxT1ARv2WSAr4BfsvO2vu+s97npB7o+w=
+github.com/hromov/cdb v0.0.0-20220425155930-8c0e56dc046f/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220425162712-d3484f2e0723 h1:QnrY9o5O00BPe+834S6WktC8N6zaK6/Ny1gLprG5jLM=
+github.com/hromov/cdb v0.0.0-20220425162712-d3484f2e0723/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220425172038-77e55b405e56 h1:q29AmpVPcHPo6GgI/SWdZMrpEUFxjhoWQEws9FbNG1s=
+github.com/hromov/cdb v0.0.0-20220425172038-77e55b405e56/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.4/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=

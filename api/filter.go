@@ -31,6 +31,9 @@ func filterFromQuery(u url.Values) models.ListFilter {
 	if parentID := u.Get("parent"); parentID != "" {
 		filter.ParentID, _ = strconv.ParseUint(parentID, 10, 64)
 	}
+	if active := u.Get("active"); active != "" {
+		filter.Active = true
+	}
 	if tagID := u.Get("tag"); tagID != "" {
 		tag64, _ := strconv.ParseUint(tagID, 10, 64)
 		filter.TagID = uint8(tag64)
