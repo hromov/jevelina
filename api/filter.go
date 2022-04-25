@@ -38,5 +38,9 @@ func filterFromQuery(u url.Values) models.ListFilter {
 		tag64, _ := strconv.ParseUint(tagID, 10, 64)
 		filter.TagID = uint8(tag64)
 	}
+	if stepID := u.Get("step"); stepID != "" {
+		step64, _ := strconv.ParseUint(stepID, 10, 64)
+		filter.StepID = uint8(step64)
+	}
 	return filter
 }
