@@ -158,8 +158,9 @@ func recordToContact(record []string) *models.Contact {
 	contact.ResponsibleID = nil
 	contact.CreatedID = nil
 
-	const timeForm = "02-01-2006 15:04:05"
+	const timeForm = "02.01.2006 15:04:05"
 	contact.CreatedAt, _ = time.Parse(timeForm, record[7])
+	contact.UpdatedAt, _ = time.Parse(timeForm, record[10])
 
 	//contact.tags = getTags
 	//contact.notices = getNotices record[13:18]

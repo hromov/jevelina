@@ -159,13 +159,32 @@ func recordToLead(record []string) *models.Lead {
 	lead.ResponsibleID = nil
 	lead.CreatedID = nil
 
-	const timeForm = "02-01-2006 15:04:05"
+	const timeForm = "02.01.2006 15:04:05"
+
 	lead.CreatedAt, _ = time.Parse(timeForm, record[4])
-	closedTime := strings.ReplaceAll(record[8], ".", "-")
-	closed, err := time.Parse(timeForm, closedTime)
-	if err == nil {
+	lead.UpdatedAt, _ = time.Parse(timeForm, record[6])
+	if record[8] != "" {
+		closed, _ := time.Parse(timeForm, record[8])
 		lead.ClosedAt = &closed
 	}
+	// lead.ClosedAt, _ = time.Parse(timeForm, record[8])
+	// createdTime := strings.ReplaceAll(record[4], ".", "-")
+	// created, err := time.Parse(timeForm, createdTime)
+	// if err == nil {
+	// 	lead.CreatedAt = created
+	// }
+
+	// updatedTime := strings.ReplaceAll(record[6], ".", "-")
+	// updated, err := time.Parse(timeForm, updatedTime)
+	// if err == nil {
+	// 	lead.UpdatedAt = updated
+	// }
+
+	// closedTime := strings.ReplaceAll(record[8], ".", "-")
+	// closed, err := time.Parse(timeForm, closedTime)
+	// if err == nil {
+	// 	lead.ClosedAt = &closed
+	// }
 
 	//tags record[9]
 	//genereate from record[15]
