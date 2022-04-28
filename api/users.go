@@ -90,16 +90,23 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB()
+		c := base.GetDB().Misc()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(user).Error; err != nil {
 			log.Printf("Can't create user. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
+		//remove uint conversion when cdb updated
+		fullUser, err := c.User(uint(user.ID))
+		if err != nil {
+			log.Printf("User should be created but we wasn't able to get it back. Error: %s", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
 
 		//it actually was created ......
-		b, err := json.Marshal(user)
+		b, err := json.Marshal(fullUser)
 		if err != nil {
 			log.Println("Can't json.Marchal(user) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
