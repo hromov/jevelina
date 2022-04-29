@@ -112,8 +112,16 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 		}
 
+		//fix after 64 update
+		fullTask, err := c.Misc().Task(uint(task.ID))
+		if err != nil {
+			log.Printf("Task should be created but we wasn't able to get it back. Error: %s", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
+
 		//it actually was created ......
-		b, err := json.Marshal(task)
+		b, err := json.Marshal(fullTask)
 		if err != nil {
 			log.Println("Can't json.Marchal(task) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
