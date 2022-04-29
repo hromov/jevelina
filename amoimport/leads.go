@@ -109,7 +109,7 @@ func Push_Leads(path string, n int) error {
 
 			for _, r := range record[10:15] {
 				if r != "" {
-					notice := &models.Task{ParentID: lead.ID, Description: strings.Trim(r, "")}
+					notice := &models.Task{ParentID: lead.ID, Description: strings.Trim(r, ""), ResponsibleID: &responsible, CreatedID: &responsible}
 					_, _ = db.Create(notice)
 				}
 			}
@@ -160,12 +160,15 @@ func recordToLead(record []string) *models.Lead {
 	lead.CreatedID = nil
 
 	const timeForm = "02.01.2006 15:04:05"
+	if t, err := time.Parse(timeForm, record[4]); err == nil {
+		lead.CreatedAt = t
+	}
 
-	lead.CreatedAt, _ = time.Parse(timeForm, record[4])
-	lead.UpdatedAt, _ = time.Parse(timeForm, record[6])
-	if record[8] != "" {
-		closed, _ := time.Parse(timeForm, record[8])
-		lead.ClosedAt = &closed
+	if t, err := time.Parse(timeForm, record[6]); err == nil {
+		lead.UpdatedAt = t
+	}
+	if t, err := time.Parse(timeForm, record[8]); err == nil {
+		lead.ClosedAt = &t
 	}
 	// lead.ClosedAt, _ = time.Parse(timeForm, record[8])
 	// createdTime := strings.ReplaceAll(record[4], ".", "-")

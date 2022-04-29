@@ -61,6 +61,9 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
 			return
 		}
+		//TODO: change after AUTH!
+		task.UpdatedID = task.ResponsibleID
+
 		//channge to base.DB?
 		if err = c.DB.Save(task).Error; err != nil {
 			log.Printf("Can't update task with ID = %d. Error: %s", ID, err.Error())
@@ -99,6 +102,8 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
 			return
 		}
+		//TODO: CHANGE TO REAL, AFTER AUTH!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		task.CreatedID = task.ResponsibleID
 		c := base.GetDB()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(task).Error; err != nil {

@@ -28,7 +28,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		user, err = c.User(uint(ID))
+		user, err = c.User(ID)
 		if err != nil {
 			log.Println("Can't get user error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -98,7 +98,7 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 		}
 		//remove uint conversion when cdb updated
-		fullUser, err := c.User(uint(user.ID))
+		fullUser, err := c.User(user.ID)
 		if err != nil {
 			log.Printf("User should be created but we wasn't able to get it back. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

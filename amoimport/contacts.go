@@ -95,7 +95,7 @@ func Push_Contacts(path string, n int) error {
 
 			for _, r := range record[13:18] {
 				if r != "" {
-					notice := &models.Task{ParentID: contact.ID, Description: strings.Trim(r, "")}
+					notice := &models.Task{ParentID: contact.ID, Description: strings.Trim(r, ""), ResponsibleID: &responsible, CreatedID: &responsible}
 					_, _ = db.Create(notice)
 				}
 			}
@@ -159,8 +159,12 @@ func recordToContact(record []string) *models.Contact {
 	contact.CreatedID = nil
 
 	const timeForm = "02.01.2006 15:04:05"
-	contact.CreatedAt, _ = time.Parse(timeForm, record[7])
-	contact.UpdatedAt, _ = time.Parse(timeForm, record[10])
+	if t, err := time.Parse(timeForm, record[7]); err == nil {
+		contact.CreatedAt = t
+	}
+	if t, err := time.Parse(timeForm, record[10]); err == nil {
+		contact.UpdatedAt = t
+	}
 
 	//contact.tags = getTags
 	//contact.notices = getNotices record[13:18]
