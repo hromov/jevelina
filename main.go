@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -11,7 +12,7 @@ import (
 	"github.com/hromov/jevelina/base"
 )
 
-const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
+// const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
 func newREST() *mux.Router {
 	r := mux.NewRouter()
@@ -42,12 +43,17 @@ func newREST() *mux.Router {
 }
 
 func main() {
-	if err := base.Init(dsn); err != nil {
+	dsn, err := os.ReadFile("/home/serhii/git/backup/keys/db-local")
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(string(dsn))
+	if err := base.Init(string(dsn)); err != nil {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
 	// testdata.Fill()
 
-	// n := 1000
+	// n := 500
 
 	// if err := amoimport.Push_Misc("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
