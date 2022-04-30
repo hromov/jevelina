@@ -28,7 +28,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case "GET":
-		task, err = c.Task(uint(ID))
+		task, err = c.Task(ID)
 		if err != nil {
 			log.Println("Can't get task error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -113,7 +113,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//fix after 64 update
-		fullTask, err := c.Misc().Task(uint(task.ID))
+		fullTask, err := c.Misc().Task(task.ID)
 		if err != nil {
 			log.Printf("Task should be created but we wasn't able to get it back. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

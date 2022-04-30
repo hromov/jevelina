@@ -49,6 +49,10 @@ github.com/hromov/cdb v0.0.0-20220429190016-d39d1dd04b0e h1:R0c51QQb23AJtIJ3hqYe
 github.com/hromov/cdb v0.0.0-20220429190016-d39d1dd04b0e/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
 github.com/hromov/cdb v0.0.0-20220429191533-c3078884385a h1:O3gtPeqfL3CYiQa5zJhb0TrAShxUbrCnfHquDDE+ZD8=
 github.com/hromov/cdb v0.0.0-20220429191533-c3078884385a/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220429214637-756c89be68e1 h1:m4nb87/T3yAblZ4C4opn3GqOKRHLwsTTY7B4uZuxnks=
+github.com/hromov/cdb v0.0.0-20220429214637-756c89be68e1/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
+github.com/hromov/cdb v0.0.0-20220430180818-2cf51ea34b79 h1:BUHUb9InEd2RdURG7e6WoRFmuD2JjvnZslpavNPf84w=
+github.com/hromov/cdb v0.0.0-20220430180818-2cf51ea34b79/go.mod h1:BHbxvuXNbPjBYGJ4Lq+NUEI6Jyvjnn4Rb2k6xb4Q6uo=
 github.com/jinzhu/inflection v1.0.0 h1:K317FqzuhWc8YvSVlFMCCUb36O/S9MCKRDI7QkRKD/E=
 github.com/jinzhu/inflection v1.0.0/go.mod h1:h+uFLlag+Qp1Va5pdKtLDYj+kHp5pxUVkryuEj+Srlc=
 github.com/jinzhu/now v1.1.4/go.mod h1:d3SSVoowX0Lcu0IBviAWJpolVfI5UJVZZ7cO71lE/z8=
