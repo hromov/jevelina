@@ -11,8 +11,8 @@ require (
 )
 
 require (
-	github.com/felixge/httpsnoop v1.0.2 // indirect
+	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
-	github.com/jinzhu/now v1.1.5 // indirect
+	github.com/jinzhu/now v1.1.4 // indirect
 	gorm.io/driver/mysql v1.3.3 // indirect
 )
