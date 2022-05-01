@@ -1,0 +1,5 @@
+runtime: go116  # or another supported version
+
+handlers:
+- url: /.*
+  script: auto

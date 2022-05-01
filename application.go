@@ -75,7 +75,7 @@ func main() {
 	// ttl := handlers.MaxAge(3600)
 	origins := handlers.AllowedOrigins([]string{"http://localhost:4200", "https://d3qttgy7smx7mi.cloudfront.net", os.Getenv("ORIGIN_ALLOWED")})
 
-	log.Fatal(http.ListenAndServe(":5000", handlers.CORS(credentials, methods, origins, headersOk)(router)))
+	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(credentials, methods, origins, headersOk)(router)))
 
 	// log.Fatal(http.ListenAndServeTLS(":5000", "_keys/public.crt", "_keys/private.pem", handlers.CORS(credentials, methods, origins, headersOk)(router)))
 }

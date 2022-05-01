@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

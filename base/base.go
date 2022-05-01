@@ -1,7 +1,7 @@
 package base
 
 import (
-	"github.com/hromov/cdb"
+	"github.com/hromov/jevelina/cdb"
 )
 
 var db *cdb.CDB

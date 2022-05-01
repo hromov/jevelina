@@ -13,8 +13,8 @@ import (
 	"time"
 
 	"github.com/go-sql-driver/mysql"
-	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb/models"
 )
 
 var mysqlErr *mysql.MySQLError

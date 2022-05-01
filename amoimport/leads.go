@@ -10,8 +10,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb/models"
 )
 
 func Get_Contact_ID(record []string) *uint64 {

@@ -11,8 +11,8 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
-	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb/models"
 )
 
 func LeadHandler(w http.ResponseWriter, r *http.Request) {

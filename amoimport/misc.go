@@ -9,8 +9,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/hromov/cdb/models"
 	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm/clause"
 )
 

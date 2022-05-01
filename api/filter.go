@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/hromov/cdb/models"
+	"github.com/hromov/jevelina/cdb/models"
 )
 
 const defaultLimit = 50
