@@ -43,7 +43,7 @@ func newREST() *mux.Router {
 }
 
 func main() {
-	dsn, err := os.ReadFile("/home/serhii/git/backup/keys/db-local")
+	dsn, err := os.ReadFile("_keys/db")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,29 +52,30 @@ func main() {
 	if err := base.Init(string(dsn)); err != nil {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
-	// testdata.Fill()
 
-	// n := 500
+	// n := 3000
 
-	// if err := amoimport.Push_Misc("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
+	// if err := amoimport.Push_Misc("_import/amocrm_export_leads_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
 	// }
 
-	// if err := amoimport.Push_Contacts("/home/serhii/git/backup/amocrm_export_contacts_2022-04-20.csv", n); err != nil {
+	// if err := amoimport.Push_Contacts("_import/amocrm_export_contacts_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
 	// }
 
-	// if err := amoimport.Push_Leads("/home/serhii/git/backup/amocrm_export_leads_2022-04-20.csv", n); err != nil {
+	// if err := amoimport.Push_Leads("_import/amocrm_export_leads_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
 	// }
 
-	// create_users()
 	router := newREST()
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json"})
 
 	// ttl := handlers.MaxAge(3600)
-	origins := handlers.AllowedOrigins([]string{"http://localhost:4200", os.Getenv("ORIGIN_ALLOWED")})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:4200", "https://d3qttgy7smx7mi.cloudfront.net", os.Getenv("ORIGIN_ALLOWED")})
+
 	log.Fatal(http.ListenAndServe(":5000", handlers.CORS(credentials, methods, origins, headersOk)(router)))
+
+	// log.Fatal(http.ListenAndServeTLS(":5000", "_keys/public.crt", "_keys/private.pem", handlers.CORS(credentials, methods, origins, headersOk)(router)))
 }
