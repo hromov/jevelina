@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
+	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
 	"github.com/hromov/jevelina/cdb/models"
 )
@@ -110,6 +111,12 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(b))
 		return
 	}
+
+	email, err := auth.GetMailByToken(r)
+	if err != nil {
+		log.Println("Error recieving email: ", err.Error())
+	}
+	log.Println("Email = ", email)
 
 	l := base.GetDB().Leads()
 	leadsResponse, err = l.List(filterFromQuery(r.URL.Query()))
