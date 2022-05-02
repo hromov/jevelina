@@ -34,8 +34,9 @@ func usersRest(r *mux.Router) *mux.Router {
 	r.HandleFunc("/manufacturers/{id}", auth.UserCheck(api.ManufacturerHandler)).Methods("GET")
 	r.HandleFunc("/tags", auth.UserCheck(api.TagsHandler)).Methods("GET")
 	r.HandleFunc("/tags/{id}", auth.UserCheck(api.TagHandler)).Methods("GET")
-	r.HandleFunc("/tasks", auth.UserCheck(api.TasksHandler)).Methods("GET")
-	r.HandleFunc("/tasks/{id}", auth.UserCheck(api.TaskHandler)).Methods("GET")
+	// r.HandleFunc("/tasks", auth.UserCheck(api.TasksHandler)).Methods("GET", "POST")
+	r.HandleFunc("/tasks", api.TasksHandler).Methods("GET", "POST")
+	r.HandleFunc("/tasks/{id}", auth.UserCheck(api.TaskHandler)).Methods("GET", "PUT")
 	r.HandleFunc("/tasktypes", auth.UserCheck(api.TaskTypesHandler)).Methods("GET")
 	r.HandleFunc("/tasktypes/{id}", auth.UserCheck(api.TaskTypeHandler)).Methods("GET")
 	return r
@@ -56,8 +57,7 @@ func adminRest(r *mux.Router) *mux.Router {
 	r.HandleFunc("/manufacturers/{id}", auth.AdminCheck(api.ManufacturerHandler)).Methods("PUT", "DELETE")
 	r.HandleFunc("/tags", auth.AdminCheck(api.TagsHandler)).Methods("POST")
 	r.HandleFunc("/tags/{id}", auth.AdminCheck(api.TagHandler)).Methods("PUT", "DELETE")
-	r.HandleFunc("/tasks", auth.AdminCheck(api.TasksHandler)).Methods("POST")
-	r.HandleFunc("/tasks/{id}", auth.AdminCheck(api.TaskHandler)).Methods("PUT", "DELETE")
+	r.HandleFunc("/tasks/{id}", auth.AdminCheck(api.TaskHandler)).Methods("DELETE")
 	r.HandleFunc("/tasktypes", auth.AdminCheck(api.TaskTypesHandler)).Methods("POST")
 	r.HandleFunc("/tasktypes/{id}", auth.AdminCheck(api.TaskTypeHandler)).Methods("PUT", "DELETE")
 	return r

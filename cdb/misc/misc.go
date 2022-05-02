@@ -149,6 +149,18 @@ func (m *Misc) Tasks(filter models.ListFilter) (*models.TasksResponse, error) {
 	if filter.ParentID != 0 {
 		q = q.Where("parent_id = ?", filter.ParentID)
 	}
+	if filter.ResponsibleID != 0 {
+		q = q.Where("responsible_id = ?", filter.ResponsibleID)
+	}
+	if !filter.MinDate.IsZero() {
+		q = q.Where("dead_line >= ?", filter.MinDate)
+	}
+	if !filter.MaxDate.IsZero() {
+		q = q.Where("dead_line < ?", filter.MaxDate)
+	}
+	if !filter.MinDate.IsZero() || !filter.MaxDate.IsZero() {
+		q = q.Where("dead_line IS NOT NULL").Where("completed = false")
+	}
 	if result := q.Find(&cr.Tasks).Count(&cr.Total); result.Error != nil {
 		return nil, result.Error
 	}

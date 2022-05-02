@@ -3,6 +3,7 @@ package api
 import (
 	"net/url"
 	"strconv"
+	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
 )
@@ -41,6 +42,14 @@ func filterFromQuery(u url.Values) models.ListFilter {
 		tag64, _ := strconv.ParseUint(tagID, 10, 64)
 		filter.TagID = uint8(tag64)
 	}
+	const timeForm = "Jan-02-2006"
+	if minDate := u.Get("min_date"); minDate != "" {
+		filter.MinDate, _ = time.Parse(timeForm, minDate)
+	}
+	if maxDate := u.Get("max_date"); maxDate != "" {
+		filter.MaxDate, _ = time.Parse(timeForm, maxDate)
+	}
+
 	if stepID := u.Get("step"); stepID != "" {
 		step64, _ := strconv.ParseUint(stepID, 10, 64)
 		filter.StepID = uint8(step64)

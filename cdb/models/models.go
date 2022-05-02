@@ -17,6 +17,8 @@ type ListFilter struct {
 	Active        bool
 	StepID        uint8
 	ResponsibleID uint64
+	MinDate       time.Time
+	MaxDate       time.Time
 }
 
 type Lead struct {
