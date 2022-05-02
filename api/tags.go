@@ -41,7 +41,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(tag)
 		if err != nil {
-			log.Println("Can't json.Marchal(tag) error: " + err.Error())
+			log.Println("Can't json.Marshal(tag) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -101,7 +101,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(tag)
 		if err != nil {
-			log.Println("Can't json.Marchal(tag) error: " + err.Error())
+			log.Println("Can't json.Marshal(tag) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -122,7 +122,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(tagsResponse)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

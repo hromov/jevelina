@@ -53,11 +53,11 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//channge to base.DB?
 		if uint64(lead.ID) != ID {
 			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, lead.ID), http.StatusBadRequest)
 			return
 		}
+
 		if err = l.DB.Save(lead).Error; err != nil {
 			log.Printf("Can't update lead with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -94,6 +94,13 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		c := base.GetDB()
 
+		user, err := auth.GetCurrentUser(r)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+		}
+		lead.ResponsibleID = &user.ID
+		lead.CreatedID = &user.ID
+
 		if err := c.DB.Create(lead).Error; err != nil {
 			log.Printf("Can't create lead. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -103,7 +110,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(lead)
 		if err != nil {
-			log.Println("Can't json.Marchal(lead) error: " + err.Error())
+			log.Println("Can't json.Marshal(lead) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -111,12 +118,6 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(b))
 		return
 	}
-
-	email, err := auth.GetMailByToken(r)
-	if err != nil {
-		log.Println("Error recieving email: ", err.Error())
-	}
-	log.Println("Email = ", email)
 
 	l := base.GetDB().Leads()
 	leadsResponse, err = l.List(filterFromQuery(r.URL.Query()))
@@ -129,7 +130,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(leadsResponse.Leads)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

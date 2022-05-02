@@ -41,7 +41,7 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(product)
 		if err != nil {
-			log.Println("Can't json.Marchal(product) error: " + err.Error())
+			log.Println("Can't json.Marshal(product) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -102,7 +102,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(product)
 		if err != nil {
-			log.Println("Can't json.Marchal(product) error: " + err.Error())
+			log.Println("Can't json.Marshal(product) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -123,7 +123,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(productsResponse)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

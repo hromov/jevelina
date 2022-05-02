@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
@@ -41,7 +42,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(contact)
 		if err != nil {
-			log.Println("Can't json.Marchal(contact) error: " + err.Error())
+			log.Println("Can't json.Marshal(contact) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -92,7 +93,13 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		c := base.GetDB()
-		//channge to base.DB?
+
+		user, err := auth.GetCurrentUser(r)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+		}
+		contact.CreatedID = &user.ID
+
 		if err := c.DB.Omit(clause.Associations).Create(contact).Error; err != nil {
 			log.Printf("Can't create contact. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -102,7 +109,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(contact)
 		if err != nil {
-			log.Println("Can't json.Marchal(contact) error: " + err.Error())
+			log.Println("Can't json.Marshal(contact) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -123,7 +130,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(contactsResponse.Contacts)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

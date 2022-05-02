@@ -32,10 +32,17 @@ func Push_Misc(path string, n int) error {
 	misc := map[string]int{}
 	db := base.GetDB()
 
-	role := &models.Role{Role: "Tester"}
+	role := &models.Role{Role: "Admin"}
 	if _, err := db.Create(role); err != nil {
 		if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
-			log.Printf("Can't create base role error: %s", err.Error())
+			log.Printf("Can't create admin role error: %s", err.Error())
+		}
+	}
+
+	role = &models.Role{Role: "User"}
+	if _, err := db.Create(role); err != nil {
+		if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
+			log.Printf("Can't create user role error: %s", err.Error())
 		}
 	}
 

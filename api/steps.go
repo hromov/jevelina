@@ -41,7 +41,7 @@ func StepHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(step)
 		if err != nil {
-			log.Println("Can't json.Marchal(step) error: " + err.Error())
+			log.Println("Can't json.Marshal(step) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -102,7 +102,7 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(step)
 		if err != nil {
-			log.Println("Can't json.Marchal(step) error: " + err.Error())
+			log.Println("Can't json.Marshal(step) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -123,7 +123,7 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(stepsResponse)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

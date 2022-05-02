@@ -42,6 +42,22 @@ func (m *Misc) User(ID uint64) (*models.User, error) {
 	return &user, nil
 }
 
+func (m *Misc) UserExist(mail string) (bool, error) {
+	var exists bool
+	if err := m.DB.Model(&models.User{}).Select("count(*) > 0").Where("Email LIKE ?", mail).Find(&exists).Error; err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+func (m *Misc) UserByEmail(mail string) (*models.User, error) {
+	var user models.User
+	if result := m.DB.Joins("Role").Where("Email LIKE ?", mail).First(&user); result.Error != nil {
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 func (m *Misc) Roles() ([]models.Role, error) {
 	var roles []models.Role
 	if result := m.DB.Find(&roles); result.Error != nil {

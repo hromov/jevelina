@@ -41,7 +41,7 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(manufacturer)
 		if err != nil {
-			log.Println("Can't json.Marchal(manufacturer) error: " + err.Error())
+			log.Println("Can't json.Marshal(manufacturer) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -102,7 +102,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(manufacturer)
 		if err != nil {
-			log.Println("Can't json.Marchal(manufacturer) error: " + err.Error())
+			log.Println("Can't json.Marshal(manufacturer) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -123,7 +123,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(manufacturersResponse)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return

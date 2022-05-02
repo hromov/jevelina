@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
@@ -41,7 +42,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(task)
 		if err != nil {
-			log.Println("Can't json.Marchal(task) error: " + err.Error())
+			log.Println("Can't json.Marshal(task) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -61,16 +62,18 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
 			return
 		}
-		//TODO: change after AUTH!
-		task.UpdatedID = task.ResponsibleID
 
-		//channge to base.DB?
+		user, err := auth.GetCurrentUser(r)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+		}
+		task.UpdatedID = &user.ID
+
 		if err = c.DB.Save(task).Error; err != nil {
 			log.Printf("Can't update task with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	case "DELETE":
 
@@ -79,7 +82,6 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -92,7 +94,6 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if r.Method == "POST" {
-		// CHECK ID for LEAD OR CONTACT
 		task := new(models.Task)
 		if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -102,17 +103,20 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
 			return
 		}
-		//TODO: CHANGE TO REAL, AFTER AUTH!!!!!!!!!!!!!!!!!!!!!!!!!!!
-		task.CreatedID = task.ResponsibleID
+
+		user, err := auth.GetCurrentUser(r)
+		if err != nil {
+			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+		}
+		task.CreatedID = &user.ID
+
 		c := base.GetDB()
-		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(task).Error; err != nil {
 			log.Printf("Can't create task. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		//fix after 64 update
 		fullTask, err := c.Misc().Task(task.ID)
 		if err != nil {
 			log.Printf("Task should be created but we wasn't able to get it back. Error: %s", err.Error())
@@ -123,14 +127,12 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(fullTask)
 		if err != nil {
-			log.Println("Can't json.Marchal(task) error: " + err.Error())
+			log.Println("Can't json.Marshal(task) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
 		fmt.Fprintf(w, string(b))
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
 		return
 	}
 

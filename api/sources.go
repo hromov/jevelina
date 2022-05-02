@@ -41,7 +41,7 @@ func SourceHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		b, err := json.Marshal(source)
 		if err != nil {
-			log.Println("Can't json.Marchal(source) error: " + err.Error())
+			log.Println("Can't json.Marshal(source) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -101,7 +101,7 @@ func SourcesHandler(w http.ResponseWriter, r *http.Request) {
 		//it actually was created ......
 		b, err := json.Marshal(source)
 		if err != nil {
-			log.Println("Can't json.Marchal(source) error: " + err.Error())
+			log.Println("Can't json.Marshal(source) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -122,7 +122,7 @@ func SourcesHandler(w http.ResponseWriter, r *http.Request) {
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(sourcesResponse)
 	if err != nil {
-		log.Println("Can't json.Marchal(contatcts) error: " + err.Error())
+		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
