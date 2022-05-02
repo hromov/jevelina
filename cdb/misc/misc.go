@@ -142,7 +142,7 @@ func (m *Misc) Tag(ID uint8) (*models.Tag, error) {
 func (m *Misc) Tasks(filter models.ListFilter) (*models.TasksResponse, error) {
 	cr := &models.TasksResponse{}
 	//How to make joins work?.Joins("Contacts")
-	q := m.DB.Preload(clause.Associations).Order("created_at asc").Limit(filter.Limit).Offset(filter.Offset)
+	q := m.DB.Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 	if filter.Query != "" {
 		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}
@@ -159,8 +159,9 @@ func (m *Misc) Tasks(filter models.ListFilter) (*models.TasksResponse, error) {
 		q = q.Where("dead_line < ?", filter.MaxDate)
 	}
 	if !filter.MinDate.IsZero() || !filter.MaxDate.IsZero() {
-		q = q.Where("dead_line IS NOT NULL").Where("completed = false")
+		q = q.Where("dead_line IS NOT NULL").Where("completed = false").Order("dead_line desc")
 	}
+	q = q.Order("created_at asc")
 	if result := q.Find(&cr.Tasks).Count(&cr.Total); result.Error != nil {
 		return nil, result.Error
 	}
