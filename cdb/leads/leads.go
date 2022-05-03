@@ -1,6 +1,8 @@
 package leads
 
 import (
+	"fmt"
+
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -15,6 +17,25 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 	cr := &models.LeadsResponse{}
 	//How to make joins work?.Joins("Contacts")
 	q := l.DB.Preload(clause.Associations).Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
+
+	// if IDs providen - return here
+	if len(filter.IDs) > 0 {
+		if err := q.Find(&cr.Leads, filter.IDs).Count(&cr.Total).Error; err != nil {
+			return nil, err
+		}
+		return cr, nil
+	}
+	if len(filter.Steps) > 0 {
+		search := ""
+		for i, step := range filter.Steps {
+			search += fmt.Sprintf("step_id = %d", step)
+			if i < (len(filter.Steps) - 1) {
+				search += " OR "
+			}
+		}
+		q = q.Where(search)
+	}
+
 	if filter.Query != "" {
 		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}

@@ -3,6 +3,7 @@ package api
 import (
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
@@ -12,6 +13,25 @@ const defaultLimit = 50
 
 func filterFromQuery(u url.Values) models.ListFilter {
 	filter := models.ListFilter{}
+	if IDs := u.Get("ids"); IDs != "" {
+		filter.IDs = make([]uint64, 0)
+		slice := strings.Split(IDs, ",")
+		for _, IDstring := range slice {
+			if IDnumber, err := strconv.ParseUint(IDstring, 10, 64); err == nil {
+				filter.IDs = append(filter.IDs, IDnumber)
+			}
+
+		}
+	}
+	if steps := u.Get("steps"); steps != "" {
+		filter.Steps = make([]uint8, 0)
+		slice := strings.Split(steps, ",")
+		for _, stepString := range slice {
+			if stepID, err := strconv.ParseUint(stepString, 10, 8); err == nil {
+				filter.Steps = append(filter.Steps, uint8(stepID))
+			}
+		}
+	}
 	if query := u.Get("query"); query != "" {
 		filter.Query = query
 	}
