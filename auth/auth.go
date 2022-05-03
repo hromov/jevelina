@@ -31,6 +31,9 @@ func GetMailByToken(r *http.Request) (string, error) {
 		log.Printf("token from request error: %v", err)
 		return "", err
 	}
+	if token == "expired" {
+		return "", errors.New("expired")
+	}
 	resp, err := http.Get(accesPath + token)
 	if err != nil {
 		log.Printf("token check error: %v", err)

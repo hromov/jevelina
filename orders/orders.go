@@ -13,34 +13,6 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type CreateLeadReq struct {
-	Name        string `json:"name"`
-	Price       int    `json:"price"`
-	Description string `json:"description,omitempty"`
-
-	ClientName  string `json:"clientname"`
-	ClientEmail string `json:"clientemail,omitempty"`
-	ClientPhone string `json:"clientphone,omitempty"`
-
-	Source       string `json:"source,omitempty"`
-	Product      string `json:"product,omitempty"`
-	Manufacturer string `json:"manufacturer,omitempty"`
-
-	UserEmail string `json:"user_email,omitempty"`
-	UserHash  string `json:"user_hash,omitempty"`
-
-	CID string `gorm:"size:64"`
-	UID string `gorm:"size:64"`
-	TID string `gorm:"size:64"`
-
-	UtmID       string `gorm:"size:64"`
-	UtmSource   string `gorm:"size:64"`
-	UtmMedium   string `gorm:"size:64"`
-	UtmCampaign string `gorm:"size:64"`
-
-	Domain string `gorm:"size:128"`
-}
-
 func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/orders" {
 		http.NotFound(w, r)
@@ -52,7 +24,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := new(CreateLeadReq)
+	c := new(models.CreateLeadReq)
 	if err := json.NewDecoder(r.Body).Decode(c); err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -108,7 +80,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func createOrGetContact(c *CreateLeadReq, user *models.User) (*models.Contact, error) {
+func createOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Contact, error) {
 	DB := base.GetDB()
 	DB.Contacts().List(models.ListFilter{Query: c.ClientPhone})
 	var contact *models.Contact
@@ -173,7 +145,7 @@ func createOrGetContact(c *CreateLeadReq, user *models.User) (*models.Contact, e
 	return contact, nil
 }
 
-func createLead(c *CreateLeadReq, contact *models.Contact) (*models.Lead, error) {
+func createLead(c *models.CreateLeadReq, contact *models.Contact) (*models.Lead, error) {
 	DB := base.GetDB()
 	lead := &models.Lead{
 		Name:          c.Name,
@@ -215,7 +187,7 @@ func createLead(c *CreateLeadReq, contact *models.Contact) (*models.Lead, error)
 	return lead, nil
 }
 
-func createTask(c *CreateLeadReq, lead *models.Lead) error {
+func createTask(c *models.CreateLeadReq, lead *models.Lead) error {
 	DB := base.GetDB()
 	task := new(models.Task)
 	if c.Description != "" {

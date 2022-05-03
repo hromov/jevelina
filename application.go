@@ -91,6 +91,7 @@ func main() {
 
 	// adminRoleID := uint8(1)
 	// admin := &models.User{
+	// 	Name:   "Admin User",
 	// 	Email:  "melifarowow@gmail.com",
 	// 	Hash:   "melifarowow@gmail.com",
 	// 	RoleID: &adminRoleID,

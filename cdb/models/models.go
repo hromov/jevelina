@@ -224,3 +224,31 @@ type Manufacturer struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"size:32;unique"`
 }
+
+type CreateLeadReq struct {
+	Name        string `json:"name"`
+	Price       int    `json:"price"`
+	Description string `json:"description,omitempty"`
+
+	ClientName  string `json:"clientname"`
+	ClientEmail string `json:"clientemail,omitempty"`
+	ClientPhone string `json:"clientphone,omitempty"`
+
+	Source       string `json:"source,omitempty"`
+	Product      string `json:"product,omitempty"`
+	Manufacturer string `json:"manufacturer,omitempty"`
+
+	UserEmail string `json:"user_email,omitempty"`
+	UserHash  string `json:"user_hash,omitempty"`
+
+	CID string `gorm:"size:64"`
+	UID string `gorm:"size:64"`
+	TID string `gorm:"size:64"`
+
+	UtmID       string `gorm:"size:64"`
+	UtmSource   string `gorm:"size:64"`
+	UtmMedium   string `gorm:"size:64"`
+	UtmCampaign string `gorm:"size:64"`
+
+	Domain string `gorm:"size:128"`
+}
