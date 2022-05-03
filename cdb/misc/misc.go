@@ -98,6 +98,14 @@ func (m *Misc) Product(ID uint32) (*models.Product, error) {
 	return &item, nil
 }
 
+func (m *Misc) ProductByName(name string) (*models.Product, error) {
+	var item models.Product
+	if result := m.DB.Where("name LIKE ?", name).First(&item); result.Error != nil {
+		return nil, result.Error
+	}
+	return &item, nil
+}
+
 func (m *Misc) Manufacturers() ([]models.Manufacturer, error) {
 	var items []models.Manufacturer
 	if result := m.DB.Find(&items); result.Error != nil {
@@ -114,6 +122,14 @@ func (m *Misc) Manufacturer(ID uint16) (*models.Manufacturer, error) {
 	return &item, nil
 }
 
+func (m *Misc) ManufacturerByName(name string) (*models.Manufacturer, error) {
+	var item models.Manufacturer
+	if result := m.DB.Where("name LIKE ?", name).First(&item); result.Error != nil {
+		return nil, result.Error
+	}
+	return &item, nil
+}
+
 func (m *Misc) Steps() ([]models.Step, error) {
 	var items []models.Step
 	if result := m.DB.Order("`order`").Find(&items); result.Error != nil {
@@ -125,6 +141,14 @@ func (m *Misc) Steps() ([]models.Step, error) {
 func (m *Misc) Step(ID uint8) (*models.Step, error) {
 	var item models.Step
 	if result := m.DB.First(&item, ID); result.Error != nil {
+		return nil, result.Error
+	}
+	return &item, nil
+}
+
+func (m *Misc) DefaultStep() (*models.Step, error) {
+	var item models.Step
+	if result := m.DB.Where("`order` = 0").First(&item); result.Error != nil {
 		return nil, result.Error
 	}
 	return &item, nil

@@ -11,6 +11,7 @@ import (
 	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/orders"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
@@ -67,11 +68,12 @@ func newREST() *mux.Router {
 	r = usersRest(r)
 	r = adminRest(r)
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
+	r.HandleFunc("/orders", orders.OrderHandler).Methods("POST")
 	return r
 }
 
 func main() {
-	dsn, err := os.ReadFile("_keys/db")
+	dsn, err := os.ReadFile("_keys/db_local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -81,10 +83,20 @@ func main() {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
 
-	// n := 3000
+	// n := 1500
 
 	// if err := amoimport.Push_Misc("_import/amocrm_export_leads_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
+	// }
+
+	// adminRoleID := uint8(1)
+	// admin := &models.User{
+	// 	Email:  "melifarowow@gmail.com",
+	// 	Hash:   "melifarowow@gmail.com",
+	// 	RoleID: &adminRoleID,
+	// }
+	// if err := base.GetDB().DB.Omit(clause.Associations).Create(admin).Error; err != nil {
+	// 	log.Fatalf("Can't create admin error: %s", err.Error())
 	// }
 
 	// if err := amoimport.Push_Contacts("_import/amocrm_export_contacts_2022-04-20.csv", n); err != nil {

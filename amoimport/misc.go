@@ -49,7 +49,6 @@ func Push_Misc(path string, n int) error {
 	for i := 0; i < n; i++ {
 		record, err := r.Read()
 
-		// Stop at EOF.
 		if err == io.EOF {
 			break
 		}
@@ -70,10 +69,11 @@ func Push_Misc(path string, n int) error {
 		// for value := range record {
 		// 	fmt.Printf(" %d = %v\n", value, record[value])
 		// }
-
 		if _, exist := misc[record[3]]; !exist && record[3] != "" {
 			misc[record[3]] = -1
-			if err := db.Omit(clause.Associations).Create(&models.User{Name: record[3], Email: fmt.Sprintf("email_%d@gmail.com", i), RoleID: &role.ID}).Error; err != nil {
+			email := fmt.Sprintf("email_%d@gmail.com", i)
+			//Hash also = email, because hashing just email could be dangerous
+			if err := db.Omit(clause.Associations).Create(&models.User{Name: record[3], Email: email, Hash: email, RoleID: &role.ID}).Error; err != nil {
 				if !errors.As(err, &mysqlErr) && mysqlErr.Number == 1062 {
 					log.Printf("Can't create user for record # = %d error: %s", i, err.Error())
 				}
@@ -190,14 +190,6 @@ func Push_Misc(path string, n int) error {
 	}
 
 	return nil
-
-	// csvReader := csv.NewReader(f)
-	// records, err := csvReader.ReadAll()
-	// if err != nil {
-	// 	return errors.New("Error parsing file: " + err.Error())
-	// }
-
-	// return records
 }
 
 //  0 = ID
