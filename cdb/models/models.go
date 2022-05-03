@@ -119,6 +119,7 @@ type User struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"size:32"`
 	Email     string         `gorm:"size:128; unique"`
+	Hash      string         `gorm:"size:128; unique"`
 	// Events    []Event
 	RoleID *uint8
 	Role   Role `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`

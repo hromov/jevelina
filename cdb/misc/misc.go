@@ -26,6 +26,14 @@ func (m *Misc) Source(ID uint8) (*models.Source, error) {
 	return &source, nil
 }
 
+func (m *Misc) SourceByName(name string) (*models.Source, error) {
+	var source models.Source
+	if result := m.DB.Where("name LIKE ?", name).First(&source); result.Error != nil {
+		return nil, result.Error
+	}
+	return &source, nil
+}
+
 func (m *Misc) Users() ([]models.User, error) {
 	var users []models.User
 	if result := m.DB.Joins("Role").Find(&users); result.Error != nil {

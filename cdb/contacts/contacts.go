@@ -60,3 +60,11 @@ func (c *Contacts) ByID(ID uint64) (*models.Contact, error) {
 	}
 	return &contact, nil
 }
+
+func (c *Contacts) ByPhone(phone string) (*models.Contact, error) {
+	contact := new(models.Contact)
+	if err := c.DB.Where(phonesOnly, sql.Named("query", phone)).First(contact).Error; err != nil {
+		return nil, err
+	}
+	return contact, nil
+}
