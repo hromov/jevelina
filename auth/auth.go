@@ -4,14 +4,12 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"strconv"
 
-	"github.com/harlow/authtoken"
 	"github.com/hromov/jevelina/base"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/muser"
 )
 
 const accesPath = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token="
@@ -24,49 +22,9 @@ type googleAuthResponse struct {
 	EmailVerified string `json:"email_verified"`
 }
 
-// GetMailByToken -
-func GetMailByToken(r *http.Request) (string, error) {
-	token, err := authtoken.FromRequest(r)
-	if err != nil {
-		log.Printf("token from request error: %v", err)
-		return "", err
-	}
-	if token == "expired" {
-		return "", errors.New("expired")
-	}
-	resp, err := http.Get(accesPath + token)
-	if err != nil {
-		log.Printf("token check error: %v", err)
-		return "", err
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		log.Printf("ioutil.ReadAll error: %v", err)
-		return "", err
-	}
-
-	answer := new(googleAuthResponse)
-	err = json.Unmarshal(body, answer)
-	if err != nil {
-		log.Printf("json.Unmarashal error: %v", err)
-		return "", err
-	}
-
-	expires, err := strconv.Atoi(answer.ExpiresIn)
-	if err != nil {
-		log.Printf("strconv.Atoi(expires) error: %v", err)
-		return "", err
-	}
-	if expires > 0 {
-		return answer.Email, nil
-	}
-	return "", errors.New("Token expired")
-}
-
 //isUser - check wheter user logged in and is in the user base
 func isUser(r *http.Request) (bool, error) {
-	mail, _ := GetMailByToken(r)
+	mail, _ := muser.GetMailByToken(r)
 	if mail == "" {
 		return false, errors.New("Authorization required")
 	}
@@ -75,7 +33,7 @@ func isUser(r *http.Request) (bool, error) {
 
 //GetCurrentUser - get currently loggined user from auth header
 func GetCurrentUser(r *http.Request) (*models.User, error) {
-	mail, _ := GetMailByToken(r)
+	mail, _ := muser.GetMailByToken(r)
 	if mail == "" {
 		return nil, errors.New("Authorization required")
 	}

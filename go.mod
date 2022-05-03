@@ -13,6 +13,7 @@ require (
 require (
 	github.com/felixge/httpsnoop v1.0.1 // indirect
 	github.com/harlow/authtoken v0.0.0-20151218063325-ef4b3666db99 // indirect
+	github.com/hromov/muser v0.0.0-20220503171519-2c9a269abf58 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.4 // indirect
 )
