@@ -100,7 +100,12 @@ func createOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Con
 		//TODO: move to generics in 1.19, if possible
 		item := contact
 		item.Analytics.CID = c.CID
-		item.Analytics.UID = c.UID
+		//if no UID was provided - use phone
+		if c.UID == "" {
+			item.Analytics.UID = contact.Phone
+		} else {
+			item.Analytics.UID = c.UID
+		}
 		item.Analytics.TID = c.TID
 		item.Analytics.UtmID = c.UtmID
 		item.Analytics.UtmSource = c.UtmSource
