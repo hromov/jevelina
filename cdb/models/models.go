@@ -180,7 +180,7 @@ type Task struct {
 	TaskType   TaskType
 
 	//just links
-	Files       string `gorm:"size:512"`
+	Files       []File `gorm:"foreignKey:ParentID"`
 	Description string `gorm:"size:1024"`
 	Results     string `gorm:"size:512"`
 
@@ -256,3 +256,57 @@ type CreateLeadReq struct {
 
 	Domain string `gorm:"size:128"`
 }
+
+type Wallet struct {
+	ID        uint16 `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+	Name      string         `gorm:"size:32;unique"`
+	Balance   int64
+	Closed    bool
+}
+
+type Transfer struct {
+	ID uint64 `gorm:"primaryKey"`
+	//Usualy LeadID
+	ParentID  uint64 `gorm:"index"`
+	CreatedAt time.Time
+	//UserID
+	CreatedBy   uint64
+	UpdatedAt   time.Time
+	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	Completed   bool
+	CompletedAt time.Time
+	//UserID
+	CompletedBy uint64
+	//Wallet
+	From uint16 `gorm:"index"`
+	//Wallet
+	To uint16 `gorm:"index"`
+	// Can be changed to id later, will try like this for now
+	Category string
+	Amount   int64
+	Files    []File `gorm:"foreignKey:ParentID"`
+}
+
+type File struct {
+	ID        uint64 `gorm:"primaryKey"`
+	ParentID  uint64 `gorm:"index"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	Name      string `json:"name,omitempty"`
+	URL       string `json:"url,omitempty"`
+}
+
+// From      *datastore.Key   `json:"from"`
+// To        *datastore.Key   `json:"to"`
+// Category  string           `json:"category"`
+// Amount    float32          `json:"amount" datastore:",noindex"`
+// CreatedAt time.Time        `json:"created_at,string"`
+// CreatedBy string           `json:"created_by"`
+// Status    TransferStatus   `json:"status"`
+// Wallets   []*datastore.Key `json:"wallets"`
+// Lead      string           `json:"lead"`
+// Ancestor  *datastore.Key   `json:"ancestor" datastore:"-"`
+// Files     []File           `json:"files,omitempty" datastore:",noindex"`

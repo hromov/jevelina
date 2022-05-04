@@ -11,7 +11,6 @@ import (
 	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
-	"github.com/hromov/jevelina/orders"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
@@ -69,7 +68,7 @@ func newREST() *mux.Router {
 	r = usersRest(r)
 	r = adminRest(r)
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
-	r.HandleFunc("/orders", orders.OrderHandler).Methods("POST")
+	r.HandleFunc("/orders", api.OrderHandler).Methods("POST")
 	return r
 }
 
