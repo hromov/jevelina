@@ -44,8 +44,8 @@ func (f *Finance) DeleteWallet(ID uint16) error {
 	return f.DB.Delete(&models.Wallet{ID: ID}).Error
 }
 
-func (f *Finance) ListWallets(filter *models.ListFilter) (items []*models.Wallet, err error) {
-	if result := f.DB.Find(items); result.Error != nil {
+func (f *Finance) ListWallets(filter *models.ListFilter) (items []models.Wallet, err error) {
+	if result := f.DB.Find(&items); result.Error != nil {
 		return nil, result.Error
 	}
 	return

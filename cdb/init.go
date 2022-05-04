@@ -66,6 +66,12 @@ func Init(dsn string) (*CDB, error) {
 		}
 	}
 
+	if !db.Migrator().HasTable("wallets") {
+		if err := db.AutoMigrate(&models.Wallet{}); err != nil {
+			return nil, err
+		}
+	}
+
 	// var lead Lead
 	// log.Println(db.Model(&lead).Association("Contacts"))
 	// // `user` is the source model, it must contains primary key
