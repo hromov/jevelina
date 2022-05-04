@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
+	"github.com/hromov/jevelina/api/fin_api"
 	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
 )
@@ -63,20 +64,11 @@ func adminRest(r *mux.Router) *mux.Router {
 	return r
 }
 
-func finRest(r *mux.Router) *mux.Router {
-	r.HandleFunc("/wallets", auth.UserCheck(api.WalletsHandler)).Methods("GET")
-	r.HandleFunc("/wallets", auth.AdminCheck(api.WalletsHandler)).Methods("POST")
-	r.HandleFunc("/wallets/{id}", auth.AdminCheck(api.WalletHandler)).Methods("PUT", "DELETE")
-	r.HandleFunc("/wallets/{id}/close", auth.AdminCheck(api.CloseWalletHandler)).Methods("PUT")
-	r.HandleFunc("/wallets/{id}/open", auth.AdminCheck(api.OpenWalletHandler)).Methods("PUT")
-	return r
-}
-
 func newREST() *mux.Router {
 	r := mux.NewRouter()
 	r = usersRest(r)
 	r = adminRest(r)
-	r = finRest(r)
+	r = fin_api.Rest(r)
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
 	r.HandleFunc("/orders", api.OrderHandler).Methods("POST")
 	return r

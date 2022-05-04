@@ -121,7 +121,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := base.GetDB().Contacts()
-	contactsResponse, err := c.List(filterFromQuery(r.URL.Query()))
+	contactsResponse, err := c.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get contacts error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

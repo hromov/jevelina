@@ -1,4 +1,4 @@
-package api
+package fin_api
 
 import (
 	"encoding/json"
@@ -21,7 +21,7 @@ func CloseWalletHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fin := base.GetDB().Finance()
-	if r.Method == "PUT" {
+	if r.Method == "GET" {
 		if err := fin.ChangeWalletState(uint16(ID), true); err != nil {
 			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -40,7 +40,7 @@ func OpenWalletHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fin := base.GetDB().Finance()
-	if r.Method == "PUT" {
+	if r.Method == "GET" {
 		if err := fin.ChangeWalletState(uint16(ID), false); err != nil {
 			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -54,15 +54,15 @@ func WalletHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
+		log.Println(ID)
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-
 	fin := base.GetDB().Finance()
 	switch r.Method {
 	case "PUT":
 		var wallet *models.Wallet
-		if err = json.NewDecoder(r.Body).Decode(wallet); err != nil {
+		if err = json.NewDecoder(r.Body).Decode(&wallet); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

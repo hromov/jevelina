@@ -22,7 +22,7 @@ func (f *Finance) CreateWallet(item *models.Wallet) (*models.Wallet, error) {
 
 func (f *Finance) ChangeWalletName(ID uint16, name string) error {
 	var wallet *models.Wallet
-	f.DB.Find(wallet, ID)
+	f.DB.First(&wallet, ID)
 	if wallet == nil {
 		return errors.New(fmt.Sprintf("Can't find wallet with ID = %d", ID))
 	}
@@ -32,7 +32,7 @@ func (f *Finance) ChangeWalletName(ID uint16, name string) error {
 
 func (f *Finance) ChangeWalletState(ID uint16, closed bool) error {
 	var wallet *models.Wallet
-	f.DB.Find(wallet, ID)
+	f.DB.First(&wallet, ID)
 	if wallet == nil {
 		return errors.New(fmt.Sprintf("Can't find wallet with ID = %d", ID))
 	}

@@ -138,7 +138,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 
 	c := base.GetDB().Misc()
 
-	tasksResponse, err := c.Tasks(filterFromQuery(r.URL.Query()))
+	tasksResponse, err := c.Tasks(FilterFromQuery(r.URL.Query()))
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(tasksResponse.Tasks)
 	if err != nil {

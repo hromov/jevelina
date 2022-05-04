@@ -21,6 +21,8 @@ type ListFilter struct {
 	ResponsibleID uint64
 	MinDate       time.Time
 	MaxDate       time.Time
+	From          uint16
+	To            uint16
 }
 
 type Lead struct {
@@ -262,7 +264,7 @@ type Wallet struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"size:32;unique"`
+	Name      string         `gorm:"size:32"`
 	Balance   int64
 	Closed    bool
 }
@@ -270,7 +272,7 @@ type Wallet struct {
 type Transfer struct {
 	ID uint64 `gorm:"primaryKey"`
 	//Usualy LeadID
-	ParentID  uint64 `gorm:"index"`
+	ParentID  *uint64 `gorm:"index"`
 	CreatedAt time.Time
 	//UserID
 	CreatedBy   uint64
@@ -278,16 +280,22 @@ type Transfer struct {
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 	Completed   bool
 	CompletedAt time.Time
+	Description string
 	//UserID
 	CompletedBy uint64
 	//Wallet
-	From uint16 `gorm:"index"`
+	From *uint16 `gorm:"index"`
 	//Wallet
-	To uint16 `gorm:"index"`
+	To *uint16 `gorm:"index"`
 	// Can be changed to id later, will try like this for now
 	Category string
 	Amount   int64
 	Files    []File `gorm:"foreignKey:ParentID"`
+}
+
+type TransfersResponse struct {
+	Transfers []Transfer
+	Total     int64
 }
 
 type File struct {
