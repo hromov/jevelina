@@ -101,7 +101,7 @@ func main() {
 	// 	log.Fatalf("Can't create admin error: %s", err.Error())
 	// }
 
-	// userRoleID := uint8(1)
+	// userRoleID := uint8(2)
 	// user := &models.User{
 	// 	Name:   "Random User",
 	// 	Email:  "random@random.org",
