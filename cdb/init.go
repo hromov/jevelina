@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hromov/jevelina/cdb/contacts"
+	"github.com/hromov/jevelina/cdb/finance"
 	"github.com/hromov/jevelina/cdb/leads"
 	"github.com/hromov/jevelina/cdb/misc"
 	"github.com/hromov/jevelina/cdb/models"
@@ -29,6 +30,10 @@ func (db *CDB) Leads() *leads.Leads {
 
 func (db *CDB) Misc() *misc.Misc {
 	return &misc.Misc{DB: db.DB}
+}
+
+func (db *CDB) Finance() *finance.Finance {
+	return &finance.Finance{DB: db.DB}
 }
 
 func Init(dsn string) (*CDB, error) {

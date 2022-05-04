@@ -63,6 +63,15 @@ func adminRest(r *mux.Router) *mux.Router {
 	return r
 }
 
+func finRest(r *mux.Router) *mux.Router {
+	r.HandleFunc("/wallets", auth.UserCheck(api.WalletsHandler)).Methods("GET")
+	r.HandleFunc("/wallets", auth.AdminCheck(api.WalletsHandler)).Methods("POST")
+	r.HandleFunc("/wallets/{id}", auth.AdminCheck(api.WalletHandler)).Methods("PUT", "DELETE")
+	r.HandleFunc("/wallets/{id}/close", auth.AdminCheck(api.CloseWalletHandler)).Methods("PUT")
+	r.HandleFunc("/wallets/{id}/open", auth.AdminCheck(api.OpenWalletHandler)).Methods("PUT")
+	return r
+}
+
 func newREST() *mux.Router {
 	r := mux.NewRouter()
 	r = usersRest(r)
