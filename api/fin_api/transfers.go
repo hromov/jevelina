@@ -79,7 +79,7 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func TransfersHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/wallets" {
+	if r.URL.Path != "/transfers" {
 		http.NotFound(w, r)
 		return
 	}

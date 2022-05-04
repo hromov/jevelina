@@ -23,6 +23,7 @@ type ListFilter struct {
 	MaxDate       time.Time
 	From          uint16
 	To            uint16
+	Wallet        uint16
 }
 
 type Lead struct {
@@ -279,7 +280,7 @@ type Transfer struct {
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
 	Completed   bool
-	CompletedAt time.Time
+	CompletedAt *time.Time
 	Description string
 	//UserID
 	CompletedBy uint64

@@ -3,6 +3,7 @@ package finance
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
@@ -65,7 +66,8 @@ func (f *Finance) CompleteTransfer(ID uint64, userID uint64) error {
 
 		t.Completed = true
 		t.CompletedBy = userID
-		t.CompletedAt = time.Now()
+		n := time.Now()
+		t.CompletedAt = &n
 		return tx.Save(t).Error
 	})
 }
@@ -75,6 +77,7 @@ func (f *Finance) DeleteTransfer(ID uint64) error {
 }
 
 func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse, error) {
+	log.Println(filter)
 	cr := &models.TransfersResponse{}
 	q := f.DB.Limit(filter.Limit).Offset(filter.Offset)
 	// if IDs providen - return here and it has to be used as parent's ID, because we don't know transfers IDs other way
@@ -105,11 +108,17 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 	if filter.To != 0 {
 		q = q.Where("to = ?", filter.To)
 	}
+	if filter.Wallet != 0 {
+		q = q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
+	}
 	if !filter.MinDate.IsZero() {
 		q = q.Where("completed_at >= ?", filter.MinDate)
 	}
 	if !filter.MaxDate.IsZero() {
 		q = q.Where("completed_at < ?", filter.MaxDate)
+	}
+	if !filter.MaxDate.IsZero() && !filter.MinDate.IsZero() {
+		q = q.Or("completed_at IS NULL")
 	}
 	//TODO: check if it gives all uncompleted at first place
 	q = q.Order("completed_at desc").Order("created_at asc")
