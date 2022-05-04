@@ -101,6 +101,17 @@ func main() {
 	// 	log.Fatalf("Can't create admin error: %s", err.Error())
 	// }
 
+	// userRoleID := uint8(1)
+	// user := &models.User{
+	// 	Name:   "Random User",
+	// 	Email:  "random@random.org",
+	// 	Hash:   "random@random.org",
+	// 	RoleID: &userRoleID,
+	// }
+	// if err := base.GetDB().DB.Omit(clause.Associations).Create(user).Error; err != nil {
+	// 	log.Printf("Can't create random error: %s", err.Error())
+	// }
+
 	// if err := amoimport.Push_Contacts("_import/amocrm_export_contacts_2022-04-20.csv", n); err != nil {
 	// 	log.Println(err)
 	// }

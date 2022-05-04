@@ -2,8 +2,10 @@ package orders
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
+	"math/rand"
 	"net/http"
 	"strings"
 	"time"
@@ -12,6 +14,8 @@ import (
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm/clause"
 )
+
+const randomUserEmail = "random@random.org"
 
 func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/orders" {
@@ -44,6 +48,15 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	if user.Hash != c.UserHash {
 		http.Error(w, "Wrong user-hash values", http.StatusForbidden)
 		return
+	}
+	if user.Email == randomUserEmail {
+		user, err = getRandomUser()
+		if err != nil {
+			log.Println("Can't get random user error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
 	}
 	contact, err := createOrGetContact(c, user)
 	if err != nil {
@@ -208,4 +221,36 @@ func createTask(c *models.CreateLeadReq, lead *models.Lead) error {
 		return err
 	}
 	return nil
+}
+
+func getRandomUser() (*models.User, error) {
+	users, err := base.GetDB().Misc().Users()
+	if err != nil {
+		return nil, err
+	}
+	if len(users) == 0 {
+		return nil, errors.New("No users found in base")
+	}
+
+	rand.Seed(time.Now().UnixNano())
+	var user *models.User
+	appropriateSeen := false
+	for user == nil {
+		for _, u := range users {
+			if u.Distribution == 0.0 {
+				continue
+			}
+			appropriateSeen = true
+			r := rand.Float32()
+			// log.Printf("checking %+v, rand = %.2f, good = %v\n", u, r, u.Distribution >= r)
+			if u.Distribution >= r {
+				return &u, nil
+			}
+		}
+		if !appropriateSeen {
+			return nil, errors.New("No user with distribution more then 0 was found")
+		}
+	}
+	return nil, errors.New("should never be called")
+
 }
