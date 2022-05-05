@@ -280,6 +280,7 @@ type Transfer struct {
 	CreatedBy   uint64
 	UpdatedAt   time.Time
 	DeletedAt   gorm.DeletedAt `gorm:"index"`
+	DeletedBy   uint64
 	Completed   bool
 	CompletedAt *time.Time
 	Description string

@@ -12,6 +12,9 @@ import (
 
 func (f *Finance) CreateTransfer(t *models.Transfer) (*models.Transfer, error) {
 	t.Completed = false
+	if t.From == t.To {
+		return nil, errors.New("Can't transfer to the same wallet")
+	}
 	// t.CreatedAt = time.Now()
 	if err := f.DB.Omit(clause.Associations).Create(t).Error; err != nil {
 		return nil, err
@@ -21,12 +24,15 @@ func (f *Finance) CreateTransfer(t *models.Transfer) (*models.Transfer, error) {
 
 func (f *Finance) UpdateTransfer(t *models.Transfer) error {
 	var oldTransfer *models.Transfer
+	if t.From == t.To {
+		return errors.New("Can't transfer to the same wallet")
+	}
 	f.DB.First(&oldTransfer, t.ID)
 	if oldTransfer == nil {
 		return errors.New(fmt.Sprintf("Can't find transfer with ID = %d", t.ID))
 	}
-	if oldTransfer.Completed {
-		return errors.New("Can't change completed transfer")
+	if oldTransfer.Completed || !oldTransfer.DeletedAt.Time.IsZero() {
+		return errors.New("Can't change completed or deleted transfer")
 	}
 	return f.DB.Omit(clause.Associations).Save(t).Error
 }
@@ -39,6 +45,10 @@ func (f *Finance) CompleteTransfer(ID uint64, userID uint64) error {
 		tx.First(&t, ID)
 		if t == nil {
 			return errors.New(fmt.Sprintf("Can't find transfer with ID = %d", ID))
+		}
+
+		if !t.DeletedAt.Time.IsZero() {
+			return errors.New("Can't complete deleted target")
 		}
 
 		if t.From != nil {
@@ -71,13 +81,48 @@ func (f *Finance) CompleteTransfer(ID uint64, userID uint64) error {
 	})
 }
 
-func (f *Finance) DeleteTransfer(ID uint64) error {
-	return f.DB.Delete(&models.Transfer{ID: ID}).Error
+func (f *Finance) DeleteTransfer(ID uint64, userID uint64) error {
+	return f.DB.Transaction(func(tx *gorm.DB) error {
+
+		var t *models.Transfer
+		tx.First(&t, ID)
+		if t == nil {
+			return errors.New(fmt.Sprintf("Can't find transfer with ID = %d", ID))
+		}
+		if t.Completed {
+			if t.From != nil {
+				var from *models.Wallet
+				if err := tx.First(&from, t.From).Error; err != nil {
+					return err
+				}
+				from.Balance += t.Amount
+				if err := tx.Save(from).Error; err != nil {
+					return err
+				}
+			}
+
+			if t.To != nil {
+				var to *models.Wallet
+				if err := tx.First(&to, t.To).Error; err != nil {
+					return err
+				}
+				to.Balance -= t.Amount
+				if err := tx.Save(to).Error; err != nil {
+					return err
+				}
+			}
+			t.DeletedBy = userID
+			if err := tx.Save(t).Error; err != nil {
+				return err
+			}
+		}
+		return tx.Delete(&models.Transfer{ID: ID}).Error
+	})
 }
 
 func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse, error) {
 	cr := &models.TransfersResponse{}
-	q := f.DB.Limit(filter.Limit).Offset(filter.Offset)
+	q := f.DB.Unscoped().Limit(filter.Limit).Offset(filter.Offset)
 	// if IDs providen - return here and it has to be used as parent's ID, because we don't know transfers IDs other way
 	if len(filter.IDs) > 0 {
 		search := ""

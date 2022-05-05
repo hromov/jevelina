@@ -68,7 +68,12 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	case "DELETE":
-		if err := fin.DeleteTransfer(ID); err != nil {
+		user, err := auth.GetCurrentUser(r)
+		if err != nil || user == nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
+		if err := fin.DeleteTransfer(ID, user.ID); err != nil {
 			log.Printf("Can't delete item with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)

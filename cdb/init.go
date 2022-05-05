@@ -81,6 +81,11 @@ func Init(dsn string) (*CDB, error) {
 			return nil, err
 		}
 	}
+	if !db.Migrator().HasTable("files") {
+		if err := db.AutoMigrate(&models.File{}); err != nil {
+			return nil, err
+		}
+	}
 
 	// var lead Lead
 	// log.Println(db.Model(&lead).Association("Contacts"))
