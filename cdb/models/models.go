@@ -24,6 +24,7 @@ type ListFilter struct {
 	From          uint16
 	To            uint16
 	Wallet        uint16
+	Completed     bool
 }
 
 type Lead struct {

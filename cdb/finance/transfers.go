@@ -3,7 +3,6 @@ package finance
 import (
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
@@ -77,7 +76,6 @@ func (f *Finance) DeleteTransfer(ID uint64) error {
 }
 
 func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse, error) {
-	log.Println(filter)
 	cr := &models.TransfersResponse{}
 	q := f.DB.Limit(filter.Limit).Offset(filter.Offset)
 	// if IDs providen - return here and it has to be used as parent's ID, because we don't know transfers IDs other way
@@ -111,15 +109,21 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 	if filter.Wallet != 0 {
 		q = q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
 	}
+	dateSearh := ""
 	if !filter.MinDate.IsZero() {
-		q = q.Where("completed_at >= ?", filter.MinDate)
+		dateSearh += fmt.Sprintf("completed_at >= '%s'", filter.MinDate)
 	}
 	if !filter.MaxDate.IsZero() {
-		q = q.Where("completed_at < ?", filter.MaxDate)
+		if dateSearh != "" {
+			dateSearh += " AND "
+		}
+		dateSearh += fmt.Sprintf("completed_at < '%s'", filter.MaxDate)
 	}
-	if !filter.MaxDate.IsZero() && !filter.MinDate.IsZero() {
-		q = q.Or("completed_at IS NULL")
+	//then we have to return datet or null
+	if !filter.Completed && dateSearh != "" {
+		dateSearh = fmt.Sprintf("((%s) OR completed_at IS NULL)", dateSearh)
 	}
+	q = q.Where(dateSearh)
 	//TODO: check if it gives all uncompleted at first place
 	q = q.Order("completed_at desc").Order("created_at asc")
 	if result := q.Find(&cr.Transfers).Count(&cr.Total); result.Error != nil {
