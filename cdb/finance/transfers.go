@@ -128,7 +128,7 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 		search := ""
 		for i, step := range filter.IDs {
 			search += fmt.Sprintf("parent_id = %d", step)
-			if i < (len(filter.Steps) - 1) {
+			if i < (len(filter.IDs) - 1) {
 				search += " OR "
 			}
 		}
