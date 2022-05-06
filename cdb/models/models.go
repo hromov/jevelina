@@ -306,8 +306,15 @@ type File struct {
 	ParentID  uint64 `gorm:"index"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Name      string `json:"name,omitempty"`
-	URL       string `json:"url,omitempty"`
+	Name      string `gorm:"size:32"`
+	URL       string `gorm:"size:128"`
+}
+
+type FileAddReq struct {
+	Parent uint64
+	Name   string
+	Type   string
+	Value  string
 }
 
 // From      *datastore.Key   `json:"from"`

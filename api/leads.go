@@ -58,10 +58,10 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err = l.DB.Save(lead).Error; err != nil {
-			log.Printf("Can't update lead with ID = %d. Error: %s", ID, err.Error())
+		if _, err := l.Save(lead); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
+			return
 		}
 		// w.WriteHeader(http.StatusOK)
 		return
@@ -101,10 +101,10 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		lead.ResponsibleID = &user.ID
 		lead.CreatedID = &user.ID
 
-		if err := c.DB.Create(lead).Error; err != nil {
-			log.Printf("Can't create lead. Error: %s", err.Error())
+		if lead, err = c.Leads().Save(lead); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
+			return
 		}
 
 		//it actually was created ......

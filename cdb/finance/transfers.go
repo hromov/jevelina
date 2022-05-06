@@ -170,7 +170,7 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 	}
 	q = q.Where(dateSearh)
 	//TODO: check if it gives all uncompleted at first place
-	q = q.Order("completed_at desc").Order("created_at asc")
+	q = q.Order("completed asc").Order("completed_at desc").Order("created_at desc")
 	if result := q.Find(&cr.Transfers).Count(&cr.Total); result.Error != nil {
 		return nil, result.Error
 	}

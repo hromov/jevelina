@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
+	"github.com/hromov/jevelina/api/files_api"
 	"github.com/hromov/jevelina/api/fin_api"
 	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
@@ -69,13 +70,14 @@ func newREST() *mux.Router {
 	r = usersRest(r)
 	r = adminRest(r)
 	r = fin_api.Rest(r)
+	r = files_api.Rest(r)
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
 	r.HandleFunc("/orders", api.OrderHandler).Methods("POST")
 	return r
 }
 
 func main() {
-	dsn, err := os.ReadFile("_keys/db_google")
+	dsn, err := os.ReadFile("_keys/db_local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -121,6 +123,7 @@ func main() {
 	// 	log.Println(err)
 	// }
 
+	// appengine.Main()
 	router := newREST()
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
@@ -129,7 +132,15 @@ func main() {
 	// ttl := handlers.MaxAge(3600)
 	origins := handlers.AllowedOrigins([]string{"http://localhost:4200", "https://d3qttgy7smx7mi.cloudfront.net", "https://front-dot-vorota-ua.ew.r.appspot.com", os.Getenv("ORIGIN_ALLOWED")})
 
-	log.Fatal(http.ListenAndServe(":8080", handlers.CORS(credentials, methods, origins, headersOk)(router)))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
 
+	log.Printf("Listening on port %s", port)
+	if err := http.ListenAndServe(":"+port, handlers.CORS(credentials, methods, origins, headersOk)(router)); err != nil {
+		log.Fatal(err)
+	}
 	// log.Fatal(http.ListenAndServeTLS(":5000", "_keys/public.crt", "_keys/private.pem", handlers.CORS(credentials, methods, origins, headersOk)(router)))
 }

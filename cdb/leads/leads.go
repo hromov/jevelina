@@ -2,6 +2,8 @@ package leads
 
 import (
 	"fmt"
+	"log"
+	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
@@ -10,6 +12,30 @@ import (
 
 type Leads struct {
 	*gorm.DB
+}
+
+func (l *Leads) Save(lead *models.Lead) (*models.Lead, error) {
+	log.Printf("%+v", lead)
+	if !lead.Step.Active && lead.ClosedAt == nil {
+		cTime := time.Now()
+		lead.ClosedAt = &cTime
+	}
+	if lead.Step.Active && lead.ClosedAt != nil {
+		lead.ClosedAt = nil
+	}
+	q := l.DB.Omit(clause.Associations)
+	if lead.ID == 0 {
+		if err := q.Create(&lead).Error; err != nil {
+			log.Printf("Can't create lead. Error: %s", err.Error())
+			return nil, err
+		}
+	} else {
+		if err := q.Save(&lead).Error; err != nil {
+			log.Printf("Can't update lead with ID = %d. Error: %s", lead.ID, err.Error())
+			return nil, err
+		}
+	}
+	return lead, nil
 }
 
 func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
