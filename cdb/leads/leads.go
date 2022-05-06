@@ -16,7 +16,7 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 	// log.Println(limit, offset, query, query == "")
 	cr := &models.LeadsResponse{}
 	//How to make joins work?.Joins("Contacts")
-	q := l.DB.Preload(clause.Associations).Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
+	q := l.DB.Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 
 	// if IDs providen - return here
 	if len(filter.IDs) > 0 {
@@ -51,6 +51,22 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 	if filter.StepID != 0 {
 		q = q.Where("step_id = ?", filter.StepID)
 	}
+	dateSearh := ""
+	if !filter.MinDate.IsZero() {
+		dateSearh += fmt.Sprintf("closed_at >= '%s'", filter.MinDate)
+	}
+	if !filter.MaxDate.IsZero() {
+		if dateSearh != "" {
+			dateSearh += " AND "
+		}
+		dateSearh += fmt.Sprintf("closed_at < '%s'", filter.MaxDate)
+	}
+	//then we have to return datet or null
+	if !filter.Completed && dateSearh != "" {
+		dateSearh = fmt.Sprintf("((%s) OR closed_at IS NULL)", dateSearh)
+	}
+	q = q.Where(dateSearh).Order("created_at desc")
+
 	if filter.TagID != 0 {
 		IDs := []uint{}
 		l.DB.Raw("select lead_id from leads_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)

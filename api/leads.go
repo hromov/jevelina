@@ -120,7 +120,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	l := base.GetDB().Leads()
-	leadsResponse, err = l.List(filterFromQuery(r.URL.Query()))
+	leadsResponse, err = l.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get leads error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

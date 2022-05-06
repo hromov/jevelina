@@ -11,7 +11,7 @@ import (
 
 const defaultLimit = 50
 
-func filterFromQuery(u url.Values) models.ListFilter {
+func FilterFromQuery(u url.Values) models.ListFilter {
 	filter := models.ListFilter{}
 	if IDs := u.Get("ids"); IDs != "" {
 		filter.IDs = make([]uint64, 0)
@@ -51,6 +51,21 @@ func filterFromQuery(u url.Values) models.ListFilter {
 	}
 	if parentID := u.Get("parent"); parentID != "" {
 		filter.ParentID, _ = strconv.ParseUint(parentID, 10, 64)
+	}
+	if from := u.Get("from"); from != "" {
+		from64, _ := strconv.ParseUint(from, 10, 64)
+		filter.From = uint16(from64)
+	}
+	if completed := u.Get("completed"); completed != "" {
+		filter.Completed, _ = strconv.ParseBool(completed)
+	}
+	if wallet := u.Get("wallet"); wallet != "" {
+		wallet64, _ := strconv.ParseUint(wallet, 10, 64)
+		filter.Wallet = uint16(wallet64)
+	}
+	if to := u.Get("to"); to != "" {
+		to64, _ := strconv.ParseUint(to, 10, 64)
+		filter.To = uint16(to64)
 	}
 	if respID := u.Get("responsible"); respID != "" {
 		filter.ResponsibleID, _ = strconv.ParseUint(respID, 10, 64)

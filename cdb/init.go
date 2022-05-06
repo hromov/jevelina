@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/hromov/jevelina/cdb/contacts"
+	"github.com/hromov/jevelina/cdb/finance"
 	"github.com/hromov/jevelina/cdb/leads"
 	"github.com/hromov/jevelina/cdb/misc"
 	"github.com/hromov/jevelina/cdb/models"
@@ -31,8 +32,16 @@ func (db *CDB) Misc() *misc.Misc {
 	return &misc.Misc{DB: db.DB}
 }
 
+func (db *CDB) Finance() *finance.Finance {
+	return &finance.Finance{DB: db.DB}
+}
+
 func Init(dsn string) (*CDB, error) {
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	// 30% fester but not so safe... let's give it a try
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
 	}
@@ -57,6 +66,23 @@ func Init(dsn string) (*CDB, error) {
 
 	if !db.Migrator().HasTable("tasks") {
 		if err := db.AutoMigrate(&models.Task{}); err != nil {
+			return nil, err
+		}
+	}
+
+	if !db.Migrator().HasTable("wallets") {
+		if err := db.AutoMigrate(&models.Wallet{}); err != nil {
+			return nil, err
+		}
+	}
+
+	if !db.Migrator().HasTable("transfers") {
+		if err := db.AutoMigrate(&models.Transfer{}); err != nil {
+			return nil, err
+		}
+	}
+	if !db.Migrator().HasTable("files") {
+		if err := db.AutoMigrate(&models.File{}); err != nil {
 			return nil, err
 		}
 	}
