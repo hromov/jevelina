@@ -55,6 +55,7 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 	case "GET":
 		url, err := files.GetUrl(ID)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "Can't get url error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}

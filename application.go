@@ -77,7 +77,7 @@ func newREST() *mux.Router {
 }
 
 func main() {
-	dsn, err := os.ReadFile("_keys/db_local")
+	dsn, err := os.ReadFile("_keys/db_google")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -123,7 +123,6 @@ func main() {
 	// 	log.Println(err)
 	// }
 
-	// appengine.Main()
 	router := newREST()
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})

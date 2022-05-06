@@ -75,7 +75,7 @@ func UploadFile(req *models.FileAddReq) (*models.File, error) {
 	}
 	defer client.Close()
 
-	fileName := fmt.Sprintf("%s_%d", req.Name, time.Now().Unix())
+	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), req.Name)
 
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(bucketName).Object(fileName).NewWriter(ctx)
@@ -114,7 +114,7 @@ func GetUrl(ID uint64) (string, error) {
 	ctx := context.Background()
 	client, err := storage.NewClient(ctx)
 	if err != nil {
-		return "", fmt.Errorf("storage.NewClient: %v", err)
+		return "", err
 	}
 	defer client.Close()
 
