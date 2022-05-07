@@ -37,11 +37,11 @@ func (db *CDB) Finance() *finance.Finance {
 }
 
 func Init(dsn string) (*CDB, error) {
-	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// 30% fester but not so safe... let's give it a try
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
+	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	// 	SkipDefaultTransaction: true,
+	// })
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
 	}
