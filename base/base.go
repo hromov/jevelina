@@ -2,13 +2,16 @@ package base
 
 import (
 	"github.com/hromov/jevelina/cdb"
+	"github.com/hromov/jevelina/cdb/files"
 )
 
 var db *cdb.CDB
 
+const bucketName = "jevelina"
+
 func Init(dsn string) error {
 	var err error
-	if db, err = cdb.Init(dsn); err != nil {
+	if db, err = cdb.Init(dsn, bucketName); err != nil {
 		return err
 	}
 	return nil
@@ -16,6 +19,10 @@ func Init(dsn string) error {
 
 func GetDB() *cdb.CDB {
 	return db
+}
+
+func Files() *files.FilesService {
+	return db.Files()
 }
 
 // func Contacts() *contacts.Contacts {

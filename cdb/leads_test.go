@@ -9,7 +9,7 @@ import (
 )
 
 func BenchmarkLeads(b *testing.B) {
-	db, err := Init(dsnForTests)
+	db, err := Init(dsnForTests, "")
 	if err != nil {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
@@ -23,7 +23,7 @@ func BenchmarkLeads(b *testing.B) {
 }
 
 func BenchmarkActiveLeads(b *testing.B) {
-	db, err := Init(dsnForTests)
+	db, err := Init(dsnForTests, "")
 	if err != nil {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}

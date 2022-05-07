@@ -3,52 +3,22 @@ package files
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"cloud.google.com/go/storage"
-	"github.com/hromov/jevelina/base"
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/vincent-petithory/dataurl"
+	"gorm.io/gorm"
 )
 
-const bucketName = "jevelina"
-
-func createBucket() error {
-	ctx := context.Background()
-
-	// Sets your Google Cloud Platform project ID.
-	projectID := "vorota-ua"
-
-	// Creates a client.
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		// log.Fatalf("Failed to create client: %v", err)
-		return err
-	}
-	defer client.Close()
-
-	// Sets the name for the new bucket.
-	bucketName := "jevelina"
-
-	// Creates a Bucket instance.
-	bucket := client.Bucket(bucketName)
-
-	// Creates the new bucket.
-	ctx, cancel := context.WithTimeout(ctx, time.Second*10)
-	defer cancel()
-	if err := bucket.Create(ctx, projectID, nil); err != nil {
-		// log.Fatalf("Failed to create bucket: %v", err)
-		return err
-	}
-
-	log.Printf("Bucket %v created.\n", bucketName)
-	return nil
+type FilesService struct {
+	BucketName string
+	*gorm.DB
 }
 
-func DeleteFile(ID uint64) error {
+func (fs *FilesService) Delete(ID uint64) error {
 	var file models.File
-	if err := base.GetDB().First(&file).Error; err != nil {
+	if err := fs.DB.First(&file).Error; err != nil {
 		return err
 	}
 	ctx := context.Background()
@@ -58,14 +28,14 @@ func DeleteFile(ID uint64) error {
 	}
 	defer client.Close()
 
-	if err := client.Bucket(bucketName).Object(file.URL).Delete(ctx); err != nil {
+	if err := client.Bucket(fs.BucketName).Object(file.URL).Delete(ctx); err != nil {
 		return err
 	}
-	return base.GetDB().DB.Delete(&file).Error
+	return fs.DB.Delete(&file).Error
 }
 
 // uploadFile uploads an object.
-func UploadFile(req *models.FileAddReq) (*models.File, error) {
+func (fs *FilesService) Upload(req *models.FileAddReq) (*models.File, error) {
 	// bucket := "bucket-name"
 	// object := "object-name"
 	ctx := context.Background()
@@ -78,7 +48,7 @@ func UploadFile(req *models.FileAddReq) (*models.File, error) {
 	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), req.Name)
 
 	// Upload an object with storage.Writer.
-	wc := client.Bucket(bucketName).Object(fileName).NewWriter(ctx)
+	wc := client.Bucket(fs.BucketName).Object(fileName).NewWriter(ctx)
 	wc.ChunkSize = 0 // note retries are not supported for chunk size 0.
 	wc.ContentType = req.Type
 	wc.Metadata = map[string]string{
@@ -99,16 +69,16 @@ func UploadFile(req *models.FileAddReq) (*models.File, error) {
 		URL:      fileName,
 	}
 
-	if err := base.GetDB().DB.Create(file).Error; err != nil {
+	if err := fs.DB.Create(file).Error; err != nil {
 		return nil, err
 	}
 
 	return file, nil
 }
 
-func GetUrl(ID uint64) (string, error) {
+func (fs *FilesService) GetUrl(ID uint64) (string, error) {
 	var file models.File
-	if err := base.GetDB().First(&file, ID).Error; err != nil {
+	if err := fs.DB.First(&file, ID).Error; err != nil {
 		return "", err
 	}
 	ctx := context.Background()
@@ -124,11 +94,11 @@ func GetUrl(ID uint64) (string, error) {
 		Expires: time.Now().Add(15 * time.Minute),
 		// Expires: time.Now().Add(24 * 365 * time.Hour),
 	}
-	return client.Bucket(bucketName).SignedURL(file.URL, opts)
+	return client.Bucket(fs.BucketName).SignedURL(file.URL, opts)
 }
 
-func List(filter models.ListFilter) ([]*models.File, error) {
+func (fs *FilesService) List(filter models.ListFilter) ([]*models.File, error) {
 	var files []*models.File
-	err := base.GetDB().DB.Where("parent_id = ?", filter.ParentID).Find(&files).Error
+	err := fs.DB.Where("parent_id = ?", filter.ParentID).Find(&files).Error
 	return files, err
 }

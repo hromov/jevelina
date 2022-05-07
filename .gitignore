@@ -3,3 +3,4 @@
 *.zip
 application
 /bin
+broken_*.*

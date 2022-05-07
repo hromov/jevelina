@@ -3,8 +3,10 @@ package cdb
 import (
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/hromov/jevelina/cdb/contacts"
+	"github.com/hromov/jevelina/cdb/files"
 	"github.com/hromov/jevelina/cdb/finance"
 	"github.com/hromov/jevelina/cdb/leads"
 	"github.com/hromov/jevelina/cdb/misc"
@@ -14,6 +16,8 @@ import (
 )
 
 const dsnForTests = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
+
+var bucketName string
 
 type CDB struct {
 	*gorm.DB
@@ -36,12 +40,21 @@ func (db *CDB) Finance() *finance.Finance {
 	return &finance.Finance{DB: db.DB}
 }
 
-func Init(dsn string) (*CDB, error) {
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+func (db *CDB) Files() *files.FilesService {
+	return &files.FilesService{DB: db.DB, BucketName: bucketName}
+}
+
+func Init(dsn string, bucketName string) (*CDB, error) {
+	if bucketName == "" {
+		//TODO: shoud it return error? Check is it real?
+		log.Println("FILES BUCKET NOT PROVIDED")
+	}
+
+	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// 30% fester but not so safe... let's give it a try
-	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
-	// 	SkipDefaultTransaction: true,
-	// })
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
 	}
@@ -86,16 +99,5 @@ func Init(dsn string) (*CDB, error) {
 			return nil, err
 		}
 	}
-
-	// var lead Lead
-	// log.Println(db.Model(&lead).Association("Contacts"))
-	// // `user` is the source model, it must contains primary key
-	// // `Languages` is a relationship's field name
-	// // If the above two requirements matched, the AssociationMode should be started successfully, or it should return error
-	// log.Println(db.Model(&lead).Association("Contacts").Error)
-
-	// for _, b := range banks_data {
-	// 	db.Create(&b)
-	// }
 	return &CDB{DB: db}, nil
 }
