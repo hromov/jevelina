@@ -99,5 +99,12 @@ func Init(dsn string, bucketName string) (*CDB, error) {
 			return nil, err
 		}
 	}
+
+	if !db.Migrator().HasTable("sources") {
+		if err := db.AutoMigrate(&models.Source{}); err != nil {
+			return nil, err
+		}
+	}
+
 	return &CDB{DB: db}, nil
 }

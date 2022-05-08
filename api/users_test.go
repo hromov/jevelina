@@ -12,14 +12,6 @@ import (
 	"github.com/hromov/jevelina/cdb/models"
 )
 
-const (
-	//TODO: get rid of. It's hardcoded inside amo import module
-	AdminRoleName  = "Admin"
-	RandomRoleName = "Random"
-	AdminUserID    = "1"
-	RandomUserID   = "2"
-)
-
 type UserTest struct {
 	name                 string
 	expectedResponseCode int
@@ -68,8 +60,6 @@ func TestUserHandler(t *testing.T) {
 			if usersFound < len(initUsers) {
 				t.Errorf("len(initUsers) = %d, but we found only: %d", len(initUsers), usersFound)
 			}
-
 		})
 	}
-
 }

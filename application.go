@@ -8,6 +8,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/hromov/amoimport"
 	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/base"
@@ -46,11 +47,11 @@ func main() {
 		log.Fatalf("Can't create init users error: %s", err.Error())
 	}
 
-	// const leads = "_import/amocrm_export_leads_2022-04-20.csv"
-	// const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
-	// if err := amoimport.Import(base.GetDB().DB, leads, contacts, 1500); err != nil {
-	// 	log.Fatalf("Can't import error: %s", err.Error())
-	// }
+	const leads = "_import/amocrm_export_leads_2022-04-20.csv"
+	const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
+	if err := amoimport.Import(base.GetDB().DB, leads, contacts, 1500); err != nil {
+		log.Fatalf("Can't import error: %s", err.Error())
+	}
 
 	router := newREST()
 	credentials := handlers.AllowCredentials()
