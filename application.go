@@ -15,6 +15,10 @@ import (
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
+const leads = "_import/amocrm_export_leads_2022-04-20.csv"
+const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
+const rowsToImport = 3000
+
 func newREST() *mux.Router {
 	r := mux.NewRouter()
 	r = routes.UserRoutes(r)
@@ -39,8 +43,12 @@ func main() {
 	bucketName := "jevelina"
 	db.SetBucket(bucketName)
 
-	// if err = Init(db.DB); err != nil {
-	// 	log.Fatalf("Can't import base and create roles")
+	// if err := InitUsers(db.DB); err != nil {
+	// 	log.Fatalf("Can't create base roles error: %s", err.Error())
+	// }
+
+	// if err := amoimport.Import(db.DB, leads, contacts, rowsToImport); err != nil {
+	// 	log.Fatalf("Can't import error: %s", err.Error())
 	// }
 
 	router := newREST()
