@@ -6,7 +6,7 @@ require (
 	cloud.google.com/go/storage v1.22.0
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
-	github.com/hromov/amoimport v0.0.0-20220508070821-69fdd3b6a7a3
+	github.com/hromov/amoimport v0.0.0-20220508152941-8df9df7be464
 	github.com/hromov/muser v0.0.0-20220503203133-e1ecbba0bd3e
 	github.com/vincent-petithory/dataurl v1.0.0
 	gorm.io/driver/mysql v1.3.3

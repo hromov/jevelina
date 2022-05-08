@@ -201,6 +201,10 @@ github.com/hromov/amoimport v0.0.0-20220508062625-23cb6c442722 h1:ScJnCVSbYGLOvw
 github.com/hromov/amoimport v0.0.0-20220508062625-23cb6c442722/go.mod h1:9UCIzMpaSRrjwa3NDdxlo24n/MKP8gbJmR5r8wl5KEM=
 github.com/hromov/amoimport v0.0.0-20220508070821-69fdd3b6a7a3 h1:xBcS+xZHG/VHurjJwP8+lspo2RKXCdx2HteNKCW/eVI=
 github.com/hromov/amoimport v0.0.0-20220508070821-69fdd3b6a7a3/go.mod h1:R4O9U8xng4GSk6nKY3msvsB/rRNEg74WNBhJVVY6YGI=
+github.com/hromov/amoimport v0.0.0-20220508104338-7772f96471b3 h1:U4rKUMrqhNIdav0hYQTpTYnugpyYMHHa2tie9uPSkuI=
+github.com/hromov/amoimport v0.0.0-20220508104338-7772f96471b3/go.mod h1:rz67DgoVgLM/uAfQOneaUP3/Fzxg5WrLBS45XWNqSnc=
+github.com/hromov/amoimport v0.0.0-20220508152941-8df9df7be464 h1:1svZJ57jRPgdK1tOmj0nl28c4XDYnqE+4DEaadl2PLU=
+github.com/hromov/amoimport v0.0.0-20220508152941-8df9df7be464/go.mod h1:rz67DgoVgLM/uAfQOneaUP3/Fzxg5WrLBS45XWNqSnc=
 github.com/hromov/muser v0.0.0-20220503203133-e1ecbba0bd3e h1:4YRSrHlNhOHeHp+OtlgV7tGsDyyHkjZ4REglH+tJBQU=
 github.com/hromov/muser v0.0.0-20220503203133-e1ecbba0bd3e/go.mod h1:qQW9YqADhcjAN9lipou+07vrkPdHpDWDr/cSLLzqEWA=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=

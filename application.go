@@ -32,23 +32,15 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, err = cdb.OpenAndInit(string(dsn))
+	db, err := cdb.OpenAndInit(string(dsn))
 	if err != nil {
 		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
+	bucketName := "jevelina"
+	db.SetBucket(bucketName)
 
-	// if _, err := auth.CreateInitRoles(db.DB); err != nil {
-	// 	log.Fatalf("Can't create base roles error: %s", err.Error())
-	// }
-
-	// if _, err := auth.CreateInitUsers(db.DB); err != nil {
-	// 	log.Fatalf("Can't create init users error: %s", err.Error())
-	// }
-
-	// const leads = "_import/amocrm_export_leads_2022-04-20.csv"
-	// const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
-	// if err := amoimport.Import(db.DB, leads, contacts, 1500); err != nil {
-	// 	log.Fatalf("Can't import error: %s", err.Error())
+	// if err = Init(db.DB); err != nil {
+	// 	log.Fatalf("Can't import base and create roles")
 	// }
 
 	router := newREST()
