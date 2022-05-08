@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"fmt"
+
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
@@ -59,4 +61,15 @@ func CreateInitRoles(db *gorm.DB) ([]*models.Role, error) {
 		}
 	}
 	return roles, nil
+}
+
+func InitUsers(db *gorm.DB) error {
+	if _, err := CreateInitRoles(db); err != nil {
+		return fmt.Errorf("Can't create base roles error: %s", err.Error())
+	}
+
+	if _, err := CreateInitUsers(db); err != nil {
+		return fmt.Errorf("Can't create init users error: %s", err.Error())
+	}
+	return nil
 }
