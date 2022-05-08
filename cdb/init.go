@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm"
 )
 
-const dsnForTests = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
+const TestDSN = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
 var bucketName string
 

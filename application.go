@@ -38,32 +38,18 @@ func main() {
 		log.Fatalf("Cant init data base error: %s", err.Error())
 	}
 
+	if _, err := auth.CreateInitRoles(); err != nil {
+		log.Fatalf("Can't create base roles error: %s", err.Error())
+	}
+
+	if _, err := auth.CreateInitUsers(); err != nil {
+		log.Fatalf("Can't create init users error: %s", err.Error())
+	}
+
 	// const leads = "_import/amocrm_export_leads_2022-04-20.csv"
 	// const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
 	// if err := amoimport.Import(base.GetDB().DB, leads, contacts, 1500); err != nil {
 	// 	log.Fatalf("Can't import error: %s", err.Error())
-	// }
-
-	// adminRoleID := uint8(1)
-	// admin := &models.User{
-	// 	Name:   "Admin User",
-	// 	Email:  "melifarowow@gmail.com",
-	// 	Hash:   "melifarowow@gmail.com",
-	// 	RoleID: &adminRoleID,
-	// }
-	// if err := base.GetDB().DB.Omit(clause.Associations).Create(admin).Error; err != nil {
-	// 	log.Fatalf("Can't create admin error: %s", err.Error())
-	// }
-
-	// userRoleID := uint8(2)
-	// user := &models.User{
-	// 	Name:   "Random User",
-	// 	Email:  "random@random.org",
-	// 	Hash:   "random@random.org",
-	// 	RoleID: &userRoleID,
-	// }
-	// if err := base.GetDB().DB.Omit(clause.Associations).Create(user).Error; err != nil {
-	// 	log.Printf("Can't create random error: %s", err.Error())
 	// }
 
 	router := newREST()
