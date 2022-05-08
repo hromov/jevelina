@@ -19,9 +19,9 @@ func isInt(s string) bool {
 }
 
 func BenchmarkContacts(b *testing.B) {
-	db, err := Init(TestDSN, "")
+	db, err := OpenTest()
 	if err != nil {
-		log.Fatalf("Cant init data base error: %s", err.Error())
+		log.Fatalf("Cant open data base error: %s", err.Error())
 	}
 	contacts := &contacts.Contacts{DB: db.DB}
 	for i := 0; i < b.N; i++ {
@@ -33,9 +33,9 @@ func BenchmarkContacts(b *testing.B) {
 }
 
 func BenchmarkContactsPhoneSearch(b *testing.B) {
-	db, err := Init(TestDSN, "")
+	db, err := OpenTest()
 	if err != nil {
-		log.Fatalf("Cant init data base error: %s", err.Error())
+		log.Fatalf("Cant open data base error: %s", err.Error())
 	}
 	contacts := &contacts.Contacts{DB: db.DB}
 	for i := 0; i < b.N; i++ {
@@ -47,9 +47,9 @@ func BenchmarkContactsPhoneSearch(b *testing.B) {
 }
 
 func BenchmarkContactsNameSearch(b *testing.B) {
-	db, err := Init(TestDSN, "")
+	db, err := OpenTest()
 	if err != nil {
-		log.Fatalf("Cant init data base error: %s", err.Error())
+		log.Fatalf("Cant open data base error: %s", err.Error())
 	}
 	contacts := &contacts.Contacts{DB: db.DB}
 	for i := 0; i < b.N; i++ {
@@ -62,7 +62,7 @@ func BenchmarkContactsNameSearch(b *testing.B) {
 
 // func BenchmarkPhonesIsIntSearch(b *testing.B) {
 // 	if err := Init(dsn); err != nil {
-// 		log.Fatalf("Cant init data base error: %s", err.Error())
+// 		log.Fatalf("Cant open data base error: %s", err.Error())
 // 	}
 // 	for i := 0; i < b.N; i++ {
 // 		if !isInt("0674430") {
@@ -77,7 +77,7 @@ func BenchmarkContactsNameSearch(b *testing.B) {
 
 // func BenchmarkPhonesRegexpSearch(b *testing.B) {
 // 	if err := Init(dsn); err != nil {
-// 		log.Fatalf("Cant init data base error: %s", err.Error())
+// 		log.Fatalf("Cant open data base error: %s", err.Error())
 // 	}
 // 	for i := 0; i < b.N; i++ {
 // 		var digitCheck = regexp.MustCompile(`^[0-9]+$`)
@@ -93,7 +93,7 @@ func BenchmarkContactsNameSearch(b *testing.B) {
 
 // func BenchmarkNamesAndPhonesSearch(b *testing.B) {
 // 	if err := Init(dsn); err != nil {
-// 		log.Fatalf("Cant init data base error: %s", err.Error())
+// 		log.Fatalf("Cant open data base error: %s", err.Error())
 // 	}
 // 	for i := 0; i < b.N; i++ {
 // 		_, err := ContactsNamesAndPhone(50, 0, "0674430")

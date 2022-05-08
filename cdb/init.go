@@ -3,7 +3,6 @@ package cdb
 import (
 	"errors"
 	"fmt"
-	"log"
 
 	"github.com/hromov/jevelina/cdb/contacts"
 	"github.com/hromov/jevelina/cdb/files"
@@ -15,41 +14,45 @@ import (
 	"gorm.io/gorm"
 )
 
-const TestDSN = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
-
-var bucketName string
+const testDSN = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
 type CDB struct {
+	BucketName string
 	*gorm.DB
 }
 
+var currentDB *CDB
+
+func GetDB() *CDB {
+	return currentDB
+}
+
 //test part
-func (db *CDB) Contacts() *contacts.Contacts {
-	return &contacts.Contacts{DB: db.DB}
+func Contacts() *contacts.Contacts {
+	return &contacts.Contacts{DB: currentDB.DB}
 }
 
-func (db *CDB) Leads() *leads.Leads {
-	return &leads.Leads{DB: db.DB}
+func Leads() *leads.Leads {
+	return &leads.Leads{DB: currentDB.DB}
 }
 
-func (db *CDB) Misc() *misc.Misc {
-	return &misc.Misc{DB: db.DB}
+func Misc() *misc.Misc {
+	return &misc.Misc{DB: currentDB.DB}
 }
 
-func (db *CDB) Finance() *finance.Finance {
-	return &finance.Finance{DB: db.DB}
+func Finance() *finance.Finance {
+	return &finance.Finance{DB: currentDB.DB}
 }
 
-func (db *CDB) Files() *files.FilesService {
-	return &files.FilesService{DB: db.DB, BucketName: bucketName}
+func Files() *files.FilesService {
+	return &files.FilesService{DB: currentDB.DB, BucketName: currentDB.BucketName}
 }
 
-func Init(dsn string, bucketName string) (*CDB, error) {
-	if bucketName == "" {
-		//TODO: shoud it return error? Check is it real?
-		log.Println("FILES BUCKET NOT PROVIDED")
-	}
+func (db *CDB) SetBucket(bucketName string) {
+	db.BucketName = bucketName
+}
 
+func Open(dsn string) (*CDB, error) {
 	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// 30% fester but not so safe... let's give it a try
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -58,53 +61,84 @@ func Init(dsn string, bucketName string) (*CDB, error) {
 	if err != nil {
 		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
 	}
-
-	// if table exist - do nothink, if not - create init structure with test data
-	if !db.Migrator().HasTable("roles") {
-		if err := db.AutoMigrate(&models.Role{}); err != nil {
-			return nil, err
-		}
-	}
-	if !db.Migrator().HasTable("contacts") {
-		if err := db.AutoMigrate(&models.Contact{}); err != nil {
-			return nil, err
-		}
-	}
-
-	if !db.Migrator().HasTable("leads") {
-		if err := db.AutoMigrate(&models.Lead{}); err != nil {
-			return nil, err
-		}
-	}
-
-	if !db.Migrator().HasTable("tasks") {
-		if err := db.AutoMigrate(&models.Task{}); err != nil {
-			return nil, err
-		}
-	}
-
-	if !db.Migrator().HasTable("wallets") {
-		if err := db.AutoMigrate(&models.Wallet{}); err != nil {
-			return nil, err
-		}
-	}
-
-	if !db.Migrator().HasTable("transfers") {
-		if err := db.AutoMigrate(&models.Transfer{}); err != nil {
-			return nil, err
-		}
-	}
-	if !db.Migrator().HasTable("files") {
-		if err := db.AutoMigrate(&models.File{}); err != nil {
-			return nil, err
-		}
-	}
-
-	if !db.Migrator().HasTable("sources") {
-		if err := db.AutoMigrate(&models.Source{}); err != nil {
-			return nil, err
-		}
-	}
-
 	return &CDB{DB: db}, nil
+}
+
+func OpenTest() (*CDB, error) {
+	db, err := gorm.Open(mysql.Open(testDSN), &gorm.Config{
+		SkipDefaultTransaction: true,
+	})
+	if err != nil {
+		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
+	}
+	return &CDB{DB: db}, nil
+}
+
+func OpenAndInit(dsn string) (*CDB, error) {
+	db, err := Open(dsn)
+	if err != nil {
+		return nil, err
+	}
+	return db, db.Init()
+}
+
+func OpenAndInitTest() (*CDB, error) {
+	db, err := OpenTest()
+	if err != nil {
+		return nil, err
+	}
+	return db, db.Init()
+}
+
+func (db *CDB) Init() error {
+
+	currentDB = db
+	// if table exist - do nothink, if not - create init structure with test data
+	if !currentDB.DB.Migrator().HasTable("roles") {
+		if err := db.AutoMigrate(&models.Role{}); err != nil {
+			return err
+		}
+	}
+	if !currentDB.DB.Migrator().HasTable("contacts") {
+		if err := db.AutoMigrate(&models.Contact{}); err != nil {
+			return err
+		}
+	}
+
+	if !currentDB.DB.Migrator().HasTable("leads") {
+		if err := db.AutoMigrate(&models.Lead{}); err != nil {
+			return err
+		}
+	}
+
+	if !currentDB.DB.Migrator().HasTable("tasks") {
+		if err := db.AutoMigrate(&models.Task{}); err != nil {
+			return err
+		}
+	}
+
+	if !currentDB.DB.Migrator().HasTable("wallets") {
+		if err := db.AutoMigrate(&models.Wallet{}); err != nil {
+			return err
+		}
+	}
+
+	if !currentDB.DB.Migrator().HasTable("transfers") {
+		if err := db.AutoMigrate(&models.Transfer{}); err != nil {
+			return err
+		}
+	}
+	if !currentDB.DB.Migrator().HasTable("files") {
+		if err := db.AutoMigrate(&models.File{}); err != nil {
+			return err
+		}
+	}
+
+	if !currentDB.DB.Migrator().HasTable("sources") {
+		if err := db.AutoMigrate(&models.Source{}); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

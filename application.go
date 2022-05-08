@@ -1,17 +1,15 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
-	"github.com/hromov/amoimport"
 	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/auth"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/routes"
 )
 
@@ -34,24 +32,24 @@ func main() {
 		log.Fatal(err)
 	}
 
-	fmt.Println(string(dsn))
-	if err := base.Init(string(dsn)); err != nil {
-		log.Fatalf("Cant init data base error: %s", err.Error())
+	_, err = cdb.OpenAndInit(string(dsn))
+	if err != nil {
+		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
 
-	if _, err := auth.CreateInitRoles(); err != nil {
-		log.Fatalf("Can't create base roles error: %s", err.Error())
-	}
+	// if _, err := auth.CreateInitRoles(db.DB); err != nil {
+	// 	log.Fatalf("Can't create base roles error: %s", err.Error())
+	// }
 
-	if _, err := auth.CreateInitUsers(); err != nil {
-		log.Fatalf("Can't create init users error: %s", err.Error())
-	}
+	// if _, err := auth.CreateInitUsers(db.DB); err != nil {
+	// 	log.Fatalf("Can't create init users error: %s", err.Error())
+	// }
 
-	const leads = "_import/amocrm_export_leads_2022-04-20.csv"
-	const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
-	if err := amoimport.Import(base.GetDB().DB, leads, contacts, 1500); err != nil {
-		log.Fatalf("Can't import error: %s", err.Error())
-	}
+	// const leads = "_import/amocrm_export_leads_2022-04-20.csv"
+	// const contacts = "_import/amocrm_export_contacts_2022-04-20.csv"
+	// if err := amoimport.Import(db.DB, leads, contacts, 1500); err != nil {
+	// 	log.Fatalf("Can't import error: %s", err.Error())
+	// }
 
 	router := newREST()
 	credentials := handlers.AllowCredentials()

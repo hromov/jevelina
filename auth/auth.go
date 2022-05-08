@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/muser"
 )
@@ -28,7 +28,7 @@ func isUser(r *http.Request) (bool, error) {
 	if mail == "" {
 		return false, errors.New("Authorization required")
 	}
-	return base.GetDB().Misc().UserExist(mail)
+	return cdb.Misc().UserExist(mail)
 }
 
 //GetCurrentUser - get currently loggined user from auth header
@@ -37,7 +37,7 @@ func GetCurrentUser(r *http.Request) (*models.User, error) {
 	if mail == "" {
 		return nil, errors.New("Authorization required")
 	}
-	user, err := base.GetDB().Misc().UserByEmail(mail)
+	user, err := cdb.Misc().UserByEmail(mail)
 	if err != nil {
 		return nil, err
 	}

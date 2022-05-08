@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/hromov/jevelina/auth"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 )
 
@@ -24,7 +24,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := base.GetDB().Leads()
+	l := cdb.Leads()
 	lead := new(models.Lead)
 	switch r.Method {
 	case "GET":
@@ -92,7 +92,6 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB()
 
 		user, err := auth.GetCurrentUser(r)
 		if err != nil {
@@ -101,7 +100,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		lead.ResponsibleID = &user.ID
 		lead.CreatedID = &user.ID
 
-		if lead, err = c.Leads().Save(lead); err != nil {
+		if lead, err = cdb.Leads().Save(lead); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -119,7 +118,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := base.GetDB().Leads()
+	l := cdb.Leads()
 	leadsResponse, err = l.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get leads error: " + err.Error())

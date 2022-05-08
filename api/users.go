@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -23,7 +23,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	var user *models.User
 
 	switch r.Method {
@@ -90,7 +90,7 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB().Misc()
+		c := cdb.Misc()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(user).Error; err != nil {
 			log.Printf("Can't create user. Error: %s", err.Error())
@@ -119,7 +119,7 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	usersResponse, err := c.Users()
 	if err != nil {
 		log.Println("Can't get users error: " + err.Error())

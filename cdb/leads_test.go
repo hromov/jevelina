@@ -9,9 +9,9 @@ import (
 )
 
 func BenchmarkLeads(b *testing.B) {
-	db, err := Init(TestDSN, "")
+	db, err := OpenTest()
 	if err != nil {
-		log.Fatalf("Cant init data base error: %s", err.Error())
+		log.Fatalf("Can't open DB error")
 	}
 	l := &leads.Leads{DB: db.DB}
 	for i := 0; i < b.N; i++ {
@@ -23,9 +23,9 @@ func BenchmarkLeads(b *testing.B) {
 }
 
 func BenchmarkActiveLeads(b *testing.B) {
-	db, err := Init(TestDSN, "")
+	db, err := OpenTest()
 	if err != nil {
-		log.Fatalf("Cant init data base error: %s", err.Error())
+		log.Fatalf("Can't open DB error")
 	}
 	l := &leads.Leads{DB: db.DB}
 	for i := 0; i < b.N; i++ {

@@ -1,7 +1,9 @@
 package cdb
 
+import "gorm.io/gorm/clause"
+
 func (c *CDB) Create(i interface{}) (interface{}, error) {
-	if err := c.DB.Create(i).Error; err != nil {
+	if err := c.DB.Omit(clause.Associations).Create(i).Error; err != nil {
 		return nil, err
 	}
 	return i, nil

@@ -9,7 +9,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 )
 
@@ -21,7 +21,7 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "File Decode Error: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		file, err := base.Files().Upload(fileAddRequest)
+		file, err := cdb.Files().Upload(fileAddRequest)
 		if err != nil {
 			http.Error(w, "File Uploading Error: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -30,7 +30,7 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, string(b))
 		return
 	case "GET":
-		files, err := base.Files().List(api.FilterFromQuery(r.URL.Query()))
+		files, err := cdb.Files().List(api.FilterFromQuery(r.URL.Query()))
 		if err != nil {
 			log.Println("Can't get transfer error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -52,7 +52,7 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case "GET":
-		url, err := base.Files().GetUrl(ID)
+		url, err := cdb.Files().GetUrl(ID)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Can't get url error: "+err.Error(), http.StatusInternalServerError)
@@ -62,7 +62,7 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%q", url)
 		return
 	case "DELETE":
-		if err := base.Files().Delete(ID); err != nil {
+		if err := cdb.Files().Delete(ID); err != nil {
 			http.Error(w, "Can't delete file error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}

@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -23,7 +23,7 @@ func TagHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	var tag *models.Tag
 
 	switch r.Method {
@@ -90,7 +90,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB()
+		c := cdb.GetDB()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(tag).Error; err != nil {
 			log.Printf("Can't create tag. Error: %s", err.Error())
@@ -112,7 +112,7 @@ func TagsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	tagsResponse, err := c.Tags()
 	if err != nil {
 		log.Println("Can't get tags error: " + err.Error())

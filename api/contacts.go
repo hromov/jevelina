@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/auth"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -24,7 +24,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Contacts()
+	c := cdb.Contacts()
 	var contact *models.Contact
 
 	switch r.Method {
@@ -92,7 +92,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB()
+		c := cdb.GetDB()
 
 		user, err := auth.GetCurrentUser(r)
 		if err != nil {
@@ -120,7 +120,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Contacts()
+	c := cdb.Contacts()
 	contactsResponse, err := c.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get contacts error: " + err.Error())

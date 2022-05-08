@@ -10,7 +10,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/auth"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 )
 
@@ -22,7 +22,7 @@ func CompleteTransferHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	//or PUT?
 	if r.Method == "GET" {
 		user, err := auth.GetCurrentUser(r)
@@ -47,7 +47,7 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	switch r.Method {
 	case "PUT":
 		var transfer *models.Transfer
@@ -88,7 +88,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	if r.Method == "POST" {
 		item := new(models.Transfer)
 		if err := json.NewDecoder(r.Body).Decode(&item); err != nil {

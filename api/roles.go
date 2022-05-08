@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -23,7 +23,7 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	var role *models.Role
 
 	switch r.Method {
@@ -91,7 +91,7 @@ func RolesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB()
+		c := cdb.GetDB()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(role).Error; err != nil {
 			log.Printf("Can't create role. Error: %s", err.Error())
@@ -113,7 +113,7 @@ func RolesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	rolesResponse, err := c.Roles()
 	if err != nil {
 		log.Println("Can't get roles error: " + err.Error())

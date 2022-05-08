@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
@@ -36,24 +37,24 @@ func GetInitRoles() []*models.Role {
 }
 
 func GetBaseRole() (*models.Role, error) {
-	return base.GetDB().Misc().Role(UserRoleID)
+	return cdb.Misc().Role(UserRoleID)
 }
 
-func CreateInitUsers() ([]*models.User, error) {
+func CreateInitUsers(db *gorm.DB) ([]*models.User, error) {
 	users := GetInitUsers()
 
 	for _, user := range users {
-		if err := base.GetDB().DB.Omit(clause.Associations).Create(user).Error; err != nil {
+		if err := db.Omit(clause.Associations).Create(user).Error; err != nil {
 			return nil, err
 		}
 	}
 	return users, nil
 }
 
-func CreateInitRoles() ([]*models.Role, error) {
+func CreateInitRoles(db *gorm.DB) ([]*models.Role, error) {
 	roles := GetInitRoles()
 	for _, role := range roles {
-		if err := base.GetDB().DB.Create(role).Error; err != nil {
+		if err := db.Create(role).Error; err != nil {
 			return nil, err
 		}
 	}

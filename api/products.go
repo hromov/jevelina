@@ -9,7 +9,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -23,7 +23,7 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	var product *models.Product
 
 	switch r.Method {
@@ -91,7 +91,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := base.GetDB()
+		c := cdb.GetDB()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(product).Error; err != nil {
 			log.Printf("Can't create product. Error: %s", err.Error())
@@ -113,7 +113,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	productsResponse, err := c.Products()
 	if err != nil {
 		log.Println("Can't get products error: " + err.Error())

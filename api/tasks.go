@@ -10,7 +10,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/auth"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -24,7 +24,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 	var task *models.Task
 
 	switch r.Method {
@@ -110,14 +110,14 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		task.CreatedID = &user.ID
 
-		c := base.GetDB()
+		c := cdb.GetDB()
 		if err := c.DB.Omit(clause.Associations).Create(task).Error; err != nil {
 			log.Printf("Can't create task. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		fullTask, err := c.Misc().Task(task.ID)
+		fullTask, err := cdb.Misc().Task(task.ID)
 		if err != nil {
 			log.Printf("Task should be created but we wasn't able to get it back. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -136,7 +136,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := base.GetDB().Misc()
+	c := cdb.Misc()
 
 	tasksResponse, err := c.Tasks(FilterFromQuery(r.URL.Query()))
 	// log.Println("banks in main: ", banks)

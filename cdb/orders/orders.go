@@ -4,18 +4,16 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
-	"gorm.io/gorm/clause"
 )
 
 func CreateOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Contact, error) {
-	DB := base.GetDB()
-	DB.Contacts().List(models.ListFilter{Query: c.ClientPhone})
+	cdb.Contacts().List(models.ListFilter{Query: c.ClientPhone})
 	var contact *models.Contact
 	// var err error
 	if c.ClientPhone != "" && len(c.ClientPhone) > 5 {
-		contact, _ = DB.Contacts().ByPhone(c.ClientPhone)
+		contact, _ = cdb.Contacts().ByPhone(c.ClientPhone)
 		// if err != nil {
 		// 	return nil, err
 		// }
@@ -43,7 +41,7 @@ func CreateOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Con
 		item.Analytics.Domain = c.Domain
 
 		if c.Source != "" {
-			if source, _ := DB.Misc().SourceByName(c.Source); source != nil {
+			if source, _ := cdb.Misc().SourceByName(c.Source); source != nil {
 				contact.SourceID = &source.ID
 			}
 		}
@@ -68,11 +66,11 @@ func CreateOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Con
 	}
 
 	if contact.ID == 0 {
-		if err := DB.Omit(clause.Associations).Create(contact).Error; err != nil {
+		if err := cdb.Contacts().Create(contact).Error; err != nil {
 			return nil, err
 		}
 	} else {
-		if err := DB.Omit(clause.Associations).Save(contact).Error; err != nil {
+		if err := cdb.Contacts().Save(contact).Error; err != nil {
 			return nil, err
 		}
 	}
@@ -80,14 +78,13 @@ func CreateOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Con
 }
 
 func CreateLead(c *models.CreateLeadReq, contact *models.Contact) (*models.Lead, error) {
-	DB := base.GetDB()
 	lead := &models.Lead{
 		Name:          c.Name,
 		Budget:        uint32(c.Price),
 		ResponsibleID: contact.ResponsibleID,
 		ContactID:     &contact.ID,
 	}
-	if step, _ := DB.Misc().DefaultStep(); step != nil {
+	if step, _ := cdb.Misc().DefaultStep(); step != nil {
 		lead.StepID = &step.ID
 	}
 	item := lead
@@ -101,28 +98,27 @@ func CreateLead(c *models.CreateLeadReq, contact *models.Contact) (*models.Lead,
 	item.Analytics.Domain = c.Domain
 
 	if c.Source != "" {
-		if source, _ := DB.Misc().SourceByName(c.Source); source != nil {
+		if source, _ := cdb.Misc().SourceByName(c.Source); source != nil {
 			lead.SourceID = &source.ID
 		}
 	}
 	if c.Product != "" {
-		if product, _ := DB.Misc().ProductByName(c.Product); product != nil {
+		if product, _ := cdb.Misc().ProductByName(c.Product); product != nil {
 			lead.ProductID = &product.ID
 		}
 	}
 	if c.Manufacturer != "" {
-		if manuf, _ := DB.Misc().ManufacturerByName(c.Manufacturer); manuf != nil {
+		if manuf, _ := cdb.Misc().ManufacturerByName(c.Manufacturer); manuf != nil {
 			lead.ManufacturerID = &manuf.ID
 		}
 	}
-	if err := DB.Omit(clause.Associations).Create(lead).Error; err != nil {
+	if err := cdb.Leads().Create(lead).Error; err != nil {
 		return nil, err
 	}
 	return lead, nil
 }
 
 func CreateTask(c *models.CreateLeadReq, lead *models.Lead) error {
-	DB := base.GetDB()
 	task := new(models.Task)
 	if c.Description != "" {
 		task.Description = c.Description
@@ -133,7 +129,7 @@ func CreateTask(c *models.CreateLeadReq, lead *models.Lead) error {
 	task.DeadLine = &t
 	task.ParentID = lead.ID
 	task.ResponsibleID = lead.ResponsibleID
-	if err := DB.Omit(clause.Associations).Create(task).Error; err != nil {
+	if err := cdb.Misc().Create(task).Error; err != nil {
 		return err
 	}
 	return nil

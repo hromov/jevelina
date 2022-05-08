@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/cdb/orders"
 )
@@ -37,8 +37,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User Email and Hash are required", http.StatusBadRequest)
 		return
 	}
-	DB := base.GetDB()
-	user, err := DB.Misc().UserByEmail(c.UserEmail)
+	user, err := cdb.Misc().UserByEmail(c.UserEmail)
 	if err != nil || user == nil {
 		http.Error(w, "Cant find user with email: "+c.UserEmail, http.StatusBadRequest)
 		return
@@ -93,7 +92,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func getRandomUser() (*models.User, error) {
-	users, err := base.GetDB().Misc().Users()
+	users, err := cdb.Misc().Users()
 	if err != nil {
 		return nil, err
 	}

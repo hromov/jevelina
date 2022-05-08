@@ -8,7 +8,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/base"
+	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 )
 
@@ -20,7 +20,7 @@ func CloseWalletHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	if r.Method == "GET" {
 		if err := fin.ChangeWalletState(uint16(ID), true); err != nil {
 			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
@@ -39,7 +39,7 @@ func OpenWalletHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	if r.Method == "GET" {
 		if err := fin.ChangeWalletState(uint16(ID), false); err != nil {
 			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
@@ -58,7 +58,7 @@ func WalletHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	switch r.Method {
 	case "PUT":
 		var wallet *models.Wallet
@@ -95,7 +95,7 @@ func WalletsHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fin := base.GetDB().Finance()
+	fin := cdb.Finance()
 	if r.Method == "POST" {
 		item := new(models.Wallet)
 		if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
