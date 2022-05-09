@@ -147,9 +147,8 @@ type Step struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"unique;size:32"`
-	//1st, 2nd etc
-	Order  uint8
-	Active bool `gorm:"index"`
+	Order     uint8
+	Active    bool `gorm:"index"`
 }
 
 type Event struct {

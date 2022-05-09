@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 )
@@ -48,7 +47,7 @@ func TestUserHandler(t *testing.T) {
 			if users == nil {
 				t.Errorf("Users are nil")
 			}
-			initUsers := auth.GetInitUsers()
+			initUsers := cdb.GetInitUsers()
 			if len(users) < len(initUsers) {
 				t.Errorf("It's expected to have at least %d user in DB, but it's only %d back", len(initUsers), len(users))
 			}

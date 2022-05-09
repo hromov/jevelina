@@ -86,8 +86,6 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	fmt.Fprintf(w, string(b))
-	// it said that its already ok now
-	// w.WriteHeader(http.StatusOK)
 	return
 }
 
@@ -110,7 +108,6 @@ func getRandomUser() (*models.User, error) {
 			}
 			appropriateSeen = true
 			r := rand.Float32()
-			// log.Printf("checking %+v, rand = %.2f, good = %v\n", u, r, u.Distribution >= r)
 			if u.Distribution >= r {
 				return &u, nil
 			}
