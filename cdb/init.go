@@ -140,5 +140,13 @@ func (db *CDB) Init() error {
 		}
 	}
 
+	//TODO: check if works on clean -> Move to file -> Readme.MD
+	user := models.User{ID: 1}
+	if err := currentDB.DB.First(&user).Error; err != nil {
+		if err := InitUsers(db.DB); err != nil {
+			return fmt.Errorf("Can't create base roles error: %s", err.Error())
+		}
+	}
+
 	return nil
 }

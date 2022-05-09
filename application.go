@@ -6,25 +6,12 @@ import (
 	"os"
 
 	"github.com/gorilla/handlers"
-	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/api"
-	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/routes"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
-
-func newREST() *mux.Router {
-	r := mux.NewRouter()
-	r = routes.UserRoutes(r)
-	r = routes.AdminRoutes(r)
-	r = routes.FinRoutes(r)
-	r = routes.FilesRoutes(r)
-	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
-	r.HandleFunc("/orders", api.OrderHandler).Methods("POST")
-	return r
-}
+const bucketName = "jevelina"
 
 func main() {
 	dsn, err := os.ReadFile("_keys/db_local")
@@ -36,20 +23,15 @@ func main() {
 	if err != nil {
 		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
-	bucketName := "jevelina"
 	db.SetBucket(bucketName)
 
-	// if err := auth.InitUsers(db.DB); err != nil {
-	// 	log.Fatalf("Can't create base roles error: %s", err.Error())
-	// }
-
-	router := newREST()
+	router := routes.Base()
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})
 
 	// ttl := handlers.MaxAge(3600)
-	origins := handlers.AllowedOrigins([]string{"http://localhost:4200", "https://d3qttgy7smx7mi.cloudfront.net", "https://front-dot-vorota-ua.ew.r.appspot.com", os.Getenv("ORIGIN_ALLOWED")})
+	origins := handlers.AllowedOrigins([]string{"http://localhost:4200", "https://front-dot-vorota-ua.ew.r.appspot.com", os.Getenv("ORIGIN_ALLOWED")})
 
 	port := os.Getenv("PORT")
 	if port == "" {

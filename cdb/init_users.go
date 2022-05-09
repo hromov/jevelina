@@ -1,9 +1,8 @@
-package auth
+package cdb
 
 import (
 	"fmt"
 
-	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -39,7 +38,7 @@ func GetInitRoles() []*models.Role {
 }
 
 func GetBaseRole() (*models.Role, error) {
-	return cdb.Misc().Role(UserRoleID)
+	return Misc().Role(UserRoleID)
 }
 
 func CreateInitUsers(db *gorm.DB) ([]*models.User, error) {
