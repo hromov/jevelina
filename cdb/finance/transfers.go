@@ -177,4 +177,10 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 	return cr, nil
 }
 
+func (f *Finance) Categories() ([]string, error) {
+	categories := make([]string, 0)
+	err := f.DB.Raw("SELECT DISTINCT(category) FROM transfers ORDER BY category asc").Limit(100).Scan(&categories).Error
+	return categories, err
+}
+
 //TODO: some grouped by category returns for analyze

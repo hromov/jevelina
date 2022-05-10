@@ -137,3 +137,13 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprintf(w, string(b))
 }
+
+func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
+	categories, err := cdb.Finance().Categories()
+	if err != nil {
+		http.Error(w, "Can't get transfer categories error: %s"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	b, _ := json.Marshal(categories)
+	fmt.Fprint(w, string(b))
+}
