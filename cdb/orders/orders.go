@@ -89,7 +89,11 @@ func CreateLead(c *models.CreateLeadReq, contact *models.Contact) (*models.Lead,
 	}
 	item := lead
 	item.Analytics.CID = c.CID
-	item.Analytics.UID = c.UID
+	uid := ""
+	if c.UID == "" {
+		uid = contact.Analytics.UID
+	}
+	item.Analytics.UID = uid
 	item.Analytics.TID = c.TID
 	item.Analytics.UtmID = c.UtmID
 	item.Analytics.UtmSource = c.UtmSource
