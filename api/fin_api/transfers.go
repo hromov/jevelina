@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
@@ -125,6 +126,11 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 	}
+
+	for i, t := range tResponse.Transfers {
+		tResponse.Transfers[i].Description = strings.ReplaceAll(t.Description, "%", "")
+	}
+
 	b, err := json.Marshal(tResponse.Transfers)
 	if err != nil {
 		log.Println("Can't json.Marshal(transfers) error: " + err.Error())
