@@ -3,7 +3,6 @@ package auth
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"net/http"
 
@@ -90,7 +89,7 @@ func UserCheckHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 	// it said that its already ok now
 	// w.WriteHeader(http.StatusOK)
 	return

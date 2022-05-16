@@ -46,7 +46,7 @@ func TaskTypeHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&tasktype); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -106,7 +106,7 @@ func TaskTypesHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 		// it said that its already ok now
 		// w.WriteHeader(http.StatusOK)
 		return
@@ -130,5 +130,5 @@ func TaskTypesHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(tasktypesResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 }

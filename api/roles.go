@@ -46,7 +46,7 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&role); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -107,7 +107,7 @@ func RolesHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 		// it said that its already ok now
 		// w.WriteHeader(http.StatusOK)
 		return
@@ -131,5 +131,5 @@ func RolesHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(rolesResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 }

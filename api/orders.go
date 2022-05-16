@@ -3,7 +3,6 @@ package api
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
@@ -85,7 +84,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 	return
 }
 

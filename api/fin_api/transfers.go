@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
@@ -116,7 +115,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 		return
 	}
 
@@ -125,11 +124,6 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 		log.Println("Can't get transfer error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
-	}
-
-	//TODO: make some appropriate
-	for i, t := range tResponse.Transfers {
-		tResponse.Transfers[i].Description = strings.ReplaceAll(t.Description, "%", "")
 	}
 
 	b, err := json.Marshal(tResponse.Transfers)
@@ -142,7 +136,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(int(tResponse.Total))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 }
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
@@ -152,5 +146,5 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	b, _ := json.Marshal(categories)
-	fmt.Fprint(w, string(b))
+	w.Write(b)
 }

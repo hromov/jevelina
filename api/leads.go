@@ -46,7 +46,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&lead); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -114,7 +114,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprintf(w, string(b))
+		w.Write(b)
 		return
 	}
 
@@ -136,5 +136,5 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", strconv.FormatInt(leadsResponse.Total, 10))
-	fmt.Fprintf(w, string(b))
+	w.Write(b)
 }
