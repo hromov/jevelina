@@ -127,6 +127,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 	}
 
+	//TODO: make some appropriate
 	for i, t := range tResponse.Transfers {
 		tResponse.Transfers[i].Description = strings.ReplaceAll(t.Description, "%", "")
 	}
