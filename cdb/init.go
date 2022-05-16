@@ -1,7 +1,6 @@
 package cdb
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hromov/jevelina/cdb/contacts"
@@ -59,7 +58,7 @@ func Open(dsn string) (*CDB, error) {
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
+		return nil, fmt.Errorf("failed to connect database error: %s", err.Error())
 	}
 	return &CDB{DB: db}, nil
 }
@@ -69,7 +68,7 @@ func OpenTest() (*CDB, error) {
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {
-		return nil, errors.New(fmt.Sprintf("failed to connect database error: %s", err.Error()))
+		return nil, fmt.Errorf("failed to connect database error: %s", err.Error())
 	}
 	return &CDB{DB: db}, nil
 }

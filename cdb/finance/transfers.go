@@ -29,7 +29,7 @@ func (f *Finance) UpdateTransfer(t *models.Transfer) error {
 	}
 	f.DB.First(&oldTransfer, t.ID)
 	if oldTransfer == nil {
-		return errors.New(fmt.Sprintf("Can't find transfer with ID = %d", t.ID))
+		return fmt.Errorf("Can't find transfer with ID = %d", t.ID)
 	}
 	if oldTransfer.Completed || !oldTransfer.DeletedAt.Time.IsZero() {
 		return errors.New("Can't change completed or deleted transfer")
@@ -44,7 +44,7 @@ func (f *Finance) CompleteTransfer(ID uint64, userID uint64) error {
 		var t *models.Transfer
 		tx.First(&t, ID)
 		if t == nil {
-			return errors.New(fmt.Sprintf("Can't find transfer with ID = %d", ID))
+			return fmt.Errorf("Can't find transfer with ID = %d", ID)
 		}
 
 		if !t.DeletedAt.Time.IsZero() {
@@ -87,7 +87,7 @@ func (f *Finance) DeleteTransfer(ID uint64, userID uint64) error {
 		var t *models.Transfer
 		tx.First(&t, ID)
 		if t == nil {
-			return errors.New(fmt.Sprintf("Can't find transfer with ID = %d", ID))
+			return fmt.Errorf("Can't find transfer with ID = %d", ID)
 		}
 		if t.Completed {
 			if t.From != nil {

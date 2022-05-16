@@ -1,7 +1,6 @@
 package finance
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/hromov/jevelina/cdb/models"
@@ -24,7 +23,7 @@ func (f *Finance) ChangeWalletName(ID uint16, name string) error {
 	var wallet *models.Wallet
 	f.DB.First(&wallet, ID)
 	if wallet == nil {
-		return errors.New(fmt.Sprintf("Can't find wallet with ID = %d", ID))
+		return fmt.Errorf("Can't find wallet with ID = %d", ID)
 	}
 	wallet.Name = name
 	return f.DB.Omit(clause.Associations).Save(wallet).Error
@@ -34,7 +33,7 @@ func (f *Finance) ChangeWalletState(ID uint16, closed bool) error {
 	var wallet *models.Wallet
 	f.DB.First(&wallet, ID)
 	if wallet == nil {
-		return errors.New(fmt.Sprintf("Can't find wallet with ID = %d", ID))
+		return fmt.Errorf("Can't find wallet with ID = %d", ID)
 	}
 	wallet.Closed = closed
 	return f.DB.Omit(clause.Associations).Save(wallet).Error
