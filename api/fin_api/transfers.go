@@ -148,3 +148,13 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 	b, _ := json.Marshal(categories)
 	w.Write(b)
 }
+
+func CategoriesSumHandler(w http.ResponseWriter, r *http.Request) {
+	sums, err := cdb.Finance().SumByCategory(api.FilterFromQuery(r.URL.Query()))
+	if err != nil {
+		http.Error(w, "Can't get sum by category error: %s"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	b, _ := json.Marshal(sums)
+	w.Write(b)
+}

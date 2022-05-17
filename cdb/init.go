@@ -63,26 +63,8 @@ func Open(dsn string) (*CDB, error) {
 	return &CDB{DB: db}, nil
 }
 
-func OpenTest() (*CDB, error) {
-	db, err := gorm.Open(mysql.Open(testDSN), &gorm.Config{
-		SkipDefaultTransaction: true,
-	})
-	if err != nil {
-		return nil, fmt.Errorf("failed to connect database error: %s", err.Error())
-	}
-	return &CDB{DB: db}, nil
-}
-
 func OpenAndInit(dsn string) (*CDB, error) {
 	db, err := Open(dsn)
-	if err != nil {
-		return nil, err
-	}
-	return db, db.Init()
-}
-
-func OpenAndInitTest() (*CDB, error) {
-	db, err := OpenTest()
 	if err != nil {
 		return nil, err
 	}

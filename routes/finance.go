@@ -17,6 +17,8 @@ func FinRoutes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/transfers/{id}", auth.UserCheck(fin_api.TransferHandler)).Methods("PUT")
 	r.HandleFunc("/transfers/{id}", auth.AdminCheck(fin_api.TransferHandler)).Methods("DELETE")
 	r.HandleFunc("/transfers/{id}/complete", auth.AdminCheck(fin_api.CompleteTransferHandler)).Methods("GET")
-	r.HandleFunc("/categories", fin_api.CategoriesHandler).Methods("GET")
+	r.HandleFunc("/categories", auth.UserCheck(fin_api.CategoriesHandler)).Methods("GET")
+
+	r.HandleFunc("/analytics/categories", auth.UserCheck(fin_api.CategoriesSumHandler)).Methods("GET")
 	return r
 }
