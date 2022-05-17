@@ -39,9 +39,13 @@ func (s *Suite) Init() (err error) {
 		Conn:                      s.sqlDB,
 		SkipInitializeWithVersion: true,
 	}), &gorm.Config{})
+
 	if err != nil {
 		return err
 	}
+
+	s.finance = &Finance{DB: s.gormDB}
+
 	return nil
 }
 
@@ -68,8 +72,6 @@ func TestCreateWallet(t *testing.T) {
 
 	walletID := initWallet.ID
 
-	s.finance = &Finance{DB: s.gormDB}
-
 	s.mock.ExpectBegin()
 
 	s.mock.ExpectExec(
@@ -86,5 +88,27 @@ func TestCreateWallet(t *testing.T) {
 
 	if err := s.mock.ExpectationsWereMet(); err != nil {
 		t.Errorf("Failed to meet expectations, got error: %v", err)
+	}
+}
+
+func TestListWallets(t *testing.T) {
+	s := &Suite{}
+	if err := s.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+
+	columns := []string{"id", "created_at", "updated_at", "deleted_at", "name", "balance", "closed"}
+
+	rows := sqlmock.NewRows(columns).
+		AddRow(1, time.Now(), time.Now(), gorm.DeletedAt{}, "wallet 1", 0, false).
+		AddRow(2, time.Now(), time.Now(), gorm.DeletedAt{}, "wallet 2", 10000, true)
+
+	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `wallets` WHERE `wallets`.`deleted_at` IS NULL")).WillReturnRows(rows)
+
+	s.finance.ListWallets(&models.ListFilter{})
+
+	if err := s.mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
 	}
 }
