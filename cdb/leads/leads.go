@@ -59,23 +59,23 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 				search += " OR "
 			}
 		}
-		q = q.Where(search)
+		q.Where(search)
 	}
 
 	if filter.Query != "" {
-		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
+		q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}
 	if filter.ContactID != 0 {
-		q = q.Where("contact_id = ?", filter.ContactID)
+		q.Where("contact_id = ?", filter.ContactID)
 	}
 	if filter.ResponsibleID != 0 {
-		q = q.Where("responsible_id = ?", filter.ResponsibleID)
+		q.Where("responsible_id = ?", filter.ResponsibleID)
 	}
 	if filter.Active {
-		q = q.Where("closed_at IS NULL")
+		q.Where("closed_at IS NULL")
 	}
 	if filter.StepID != 0 {
-		q = q.Where("step_id = ?", filter.StepID)
+		q.Where("step_id = ?", filter.StepID)
 	}
 	dateSearh := ""
 	if !filter.MinDate.IsZero() {
@@ -91,14 +91,14 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 	if !filter.Completed && dateSearh != "" {
 		dateSearh = fmt.Sprintf("((%s) OR closed_at IS NULL)", dateSearh)
 	}
-	q = q.Where(dateSearh).Order("created_at desc")
+	q.Where(dateSearh).Order("created_at desc")
 
 	if filter.TagID != 0 {
 		IDs := []uint{}
 		l.DB.Raw("select lead_id from leads_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
-		q = q.Find(&cr.Leads, IDs)
+		q.Find(&cr.Leads, IDs)
 	} else {
-		q = q.Find(&cr.Leads)
+		q.Find(&cr.Leads)
 	}
 	if result := q.Count(&cr.Total); result.Error != nil {
 		return nil, result.Error

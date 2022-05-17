@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type TransferTest struct {
+type FilterTest struct {
 	name   string
 	filter models.ListFilter
 	query  string
@@ -22,8 +22,7 @@ type TransferTest struct {
 const timeForm = "Jan-02-2006"
 
 var timeExample, _ = time.Parse(timeForm, "May-08-2022")
-var parentID = 1000
-var tests = []TransferTest{
+var filterTests = []FilterTest{
 	{
 		name:   "no filter",
 		filter: models.ListFilter{},
@@ -54,6 +53,21 @@ var tests = []TransferTest{
 	},
 }
 
+var sumTests = []FilterTest{
+	{
+		name:   "sum, no filter",
+		filter: models.ListFilter{},
+		query:  regexp.QuoteMeta("SELECT category, sum(amount) as total FROM `transfers` WHERE "),
+	},
+	{
+		name:   "sum, date range, completed",
+		filter: models.ListFilter{MinDate: timeExample, MaxDate: timeExample, Completed: true},
+		query: regexp.QuoteMeta(
+			fmt.Sprintf("SELECT category, sum(amount) as total FROM `transfers` WHERE (completed_at >= '%s' AND completed_at < '%s') AND `transfers`.`deleted_at` IS NULL GROUP BY `category`", timeExample, timeExample),
+		),
+	},
+}
+
 func TestTransfers(t *testing.T) {
 	s := &Suite{}
 	if err := s.Init(); err != nil {
@@ -70,7 +84,7 @@ func TestTransfers(t *testing.T) {
 		AddRow(4, time.Now(), time.Now(), gorm.DeletedAt{}, "t 4", 2000, true, "cat 3", 1002, nil, 101).
 		AddRow(5, time.Now(), time.Now(), gorm.DeletedAt{}, "t 4", 2000, true, "cat 3", 1003, nil, 100)
 
-	for _, test := range tests {
+	for _, test := range filterTests {
 		t.Run(test.name, func(t *testing.T) {
 			if test.args != nil {
 				s.mock.ExpectQuery(test.query).WithArgs(test.args...).WillReturnRows(rows)
@@ -81,6 +95,36 @@ func TestTransfers(t *testing.T) {
 			//s.mock.ExpectQuery(regexp.QuoteMeta("SELECT count(*) FROM `transfers`")).WillReturnRows(count)
 
 			s.finance.Transfers(test.filter)
+
+			if err := s.mock.ExpectationsWereMet(); err != nil {
+				t.Errorf("there were unfulfilled expectations: %s", err)
+			}
+		})
+	}
+}
+
+func TestSumByCategory(t *testing.T) {
+	s := &Suite{}
+	if err := s.Init(); err != nil {
+		t.Fatal(err)
+	}
+	defer s.Close()
+
+	columns := []string{"category", "total"}
+
+	rows := sqlmock.NewRows(columns).
+		AddRow("cat 1", 1000).
+		AddRow("cat 2", 500)
+
+	for _, test := range sumTests {
+		t.Run(test.name, func(t *testing.T) {
+			if test.args != nil {
+				s.mock.ExpectQuery(test.query).WithArgs(test.args...).WillReturnRows(rows)
+			} else {
+				s.mock.ExpectQuery(test.query).WillReturnRows(rows)
+			}
+
+			s.finance.SumByCategory(test.filter)
 
 			if err := s.mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)

@@ -140,20 +140,49 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 
 	//Category is text field for now, so let's use query. TODO: if changed to ID...
 	if filter.Query != "" {
-		q = q.Where("category LIKE ?", "%"+filter.Query+"%")
+		q.Where("category LIKE ?", "%"+filter.Query+"%")
 	}
 	if filter.ParentID != 0 {
-		q = q.Where("parent_id = ?", filter.ParentID)
+		q.Where("parent_id = ?", filter.ParentID)
 	}
 	if filter.From != 0 {
-		q = q.Where("from = ?", filter.From)
+		q.Where("from = ?", filter.From)
 	}
 	if filter.To != 0 {
-		q = q.Where("to = ?", filter.To)
+		q.Where("to = ?", filter.To)
 	}
 	if filter.Wallet != 0 {
-		q = q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
+		q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
 	}
+	AddDateCondition(filter, q)
+	//TODO: check if it gives all uncompleted at first place
+	q.Order("completed asc").Order("completed_at desc").Order("created_at desc")
+	if result := q.Find(&cr.Transfers).Count(&cr.Total); result.Error != nil {
+		return nil, result.Error
+	}
+	return cr, nil
+}
+
+func (f *Finance) Categories() ([]string, error) {
+	categories := make([]string, 0)
+	err := f.DB.Raw("SELECT DISTINCT(category) FROM transfers WHERE deleted_at IS NULL ORDER BY category asc").Limit(100).Scan(&categories).Error
+	return categories, err
+}
+
+type SumResult struct {
+	Category string
+	Total    int
+}
+
+func (f *Finance) SumByCategory(filter models.ListFilter) ([]SumResult, error) {
+	results := make([]SumResult, 0)
+	q := f.DB.Model(&models.Transfer{})
+	AddDateCondition(filter, q)
+	err := q.Select("category, sum(amount) as total").Group("category").Find(&results).Error
+	return results, err
+}
+
+func AddDateCondition(filter models.ListFilter, q *gorm.DB) {
 	dateSearh := ""
 	if !filter.MinDate.IsZero() {
 		dateSearh += fmt.Sprintf("completed_at >= '%s'", filter.MinDate)
@@ -168,19 +197,5 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 	if !filter.Completed && dateSearh != "" {
 		dateSearh = fmt.Sprintf("((%s) OR completed_at IS NULL)", dateSearh)
 	}
-	q = q.Where(dateSearh)
-	//TODO: check if it gives all uncompleted at first place
-	q = q.Order("completed asc").Order("completed_at desc").Order("created_at desc")
-	if result := q.Find(&cr.Transfers).Count(&cr.Total); result.Error != nil {
-		return nil, result.Error
-	}
-	return cr, nil
+	q.Where(dateSearh)
 }
-
-func (f *Finance) Categories() ([]string, error) {
-	categories := make([]string, 0)
-	err := f.DB.Raw("SELECT DISTINCT(category) FROM transfers WHERE deleted_at IS NULL ORDER BY category asc").Limit(100).Scan(&categories).Error
-	return categories, err
-}
-
-//TODO: some grouped by category returns for analyze

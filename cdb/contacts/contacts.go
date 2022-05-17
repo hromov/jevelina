@@ -35,14 +35,14 @@ func (c *Contacts) List(filter models.ListFilter) (*models.ContactsResponse, err
 		} else {
 			searchType = fullSearch
 		}
-		q = q.Where(searchType, sql.Named("query", "%"+filter.Query+"%"))
+		q.Where(searchType, sql.Named("query", "%"+filter.Query+"%"))
 	}
 	if filter.TagID != 0 {
 		IDs := []uint{}
 		c.DB.Raw("select contact_id from contacts_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
-		q = q.Find(&cr.Contacts, IDs)
+		q.Find(&cr.Contacts, IDs)
 	} else {
-		q = q.Find(&cr.Contacts)
+		q.Find(&cr.Contacts)
 	}
 
 	if result := q.Count(&cr.Total); result.Error != nil {
