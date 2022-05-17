@@ -169,17 +169,30 @@ func (f *Finance) Categories() ([]string, error) {
 	return categories, err
 }
 
-type SumResult struct {
+type CatTotal struct {
 	Category string
 	Total    int
 }
 
-func (f *Finance) SumByCategory(filter models.ListFilter) ([]SumResult, error) {
-	results := make([]SumResult, 0)
+type CategorisedCashflow struct {
+	Incomes  []CatTotal
+	Expenses []CatTotal
+}
+
+func (f *Finance) SumByCategory(filter models.ListFilter) (*CategorisedCashflow, error) {
+	incomes := make([]CatTotal, 0)
+	expenses := make([]CatTotal, 0)
 	q := f.DB.Model(&models.Transfer{})
 	AddDateCondition(filter, q)
-	err := q.Select("category, sum(amount) as total").Group("category").Find(&results).Error
-	return results, err
+	if err := q.Select("category, sum(amount) as total").Where("`from` IS NULL").Group("category").Find(&incomes).Error; err != nil {
+		return nil, fmt.Errorf("Can't get incomes error: %s", err.Error())
+	}
+	q2 := f.DB.Model(&models.Transfer{})
+	AddDateCondition(filter, q2)
+	if err := q2.Select("category, sum(amount) as total").Where("`to` IS NULL").Group("category").Find(&expenses).Error; err != nil {
+		return nil, fmt.Errorf("Can't get expenses error: %s", err.Error())
+	}
+	return &CategorisedCashflow{Incomes: incomes, Expenses: expenses}, nil
 }
 
 func AddDateCondition(filter models.ListFilter, q *gorm.DB) {

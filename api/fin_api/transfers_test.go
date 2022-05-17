@@ -71,7 +71,12 @@ func TestCategoriesSum(t *testing.T) {
 		AddRow("cat 1", 1000).
 		AddRow("cat 2", 500)
 
-	mock.ExpectQuery(regexp.QuoteMeta("SELECT category, sum(amount) as total FROM `transfers` WHERE ")).WillReturnRows(rows)
+	rows2 := sqlmock.NewRows(columns).
+		AddRow("cat 3", 1000).
+		AddRow("cat 4", 500)
+
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT category, sum(amount) as total FROM `transfers` WHERE `from` IS NULL AND `transfers`.`deleted_at` IS NULL GROUP BY `category`")).WillReturnRows(rows)
+	mock.ExpectQuery(regexp.QuoteMeta("SELECT category, sum(amount) as total FROM `transfers` WHERE `to` IS NULL AND `transfers`.`deleted_at` IS NULL GROUP BY `category`")).WillReturnRows(rows2)
 
 	// now we execute our request
 	CategoriesSumHandler(w, req)
@@ -80,10 +85,16 @@ func TestCategoriesSum(t *testing.T) {
 		t.Fatalf("expected status code to be 200, but got: %d", w.Code)
 	}
 
-	data := []finance.SumResult{
+	incomes := []finance.CatTotal{
 		{Category: "cat 1", Total: 1000},
 		{Category: "cat 2", Total: 500},
 	}
+	expenses := []finance.CatTotal{
+		{Category: "cat 3", Total: 1000},
+		{Category: "cat 4", Total: 500},
+	}
+
+	data := finance.CategorisedCashflow{Incomes: incomes, Expenses: expenses}
 	cdb.AssertJSON(w.Body.Bytes(), data, t)
 
 	// we make sure that all expectations were met
