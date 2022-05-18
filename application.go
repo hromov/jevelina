@@ -14,7 +14,7 @@ import (
 const bucketName = "jevelina"
 
 func main() {
-	dsn, err := os.ReadFile("_keys/db_google2")
+	dsn, err := os.ReadFile("_keys/db_google")
 	if err != nil {
 		log.Fatal(err)
 	}

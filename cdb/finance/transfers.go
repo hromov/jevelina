@@ -27,12 +27,12 @@ func (f *Finance) UpdateTransfer(t *models.Transfer) error {
 	if t.From == t.To {
 		return errors.New("Can't transfer to the same wallet")
 	}
-	f.DB.First(&oldTransfer, t.ID)
+	f.DB.Unscoped().First(&oldTransfer, t.ID)
 	if oldTransfer == nil {
 		return fmt.Errorf("Can't find transfer with ID = %d", t.ID)
 	}
 	if oldTransfer.Completed || !oldTransfer.DeletedAt.Time.IsZero() {
-		return errors.New("Can't change completed or deleted transfer")
+		return f.DB.Unscoped().Model(oldTransfer).Updates(models.Transfer{Category: t.Category, Description: t.Description}).Error
 	}
 	return f.DB.Omit(clause.Associations).Save(t).Error
 }
