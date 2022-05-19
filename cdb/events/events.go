@@ -2,7 +2,6 @@ package events
 
 import (
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
@@ -10,7 +9,7 @@ import (
 )
 
 type EventService struct {
-	db *gorm.DB
+	DB *gorm.DB
 }
 
 func (es *EventService) Save(newEvent models.NewEvent) error {
@@ -21,13 +20,12 @@ func (es *EventService) Save(newEvent models.NewEvent) error {
 		EventParentType: newEvent.EventParentType,
 		Description:     fmt.Sprintf("[%s] %s", newEvent.EventType.String(), newEvent.Message),
 	}
-	return es.db.Create(event).Error
+	return es.DB.Create(event).Error
 }
 
 func (es *EventService) List(filter models.EventFilter) (*models.EventsResponse, error) {
 	er := &models.EventsResponse{}
-	q := es.db
-	log.Println("FILTER = ", filter)
+	q := es.DB
 	if filter.EventParentType != 0 {
 		q = q.Where("event_parent_type = ?", filter.EventParentType)
 	}

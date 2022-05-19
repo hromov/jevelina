@@ -45,7 +45,7 @@ func (s *Suite) Init() (err error) {
 		return err
 	}
 
-	s.es = &EventService{db: s.gormDB}
+	s.es = &EventService{DB: s.gormDB}
 
 	return nil
 }

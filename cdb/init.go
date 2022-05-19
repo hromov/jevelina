@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/hromov/jevelina/cdb/contacts"
+	"github.com/hromov/jevelina/cdb/events"
 	"github.com/hromov/jevelina/cdb/files"
 	"github.com/hromov/jevelina/cdb/finance"
 	"github.com/hromov/jevelina/cdb/leads"
@@ -40,11 +41,15 @@ func Misc() *misc.Misc {
 }
 
 func Finance() *finance.Finance {
-	return &finance.Finance{DB: currentDB.DB}
+	return &finance.Finance{DB: currentDB.DB, Events: Events()}
 }
 
 func Files() *files.FilesService {
 	return &files.FilesService{DB: currentDB.DB, BucketName: currentDB.BucketName}
+}
+
+func Events() *events.EventService {
+	return &events.EventService{DB: currentDB.DB}
 }
 
 func (db *CDB) SetBucket(bucketName string) {

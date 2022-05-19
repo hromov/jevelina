@@ -3,6 +3,7 @@ package finance
 import (
 	"fmt"
 
+	"github.com/hromov/jevelina/cdb/events"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -10,6 +11,7 @@ import (
 
 type Finance struct {
 	*gorm.DB
+	Events *events.EventService
 }
 
 func (f *Finance) CreateWallet(item *models.Wallet) (*models.Wallet, error) {

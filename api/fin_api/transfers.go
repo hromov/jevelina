@@ -61,7 +61,13 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err = fin.UpdateTransfer(transfer); err != nil {
+		user, err := auth.GetCurrentUser(r)
+		if err != nil || user == nil {
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+		}
+
+		if err = fin.UpdateTransfer(user.ID, transfer); err != nil {
 			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)

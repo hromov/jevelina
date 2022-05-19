@@ -22,7 +22,7 @@ func (f *Finance) CreateTransfer(t *models.Transfer) (*models.Transfer, error) {
 	return t, nil
 }
 
-func (f *Finance) UpdateTransfer(t *models.Transfer) error {
+func (f *Finance) UpdateTransfer(userID uint64, t *models.Transfer) error {
 	var oldTransfer *models.Transfer
 	if t.From == t.To {
 		return errors.New("Can't transfer to the same wallet")
@@ -32,6 +32,7 @@ func (f *Finance) UpdateTransfer(t *models.Transfer) error {
 		return fmt.Errorf("Can't find transfer with ID = %d", t.ID)
 	}
 	if oldTransfer.Completed || !oldTransfer.DeletedAt.Time.IsZero() {
+		f.categoryChangeCheck(userID, *oldTransfer, *t)
 		return f.DB.Unscoped().Model(oldTransfer).Updates(models.Transfer{Category: t.Category, Description: t.Description}).Error
 	}
 	return f.DB.Omit(clause.Associations).Save(t).Error
@@ -211,4 +212,16 @@ func AddDateCondition(filter models.ListFilter, q *gorm.DB) {
 		dateSearh = fmt.Sprintf("((%s) OR completed_at IS NULL)", dateSearh)
 	}
 	q = q.Where(dateSearh)
+}
+
+func (f *Finance) categoryChangeCheck(userID uint64, oldTransfer, t models.Transfer) {
+	if oldTransfer.Category != t.Category {
+		f.Events.Save(models.NewEvent{
+			UserID:          userID,
+			ParentID:        oldTransfer.ID,
+			Message:         fmt.Sprintf("%s > %s", oldTransfer.Category, t.Category),
+			EventType:       models.CategoryChange,
+			EventParentType: models.TransferEvent,
+		})
+	}
 }
