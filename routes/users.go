@@ -9,8 +9,7 @@ import (
 func UserRoutes(r *mux.Router) *mux.Router {
 	r.HandleFunc("/contacts", auth.UserCheck(api.ContactsHandler)).Methods("GET", "POST")
 	r.HandleFunc("/contacts/{id}", auth.UserCheck(api.ContactHandler)).Methods("GET", "PUT", "DELETE")
-	// r.HandleFunc("/leads", auth.UserCheck(api.LeadsHandler)).Methods("GET", "POST")
-	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET", "POST")
+	r.HandleFunc("/leads", auth.UserCheck(api.LeadsHandler)).Methods("GET", "POST")
 	r.HandleFunc("/leads/{id}", auth.UserCheck(api.LeadHandler)).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/users", auth.UserCheck(api.UsersHandler)).Methods("GET")
 	r.HandleFunc("/users/{id}", auth.UserCheck(api.UserHandler)).Methods("GET")
