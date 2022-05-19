@@ -140,19 +140,19 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 
 	//Category is text field for now, so let's use query. TODO: if changed to ID...
 	if filter.Query != "" {
-		q.Where("category LIKE ?", "%"+filter.Query+"%")
+		q = q.Where("category LIKE ?", "%"+filter.Query+"%")
 	}
 	if filter.ParentID != 0 {
-		q.Where("parent_id = ?", filter.ParentID)
+		q = q.Where("parent_id = ?", filter.ParentID)
 	}
 	if filter.From != 0 {
-		q.Where("from = ?", filter.From)
+		q = q.Where("from = ?", filter.From)
 	}
 	if filter.To != 0 {
-		q.Where("to = ?", filter.To)
+		q = q.Where("to = ?", filter.To)
 	}
 	if filter.Wallet != 0 {
-		q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
+		q = q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
 	}
 	AddDateCondition(filter, q)
 	//TODO: check if it gives all uncompleted at first place
@@ -210,5 +210,5 @@ func AddDateCondition(filter models.ListFilter, q *gorm.DB) {
 	if !filter.Completed && dateSearh != "" {
 		dateSearh = fmt.Sprintf("((%s) OR completed_at IS NULL)", dateSearh)
 	}
-	q.Where(dateSearh)
+	q = q.Where(dateSearh)
 }

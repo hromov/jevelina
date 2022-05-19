@@ -121,6 +121,12 @@ func (db *CDB) Init() error {
 		}
 	}
 
+	if !currentDB.DB.Migrator().HasTable("events") {
+		if err := db.AutoMigrate(&models.Event{}); err != nil {
+			return err
+		}
+	}
+
 	//TODO: check if works on clean -> Move to file -> Readme.MD
 	user := models.User{ID: 1}
 	if err := currentDB.DB.First(&user).Error; err != nil {

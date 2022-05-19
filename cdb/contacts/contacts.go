@@ -35,7 +35,7 @@ func (c *Contacts) List(filter models.ListFilter) (*models.ContactsResponse, err
 		} else {
 			searchType = fullSearch
 		}
-		q.Where(searchType, sql.Named("query", "%"+filter.Query+"%"))
+		q = q.Where(searchType, sql.Named("query", "%"+filter.Query+"%"))
 	}
 	if filter.TagID != 0 {
 		IDs := []uint{}

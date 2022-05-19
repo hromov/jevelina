@@ -59,23 +59,23 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 				search += " OR "
 			}
 		}
-		q.Where(search)
+		q = q.Where(search)
 	}
 
 	if filter.Query != "" {
-		q.Where("name LIKE ?", "%"+filter.Query+"%")
+		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}
 	if filter.ContactID != 0 {
-		q.Where("contact_id = ?", filter.ContactID)
+		q = q.Where("contact_id = ?", filter.ContactID)
 	}
 	if filter.ResponsibleID != 0 {
-		q.Where("responsible_id = ?", filter.ResponsibleID)
+		q = q.Where("responsible_id = ?", filter.ResponsibleID)
 	}
 	if filter.Active {
-		q.Where("closed_at IS NULL")
+		q = q.Where("closed_at IS NULL")
 	}
 	if filter.StepID != 0 {
-		q.Where("step_id = ?", filter.StepID)
+		q = q.Where("step_id = ?", filter.StepID)
 	}
 	dateSearh := ""
 	if !filter.MinDate.IsZero() {
@@ -91,7 +91,7 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 	if !filter.Completed && dateSearh != "" {
 		dateSearh = fmt.Sprintf("((%s) OR closed_at IS NULL)", dateSearh)
 	}
-	q.Where(dateSearh).Order("created_at desc")
+	q = q.Where(dateSearh).Order("created_at desc")
 
 	if filter.TagID != 0 {
 		IDs := []uint{}

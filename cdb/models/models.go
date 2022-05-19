@@ -151,15 +151,6 @@ type Step struct {
 	Active    bool `gorm:"index"`
 }
 
-type Event struct {
-	ID          uint64 `gorm:"primaryKey"`
-	CreatedAt   time.Time
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	ParentID    uint64
-	Description string `gorm:"size:256"`
-}
-
 type Tag struct {
 	ID        uint8 `gorm:"primaryKey"`
 	CreatedAt time.Time
@@ -316,14 +307,63 @@ type FileAddReq struct {
 	Value  string
 }
 
-// From      *datastore.Key   `json:"from"`
-// To        *datastore.Key   `json:"to"`
-// Category  string           `json:"category"`
-// Amount    float32          `json:"amount" datastore:",noindex"`
-// CreatedAt time.Time        `json:"created_at,string"`
-// CreatedBy string           `json:"created_by"`
-// Status    TransferStatus   `json:"status"`
-// Wallets   []*datastore.Key `json:"wallets"`
-// Lead      string           `json:"lead"`
-// Ancestor  *datastore.Key   `json:"ancestor" datastore:"-"`
-// Files     []File           `json:"files,omitempty" datastore:",noindex"`
+type EventParentType int16
+
+const (
+	TransferEvent EventParentType = iota + 1
+	LeadEvent
+	ContactEvent
+)
+
+type EventType int16
+
+const (
+	Create EventType = iota + 1
+	Update
+	Delete
+	CategoryChange
+)
+
+func (et EventType) String() string {
+	switch et {
+	case Create:
+		return "Create"
+	case Update:
+		return "Update"
+	case Delete:
+		return "Delete"
+	case CategoryChange:
+		return "Category Change"
+	}
+	return "unknown"
+}
+
+type Event struct {
+	ID              uint64 `gorm:"primaryKey"`
+	CreatedAt       time.Time
+	ParentID        uint64
+	UserID          uint64
+	EventParentType EventParentType
+	Description     string `gorm:"size:512"`
+}
+
+type NewEvent struct {
+	ParentID        uint64
+	UserID          uint64
+	Message         string
+	EventType       EventType
+	EventParentType EventParentType
+}
+
+type EventsResponse struct {
+	Events []Event
+	Total  int64
+}
+
+type EventFilter struct {
+	ParentID        uint64
+	UserID          uint64
+	EventParentType EventParentType
+	Limit           int
+	Offset          int
+}

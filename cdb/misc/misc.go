@@ -176,22 +176,22 @@ func (m *Misc) Tasks(filter models.ListFilter) (*models.TasksResponse, error) {
 	//How to make joins work?.Joins("Contacts")
 	q := m.DB.Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 	if filter.Query != "" {
-		q.Where("name LIKE ?", "%"+filter.Query+"%")
+		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}
 	if filter.ParentID != 0 {
-		q.Where("parent_id = ?", filter.ParentID)
+		q = q.Where("parent_id = ?", filter.ParentID)
 	}
 	if filter.ResponsibleID != 0 {
-		q.Where("responsible_id = ?", filter.ResponsibleID)
+		q = q.Where("responsible_id = ?", filter.ResponsibleID)
 	}
 	if !filter.MinDate.IsZero() {
-		q.Where("dead_line >= ?", filter.MinDate)
+		q = q.Where("dead_line >= ?", filter.MinDate)
 	}
 	if !filter.MaxDate.IsZero() {
-		q.Where("dead_line < ?", filter.MaxDate)
+		q = q.Where("dead_line < ?", filter.MaxDate)
 	}
 	if !filter.MinDate.IsZero() || !filter.MaxDate.IsZero() {
-		q.Where("dead_line IS NOT NULL").Where("completed = false").Order("dead_line desc")
+		q = q.Where("dead_line IS NOT NULL").Where("completed = false").Order("dead_line desc")
 	}
 	q.Order("created_at asc")
 	if result := q.Find(&cr.Tasks).Count(&cr.Total); result.Error != nil {
