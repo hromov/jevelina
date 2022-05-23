@@ -59,22 +59,18 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//channge to base.DB?
 		if err = c.DB.Omit(clause.Associations).Save(contact).Error; err != nil {
 			log.Printf("Can't update contact with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	case "DELETE":
-
-		if err = c.DB.Delete(&models.Contact{ID: ID}).Error; err != nil {
+		if err = c.Delete(ID); err != nil {
 			log.Printf("Can't delete contact with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	}
 

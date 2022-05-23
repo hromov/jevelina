@@ -63,16 +63,14 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	case "DELETE":
 
-		if err = l.DB.Delete(&models.Lead{ID: ID}).Error; err != nil {
+		if err = l.Delete(ID); err != nil {
 			log.Printf("Can't delete lead with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	}
 }
@@ -126,7 +124,6 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 	}
 
-	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(leadsResponse.Leads)
 	if err != nil {
 		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())

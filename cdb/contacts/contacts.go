@@ -2,8 +2,10 @@ package contacts
 
 import (
 	"database/sql"
+	"log"
 	"unicode"
 
+	"github.com/hromov/jevelina/cdb/misc"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -55,7 +57,7 @@ func (c *Contacts) ByID(ID uint64) (*models.Contact, error) {
 	// log.Println(limit, offset, query, query == "")
 	var contact models.Contact
 
-	if result := c.DB.Preload(clause.Associations).First(&contact, ID); result.Error != nil {
+	if result := c.DB.Unscoped().Preload(clause.Associations).First(&contact, ID); result.Error != nil {
 		return nil, result.Error
 	}
 	return &contact, nil
@@ -67,4 +69,14 @@ func (c *Contacts) ByPhone(phone string) (*models.Contact, error) {
 		return nil, err
 	}
 	return contact, nil
+}
+
+func (c *Contacts) Delete(ID uint64) error {
+	if err := c.DB.Delete(&models.Contact{ID: ID}).Error; err != nil {
+		return err
+	}
+	if err := misc.DeleteTaskByParent(c.DB, ID); err != nil {
+		log.Printf("Error while deliting tasks for contact: %s", err.Error())
+	}
+	return nil
 }

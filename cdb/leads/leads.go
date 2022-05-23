@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/hromov/jevelina/cdb/misc"
 	"github.com/hromov/jevelina/cdb/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -110,8 +111,18 @@ func (l *Leads) ByID(ID uint64) (*models.Lead, error) {
 	// log.Println(limit, offset, query, query == "")
 	var lead models.Lead
 
-	if result := l.DB.Preload(clause.Associations).First(&lead, ID); result.Error != nil {
+	if result := l.DB.Unscoped().Preload(clause.Associations).First(&lead, ID); result.Error != nil {
 		return nil, result.Error
 	}
 	return &lead, nil
+}
+
+func (l *Leads) Delete(ID uint64) error {
+	if err := l.DB.Delete(&models.Lead{ID: ID}).Error; err != nil {
+		return err
+	}
+	if err := misc.DeleteTaskByParent(l.DB, ID); err != nil {
+		log.Printf("Error while deliting tasks for lead: %s", err.Error())
+	}
+	return nil
 }
