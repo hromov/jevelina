@@ -69,7 +69,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		task.UpdatedID = &user.ID
 
-		if err = c.DB.Save(task).Error; err != nil {
+		if err = c.DB.Omit(clause.Associations).Save(task).Error; err != nil {
 			log.Printf("Can't update task with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
