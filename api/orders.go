@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"log"
-	"math/rand"
+
+	"crypto/rand"
+	"math/big"
 	"net/http"
-	"time"
 
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
@@ -47,7 +48,16 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user.Email == randomUserEmail {
-		user, err = getRandomUser()
+		users, err := cdb.Misc().Users()
+		if err != nil {
+			http.Error(w, "Can't get users", http.StatusInternalServerError)
+			return
+		}
+		if len(users) == 0 {
+			http.Error(w, "Users length = 0", http.StatusInternalServerError)
+			return
+		}
+		user, err = getRandomUser(users)
 		if err != nil {
 			log.Println("Can't get random user error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -88,32 +98,42 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func getRandomUser() (*models.User, error) {
-	users, err := cdb.Misc().Users()
+func getRandomUser(users []models.User) (*models.User, error) {
+	filtered := []models.User{}
+	for _, u := range users {
+		if u.Distribution > 0.0 {
+			filtered = append(filtered, u)
+		}
+	}
+
+	if len(filtered) == 0 {
+		return nil, errors.New("no good users found")
+	}
+
+	r, err := rand.Int(rand.Reader, big.NewInt(int64(len(filtered))))
 	if err != nil {
 		return nil, err
 	}
-	if len(users) == 0 {
-		return nil, errors.New("No users found in base")
-	}
+	return &filtered[r.Int64()], nil
 
-	rand.Seed(time.Now().UnixNano())
-	var user *models.User
-	appropriateSeen := false
-	for user == nil {
-		for _, u := range users {
-			if u.Distribution == 0.0 {
-				continue
-			}
-			appropriateSeen = true
-			r := rand.Float32()
-			if u.Distribution >= r {
-				return &u, nil
-			}
-		}
-		if !appropriateSeen {
-			return nil, errors.New("No user with distribution more then 0 was found")
-		}
-	}
-	return nil, errors.New("should never be called")
+	// for user == nil {
+	// 	for _, u := range users {
+
+	// 		appropriateSeen = true
+	// 		// r := rand.Float32()
+	// 		r, err := rand.Int(rand.Reader, big.NewInt(100))
+	// 		if err != nil {
+	// 			return nil, err
+	// 		}
+	// 		userNumber := int(u.Distribution * 100)
+	// 		log.Println(u.Email, r, u.Distribution, big.NewInt(int64(userNumber)).Cmp(r))
+	// 		if big.NewInt(int64(userNumber)).Cmp(r) >= 0 {
+	// 			return &u, nil
+	// 		}
+	// 	}
+	// 	if !appropriateSeen {
+	// 		return nil, errors.New("No user with distribution more then 0 was found")
+	// 	}
+	// }
+	// return nil, errors.New("should never be called")
 }
