@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/google/uuid"
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/vincent-petithory/dataurl"
 	"gorm.io/gorm"
@@ -44,7 +45,7 @@ func (fs *FilesService) Upload(req *models.FileAddReq) (*models.File, error) {
 	}
 	defer client.Close()
 
-	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), req.Name)
+	fileName := uuid.New().String()
 
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(fs.BucketName).Object(fileName).NewWriter(ctx)
