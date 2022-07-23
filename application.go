@@ -16,7 +16,6 @@ const bucketName = "jevelina"
 
 func main() {
 	cfg := config.Get()
-	log.Println(os.Getenv("GOOGLE_APPLICATION_CREDENTIALS"))
 	log.Println(cfg)
 	dsn, err := os.ReadFile("_keys/db_google2")
 	if err != nil {
