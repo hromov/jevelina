@@ -17,7 +17,7 @@ const bucketName = "jevelina"
 func main() {
 	cfg := config.Get()
 	log.Println(cfg)
-	dsn, err := os.ReadFile("_keys/db_google2")
+	dsn, err := os.ReadFile("_keys/db_google")
 	if err != nil {
 		log.Fatal(err)
 	}
