@@ -63,6 +63,7 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 		if err := cdb.Files().Delete(ID); err != nil {
+			log.Println(err)
 			http.Error(w, "Can't delete file error: "+err.Error(), http.StatusInternalServerError)
 			return
 		}

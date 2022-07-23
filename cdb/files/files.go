@@ -18,7 +18,7 @@ type FilesService struct {
 
 func (fs *FilesService) Delete(ID uint64) error {
 	var file models.File
-	if err := fs.DB.First(&file).Error; err != nil {
+	if err := fs.DB.First(&file, ID).Error; err != nil {
 		return err
 	}
 	ctx := context.Background()
@@ -27,9 +27,8 @@ func (fs *FilesService) Delete(ID uint64) error {
 		return err
 	}
 	defer client.Close()
-
-	if err := client.Bucket(fs.BucketName).Object(file.URL).Delete(ctx); err != nil {
-		return err
+	if err = client.Bucket(fs.BucketName).Object(file.URL).Delete(ctx); err != nil {
+		return fmt.Errorf("Can't delete file: %+v, error: %s", file, err.Error())
 	}
 	return fs.DB.Delete(&file).Error
 }
