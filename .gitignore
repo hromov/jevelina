@@ -4,3 +4,4 @@
 application
 /bin
 /broken
+.env

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/google/uuid"
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/vincent-petithory/dataurl"
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ type FilesService struct {
 
 func (fs *FilesService) Delete(ID uint64) error {
 	var file models.File
-	if err := fs.DB.First(&file).Error; err != nil {
+	if err := fs.DB.First(&file, ID).Error; err != nil {
 		return err
 	}
 	ctx := context.Background()
@@ -27,9 +28,8 @@ func (fs *FilesService) Delete(ID uint64) error {
 		return err
 	}
 	defer client.Close()
-
-	if err := client.Bucket(fs.BucketName).Object(file.URL).Delete(ctx); err != nil {
-		return err
+	if err = client.Bucket(fs.BucketName).Object(file.URL).Delete(ctx); err != nil {
+		return fmt.Errorf("Can't delete file: %+v, error: %s", file, err.Error())
 	}
 	return fs.DB.Delete(&file).Error
 }
@@ -45,7 +45,7 @@ func (fs *FilesService) Upload(req *models.FileAddReq) (*models.File, error) {
 	}
 	defer client.Close()
 
-	fileName := fmt.Sprintf("%d_%s", time.Now().Unix(), req.Name)
+	fileName := uuid.New().String()
 
 	// Upload an object with storage.Writer.
 	wc := client.Bucket(fs.BucketName).Object(fileName).NewWriter(ctx)

@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/hromov/jevelina/cdb"
+	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/routes"
 )
 
@@ -14,7 +15,9 @@ import (
 const bucketName = "jevelina"
 
 func main() {
-	dsn, err := os.ReadFile("_keys/db_google")
+	cfg := config.Get()
+	log.Println(cfg)
+	dsn, err := os.ReadFile("_keys/db_google2")
 	if err != nil {
 		log.Fatal(err)
 	}

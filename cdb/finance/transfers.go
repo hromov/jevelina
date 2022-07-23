@@ -123,7 +123,7 @@ func (f *Finance) DeleteTransfer(ID uint64, userID uint64) error {
 
 func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse, error) {
 	cr := &models.TransfersResponse{}
-	q := f.DB.Unscoped().Limit(filter.Limit).Offset(filter.Offset)
+	q := f.DB.Preload("Files").Limit(filter.Limit).Offset(filter.Offset)
 	// if IDs providen - return here and it has to be used as parent's ID, because we don't know transfers IDs other way
 	if len(filter.IDs) > 0 {
 		search := ""
