@@ -26,30 +26,30 @@ var filterTests = []FilterTest{
 	{
 		name:    "no filter",
 		filter:  models.ListFilter{},
-		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` ORDER BY completed asc,completed_at desc,created_at desc")},
+		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` WHERE `transfers`.`deleted_at` IS NULL ORDER BY completed asc,completed_at desc,created_at desc")},
 	},
 	{
 		name:    "limit 3",
 		filter:  models.ListFilter{Limit: 3},
-		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` ORDER BY completed asc,completed_at desc,created_at desc LIMIT 3")},
+		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` WHERE `transfers`.`deleted_at` IS NULL ORDER BY completed asc,completed_at desc,created_at desc LIMIT 3")},
 	},
 	{
 		name:   "date range",
 		filter: models.ListFilter{MinDate: timeExample, MaxDate: timeExample},
 		queries: []string{regexp.QuoteMeta(
-			fmt.Sprintf("SELECT * FROM `transfers` WHERE ((completed_at >= '%s' AND completed_at < '%s') OR completed_at IS NULL", timeExample, timeExample),
-		)},
+			fmt.Sprintf("SELECT * FROM `transfers` WHERE* ((completed_at >= '%s' AND completed_at < '%s') OR completed_at IS NULL", timeExample, timeExample)),
+		},
 	},
 	{
 		name:    "single parent",
 		filter:  models.ListFilter{ParentID: 1000},
-		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` WHERE parent_id = ? ORDER BY completed asc,completed_at desc,created_at desc")},
+		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` WHERE* parent_id = ? ORDER BY completed asc,completed_at desc,created_at desc")},
 		args:    []driver.Value{1000},
 	},
 	{
 		name:    "multiple parents",
 		filter:  models.ListFilter{IDs: []uint64{1000, 1001}},
-		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` WHERE parent_id = 1000 OR parent_id = 1001")},
+		queries: []string{regexp.QuoteMeta("SELECT * FROM `transfers` WHERE* parent_id = 1000 OR parent_id = 1001")},
 	},
 }
 

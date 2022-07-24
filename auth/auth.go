@@ -11,16 +11,6 @@ import (
 	"github.com/hromov/muser"
 )
 
-const accesPath = "https://www.googleapis.com/oauth2/v3/tokeninfo?access_token="
-
-type googleAuthResponse struct {
-	Aud           string
-	ExpiresIn     string `json:"expires_in"`
-	Scope         string
-	Email         string
-	EmailVerified string `json:"email_verified"`
-}
-
 //isUser - check wheter user logged in and is in the user base
 func isUser(r *http.Request) (bool, error) {
 	mail, _ := muser.GetMailByToken(r)
