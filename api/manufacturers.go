@@ -46,7 +46,7 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&manufacturer); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -58,13 +58,11 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//channge to base.DB?
 		if err = c.DB.Omit(clause.Associations).Save(manufacturer).Error; err != nil {
 			log.Printf("Can't update manufacturer with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	case "DELETE":
 
@@ -73,7 +71,6 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// w.WriteHeader(http.StatusOK)
 		return
 	}
 
@@ -92,14 +89,12 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		c := cdb.GetDB()
-		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(manufacturer).Error; err != nil {
 			log.Printf("Can't create manufacturer. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		//it actually was created ......
 		b, err := json.Marshal(manufacturer)
 		if err != nil {
 			log.Println("Can't json.Marshal(manufacturer) error: " + err.Error())
@@ -107,9 +102,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(b)
 		return
 	}
 
@@ -120,7 +113,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 	}
-	// log.Println("banks in main: ", banks)
+
 	b, err := json.Marshal(manufacturersResponse)
 	if err != nil {
 		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
@@ -131,5 +124,5 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(manufacturersResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	w.Write(b)
+	_, _ = w.Write(b)
 }

@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"time"
 
 	"gorm.io/gorm"
@@ -366,4 +367,22 @@ type EventFilter struct {
 	EventParentType EventParentType
 	Limit           int
 	Offset          int
+}
+
+// TODO: move to cdb
+func (filter *ListFilter) DateCondition() string {
+	dateSearh := ""
+	if !filter.MinDate.IsZero() {
+		dateSearh += fmt.Sprintf("completed_at >= '%s'", filter.MinDate)
+	}
+	if !filter.MaxDate.IsZero() {
+		if dateSearh != "" {
+			dateSearh += " AND "
+		}
+		dateSearh += fmt.Sprintf("completed_at < '%s'", filter.MaxDate)
+	}
+	if !filter.Completed && dateSearh != "" {
+		dateSearh = fmt.Sprintf("((%s) OR completed_at IS NULL)", dateSearh)
+	}
+	return dateSearh
 }

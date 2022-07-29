@@ -40,10 +40,6 @@ func InitMock() (sqlmock.Sqlmock, error) {
 		return nil, fmt.Errorf("mock db is null")
 	}
 
-	if mock == nil {
-		return nil, fmt.Errorf("sqlmock is null")
-	}
-
 	gormDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      db,
 		SkipInitializeWithVersion: true,
@@ -64,7 +60,7 @@ func AssertJSON(actual []byte, data interface{}, t *testing.T) {
 		t.Fatalf("an error '%s' was not expected when marshaling expected json data", err)
 	}
 
-	if bytes.Compare(expected, actual) != 0 {
+	if !bytes.Equal(expected, actual) {
 		t.Errorf("the expected json: %s is different from actual %s", expected, actual)
 	}
 }

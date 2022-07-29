@@ -3,6 +3,7 @@ package finance
 import (
 	"errors"
 	"fmt"
+	"log"
 	"time"
 
 	"github.com/hromov/jevelina/cdb/models"
@@ -15,7 +16,6 @@ func (f *Finance) CreateTransfer(t *models.Transfer) (*models.Transfer, error) {
 	if t.From == t.To {
 		return nil, errors.New("Can't transfer to the same wallet")
 	}
-	// t.CreatedAt = time.Now()
 	if err := f.DB.Omit(clause.Associations).Create(t).Error; err != nil {
 		return nil, err
 	}
@@ -155,7 +155,7 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 	if filter.Wallet != 0 {
 		q = q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
 	}
-	AddDateCondition(filter, q)
+	q = q.Where(filter.DateCondition())
 	//TODO: check if it gives all uncompleted at first place
 	q.Order("completed asc").Order("completed_at desc").Order("created_at desc")
 	if result := q.Find(&cr.Transfers).Count(&cr.Total); result.Error != nil {
@@ -183,45 +183,27 @@ type CategorisedCashflow struct {
 func (f *Finance) SumByCategory(filter models.ListFilter) (*CategorisedCashflow, error) {
 	incomes := make([]CatTotal, 0)
 	expenses := make([]CatTotal, 0)
-	q := f.DB.Model(&models.Transfer{})
-	AddDateCondition(filter, q)
+	q := f.DB.Model(&models.Transfer{}).Where(filter.DateCondition())
 	if err := q.Select("category, sum(amount) as total").Where("`from` IS NULL").Group("category").Find(&incomes).Error; err != nil {
 		return nil, fmt.Errorf("Can't get incomes error: %s", err.Error())
 	}
-	q2 := f.DB.Model(&models.Transfer{})
-	AddDateCondition(filter, q2)
+	q2 := f.DB.Model(&models.Transfer{}).Where(filter.DateCondition())
 	if err := q2.Select("category, sum(amount) as total").Where("`to` IS NULL").Group("category").Find(&expenses).Error; err != nil {
 		return nil, fmt.Errorf("Can't get expenses error: %s", err.Error())
 	}
 	return &CategorisedCashflow{Incomes: incomes, Expenses: expenses}, nil
 }
 
-func AddDateCondition(filter models.ListFilter, q *gorm.DB) {
-	dateSearh := ""
-	if !filter.MinDate.IsZero() {
-		dateSearh += fmt.Sprintf("completed_at >= '%s'", filter.MinDate)
-	}
-	if !filter.MaxDate.IsZero() {
-		if dateSearh != "" {
-			dateSearh += " AND "
-		}
-		dateSearh += fmt.Sprintf("completed_at < '%s'", filter.MaxDate)
-	}
-	//then we have to return datet or null
-	if !filter.Completed && dateSearh != "" {
-		dateSearh = fmt.Sprintf("((%s) OR completed_at IS NULL)", dateSearh)
-	}
-	q = q.Where(dateSearh)
-}
-
 func (f *Finance) categoryChangeCheck(userID uint64, oldTransfer, t models.Transfer) {
 	if oldTransfer.Category != t.Category {
-		f.Events.Save(models.NewEvent{
+		if err := f.Events.Save(models.NewEvent{
 			UserID:          userID,
 			ParentID:        oldTransfer.ID,
 			Message:         fmt.Sprintf("%s > %s", oldTransfer.Category, t.Category),
 			EventType:       models.CategoryChange,
 			EventParentType: models.TransferEvent,
-		})
+		}); err != nil {
+			log.Println("events save error: ", err)
+		}
 	}
 }

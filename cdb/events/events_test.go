@@ -10,6 +10,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/stretchr/testify/require"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -119,13 +120,16 @@ func TestList(t *testing.T) {
 	rows := sqlmock.NewRows(columns).
 		AddRow(1, time.Now(), 1, 1, 1, "Some text for 1").
 		AddRow(2, time.Now(), 2, 1, 1, "Some text for 2")
+	count := sqlmock.NewRows([]string{"count"}).AddRow(1)
+	cQ := "SELECT count *"
 
 	for _, test := range listTests {
 		t.Run(test.name, func(t *testing.T) {
 			s.mock.ExpectQuery(test.query).WithArgs(test.args...).WillReturnRows(rows)
-
-			s.es.List(test.filter)
-
+			s.mock.ExpectQuery(cQ).WithArgs(test.args...).WillReturnRows(count)
+			if _, err := s.es.List(test.filter); err != nil {
+				require.NoError(t, err)
+			}
 			if err := s.mock.ExpectationsWereMet(); err != nil {
 				t.Errorf("there were unfulfilled expectations: %s", err)
 			}

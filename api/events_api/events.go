@@ -50,5 +50,5 @@ func ListHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(int(eResponse.Total))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	w.Write(b)
+	_, _ = w.Write(b)
 }

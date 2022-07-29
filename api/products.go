@@ -46,7 +46,7 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -92,14 +92,12 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		c := cdb.GetDB()
-		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(product).Error; err != nil {
 			log.Printf("Can't create product. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		//it actually was created ......
 		b, err := json.Marshal(product)
 		if err != nil {
 			log.Println("Can't json.Marshal(product) error: " + err.Error())
@@ -107,10 +105,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
-		return
+		_, _ = w.Write(b)
 	}
 
 	c := cdb.Misc()
@@ -131,5 +126,5 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(productsResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	w.Write(b)
+	_, _ = w.Write(b)
 }

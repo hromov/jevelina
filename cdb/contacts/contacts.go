@@ -2,6 +2,7 @@ package contacts
 
 import (
 	"database/sql"
+	"errors"
 	"log"
 	"unicode"
 
@@ -64,6 +65,9 @@ func (c *Contacts) ByID(ID uint64) (*models.Contact, error) {
 }
 
 func (c *Contacts) ByPhone(phone string) (*models.Contact, error) {
+	if phone == "" || len(phone) < 6 {
+		return nil, errors.New("Phone should be at least 6 char length")
+	}
 	contact := new(models.Contact)
 	if err := c.DB.Where(phonesOnly, sql.Named("query", phone)).First(contact).Error; err != nil {
 		return nil, err

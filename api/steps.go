@@ -46,7 +46,7 @@ func StepHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&step); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -107,7 +107,7 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 		// it said that its already ok now
 		// w.WriteHeader(http.StatusOK)
 		return
@@ -131,5 +131,5 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(stepsResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	w.Write(b)
+	_, _ = w.Write(b)
 }
