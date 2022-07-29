@@ -115,7 +115,7 @@ func WalletsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, b)
+		fmt.Fprint(w, string(b))
 	}
 
 	wallets, err := fin.ListWallets(nil)
@@ -134,5 +134,5 @@ func WalletsHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(wallets))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, b)
+	fmt.Fprint(w, string(b))
 }

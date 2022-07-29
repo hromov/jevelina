@@ -120,7 +120,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, b)
+		fmt.Fprint(w, string(b))
 	}
 
 	tResponse, err := fin.Transfers(api.FilterFromQuery(r.URL.Query()))
@@ -140,7 +140,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(int(tResponse.Total))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, b)
+	fmt.Fprint(w, string(b))
 }
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
@@ -150,7 +150,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	b, _ := json.Marshal(categories)
-	fmt.Fprint(w, b)
+	fmt.Fprint(w, string(b))
 }
 
 func CategoriesSumHandler(w http.ResponseWriter, r *http.Request) {
@@ -160,5 +160,5 @@ func CategoriesSumHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	b, _ := json.Marshal(sums)
-	fmt.Fprint(w, b)
+	fmt.Fprint(w, string(b))
 }

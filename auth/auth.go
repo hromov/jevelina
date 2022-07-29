@@ -80,5 +80,5 @@ func UserCheckHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	fmt.Fprint(w, b)
+	fmt.Fprint(w, string(b))
 }
