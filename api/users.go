@@ -46,7 +46,7 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -113,7 +113,7 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 		// it said that its already ok now
 		// w.WriteHeader(http.StatusOK)
 		return
@@ -137,5 +137,5 @@ func UsersHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(usersResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	_, _ = w.Write(b)
+	fmt.Fprint(w, b)
 }

@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 
 	"crypto/rand"
@@ -96,7 +97,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	_, _ = w.Write(b)
+	fmt.Fprint(w, b)
 }
 
 func getRandomUser(users []models.User) (*models.User, error) {

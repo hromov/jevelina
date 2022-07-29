@@ -46,7 +46,7 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -105,7 +105,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 	}
 
 	c := cdb.Misc()
@@ -126,5 +126,5 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(productsResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	_, _ = w.Write(b)
+	fmt.Fprint(w, b)
 }
