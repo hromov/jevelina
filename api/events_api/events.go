@@ -2,6 +2,7 @@ package events_api
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -50,5 +51,5 @@ func ListHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(int(eResponse.Total))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	_, _ = w.Write(b)
+	fmt.Fprint(w, b)
 }

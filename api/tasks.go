@@ -47,7 +47,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 		return
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&task); err != nil {
@@ -133,7 +133,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 		return
 	}
 
@@ -155,5 +155,5 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
-	_, _ = w.Write(b)
+	fmt.Fprint(w, b)
 }

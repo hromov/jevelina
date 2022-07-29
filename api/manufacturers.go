@@ -46,7 +46,7 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&manufacturer); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -102,7 +102,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		_, _ = w.Write(b)
+		fmt.Fprint(w, b)
 		return
 	}
 
@@ -124,5 +124,5 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(manufacturersResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	_, _ = w.Write(b)
+	fmt.Fprint(w, b)
 }
