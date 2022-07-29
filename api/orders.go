@@ -96,8 +96,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	w.Write(b)
-	return
+	_, _ = w.Write(b)
 }
 
 func getRandomUser(users []models.User) (*models.User, error) {
@@ -117,25 +116,4 @@ func getRandomUser(users []models.User) (*models.User, error) {
 		return nil, err
 	}
 	return &filtered[r.Int64()], nil
-
-	// for user == nil {
-	// 	for _, u := range users {
-
-	// 		appropriateSeen = true
-	// 		// r := rand.Float32()
-	// 		r, err := rand.Int(rand.Reader, big.NewInt(100))
-	// 		if err != nil {
-	// 			return nil, err
-	// 		}
-	// 		userNumber := int(u.Distribution * 100)
-	// 		log.Println(u.Email, r, u.Distribution, big.NewInt(int64(userNumber)).Cmp(r))
-	// 		if big.NewInt(int64(userNumber)).Cmp(r) >= 0 {
-	// 			return &u, nil
-	// 		}
-	// 	}
-	// 	if !appropriateSeen {
-	// 		return nil, errors.New("No user with distribution more then 0 was found")
-	// 	}
-	// }
-	// return nil, errors.New("should never be called")
 }

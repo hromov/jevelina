@@ -27,7 +27,7 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		b, _ := json.Marshal(file)
-		w.Write(b)
+		_, _ = w.Write(b)
 		return
 	case "GET":
 		files, err := cdb.Files().List(api.FilterFromQuery(r.URL.Query()))
@@ -37,10 +37,9 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 		}
 		b, _ := json.Marshal(files)
-		w.Write(b)
+		_, _ = w.Write(b)
 		return
 	}
-	return
 }
 
 func FileHandler(w http.ResponseWriter, r *http.Request) {
@@ -69,5 +68,4 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	return
 }

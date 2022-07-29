@@ -28,7 +28,6 @@ func CloseWalletHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 		}
 	}
-	return
 }
 
 func OpenWalletHandler(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +46,6 @@ func OpenWalletHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 		}
 	}
-	return
 }
 
 func WalletHandler(w http.ResponseWriter, r *http.Request) {
@@ -117,8 +115,7 @@ func WalletsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
-		return
+		_, _ = w.Write(b)
 	}
 
 	wallets, err := fin.ListWallets(nil)
@@ -137,5 +134,5 @@ func WalletsHandler(w http.ResponseWriter, r *http.Request) {
 	total := strconv.Itoa(len(wallets))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
-	w.Write(b)
+	_, _ = w.Write(b)
 }

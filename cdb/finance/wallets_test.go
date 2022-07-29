@@ -9,6 +9,7 @@ import (
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/stretchr/testify/require"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
@@ -106,9 +107,8 @@ func TestListWallets(t *testing.T) {
 
 	s.mock.ExpectQuery(regexp.QuoteMeta("SELECT * FROM `wallets` WHERE `wallets`.`deleted_at` IS NULL")).WillReturnRows(rows)
 
-	s.finance.ListWallets(&models.ListFilter{})
+	_, err := s.finance.ListWallets(&models.ListFilter{})
 
-	if err := s.mock.ExpectationsWereMet(); err != nil {
-		t.Errorf("there were unfulfilled expectations: %s", err)
-	}
+	require.NoError(t, err)
+	require.NoError(t, s.mock.ExpectationsWereMet())
 }

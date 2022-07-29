@@ -9,15 +9,7 @@ import (
 )
 
 func CreateOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Contact, error) {
-	cdb.Contacts().List(models.ListFilter{Query: c.ClientPhone})
-	var contact *models.Contact
-	// var err error
-	if c.ClientPhone != "" && len(c.ClientPhone) > 5 {
-		contact, _ = cdb.Contacts().ByPhone(c.ClientPhone)
-		// if err != nil {
-		// 	return nil, err
-		// }
-	}
+	contact, _ := cdb.Contacts().ByPhone(c.ClientPhone)
 	if contact == nil {
 		contact = &models.Contact{
 			Name:  c.ClientName,

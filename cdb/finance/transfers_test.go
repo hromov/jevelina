@@ -106,7 +106,8 @@ func TestTransfers(t *testing.T) {
 			s.mock.ExpectQuery("SELECT \\* FROM `files` WHERE .*").WillReturnRows(filesRow)
 			s.mock.ExpectQuery("SELECT count\\(\\*\\) FROM `transfers` .*").WillReturnRows(countRow)
 
-			s.finance.Transfers(test.filter)
+			_, err := s.finance.Transfers(test.filter)
+			require.NoError(t, err)
 			require.NoError(t, s.mock.ExpectationsWereMet())
 		})
 	}
@@ -137,11 +138,9 @@ func TestSumByCategory(t *testing.T) {
 				}
 			}
 
-			s.finance.SumByCategory(test.filter)
-
-			if err := s.mock.ExpectationsWereMet(); err != nil {
-				t.Errorf("there were unfulfilled expectations: %s", err)
-			}
+			_, err := s.finance.SumByCategory(test.filter)
+			require.NoError(t, err)
+			require.NoError(t, s.mock.ExpectationsWereMet())
 		})
 	}
 }

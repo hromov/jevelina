@@ -47,7 +47,8 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
+		return
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&task); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -132,13 +133,18 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 		return
 	}
 
 	c := cdb.Misc()
 
 	tasksResponse, err := c.Tasks(FilterFromQuery(r.URL.Query()))
+	if err != nil {
+		log.Println("tasks Response error: ", err.Error())
+		http.Error(w, http.StatusText(http.StatusInternalServerError),
+			http.StatusInternalServerError)
+	}
 	// log.Println("banks in main: ", banks)
 	b, err := json.Marshal(tasksResponse.Tasks)
 	if err != nil {
@@ -149,5 +155,5 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
-	w.Write(b)
+	_, _ = w.Write(b)
 }

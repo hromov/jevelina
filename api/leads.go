@@ -46,7 +46,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&lead); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -76,7 +76,6 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func LeadsHandler(w http.ResponseWriter, r *http.Request) {
-	leadsResponse := &models.LeadsResponse{}
 	var err error
 
 	if r.URL.Path != "/leads" {
@@ -104,7 +103,6 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		//it actually was created ......
 		b, err := json.Marshal(lead)
 		if err != nil {
 			log.Println("Can't json.Marshal(lead) error: " + err.Error())
@@ -112,12 +110,12 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		w.Write(b)
+		_, _ = w.Write(b)
 		return
 	}
 
 	l := cdb.Leads()
-	leadsResponse, err = l.List(FilterFromQuery(r.URL.Query()))
+	leadsResponse, err := l.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get leads error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -133,5 +131,5 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", strconv.FormatInt(leadsResponse.Total, 10))
-	w.Write(b)
+	_, _ = w.Write(b)
 }

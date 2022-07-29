@@ -79,8 +79,5 @@ func UserCheckHandler(w http.ResponseWriter, r *http.Request) {
 			http.StatusInternalServerError)
 		return
 	}
-	w.Write(b)
-	// it said that its already ok now
-	// w.WriteHeader(http.StatusOK)
-	return
+	_, _ = w.Write(b)
 }
