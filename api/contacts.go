@@ -47,7 +47,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, b)
+		fmt.Fprint(w, string(b))
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&contact); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
@@ -110,7 +110,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		fmt.Fprint(w, b)
+		fmt.Fprint(w, string(b))
 		return
 	}
 
@@ -132,5 +132,5 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", strconv.FormatInt(contactsResponse.Total, 10))
 
-	fmt.Fprint(w, b)
+	fmt.Fprint(w, string(b))
 }
