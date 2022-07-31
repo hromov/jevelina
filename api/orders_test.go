@@ -3,12 +3,12 @@ package api
 import (
 	"testing"
 
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/domain/users"
 	"github.com/stretchr/testify/require"
 )
 
 func TestGetRandomUser(t *testing.T) {
-	users := []models.User{
+	users := []users.User{
 		{
 			Email:        "user1@email.com",
 			Distribution: 0.25,

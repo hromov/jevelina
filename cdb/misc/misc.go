@@ -33,54 +33,6 @@ func (m *Misc) SourceByName(name string) (*models.Source, error) {
 	return &source, nil
 }
 
-func (m *Misc) Users() ([]models.User, error) {
-	var users []models.User
-	if result := m.DB.Joins("Role").Find(&users); result.Error != nil {
-		return nil, result.Error
-	}
-	return users, nil
-}
-
-func (m *Misc) User(ID uint64) (*models.User, error) {
-	var user models.User
-	if result := m.DB.Joins("Role").First(&user, ID); result.Error != nil {
-		return nil, result.Error
-	}
-	return &user, nil
-}
-
-func (m *Misc) UserExist(mail string) (bool, error) {
-	var exists bool
-	if err := m.DB.Model(&models.User{}).Select("count(*) > 0").Where("Email LIKE ?", mail).Find(&exists).Error; err != nil {
-		return false, err
-	}
-	return exists, nil
-}
-
-func (m *Misc) UserByEmail(mail string) (*models.User, error) {
-	var user models.User
-	if result := m.DB.Joins("Role").Where("Email LIKE ?", mail).First(&user); result.Error != nil {
-		return nil, result.Error
-	}
-	return &user, nil
-}
-
-func (m *Misc) Roles() ([]models.Role, error) {
-	var roles []models.Role
-	if result := m.DB.Find(&roles); result.Error != nil {
-		return nil, result.Error
-	}
-	return roles, nil
-}
-
-func (m *Misc) Role(ID uint8) (*models.Role, error) {
-	var role models.Role
-	if result := m.DB.First(&role, ID); result.Error != nil {
-		return nil, result.Error
-	}
-	return &role, nil
-}
-
 func (m *Misc) Products() ([]models.Product, error) {
 	var items []models.Product
 	if result := m.DB.Find(&items); result.Error != nil {

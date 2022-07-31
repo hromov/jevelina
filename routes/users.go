@@ -3,31 +3,41 @@ package routes
 import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/api"
-	"github.com/hromov/jevelina/auth"
+	"github.com/hromov/jevelina/api/files_api"
+	"github.com/hromov/jevelina/api/fin_api"
+	"github.com/hromov/jevelina/domain/users"
 )
 
-func UserRoutes(r *mux.Router) *mux.Router {
-	r.HandleFunc("/contacts", auth.UserCheck(api.ContactsHandler)).Methods("GET", "POST")
-	r.HandleFunc("/contacts/{id}", auth.UserCheck(api.ContactHandler)).Methods("GET", "PUT", "DELETE")
-	r.HandleFunc("/leads", auth.UserCheck(api.LeadsHandler)).Methods("GET", "POST")
-	r.HandleFunc("/leads/{id}", auth.UserCheck(api.LeadHandler)).Methods("GET", "PUT", "DELETE")
-	r.HandleFunc("/users", auth.UserCheck(api.UsersHandler)).Methods("GET")
-	r.HandleFunc("/users/{id}", auth.UserCheck(api.UserHandler)).Methods("GET")
-	r.HandleFunc("/sources", auth.UserCheck(api.SourcesHandler)).Methods("GET")
-	r.HandleFunc("/sources/{id}", auth.UserCheck(api.SourceHandler)).Methods("GET")
-	r.HandleFunc("/roles", auth.UserCheck(api.RolesHandler)).Methods("GET")
-	r.HandleFunc("/roles/{id}", auth.UserCheck(api.RoleHandler)).Methods("GET")
-	r.HandleFunc("/steps", auth.UserCheck(api.StepsHandler)).Methods("GET")
-	r.HandleFunc("/steps/{id}", auth.UserCheck(api.StepHandler)).Methods("GET")
-	r.HandleFunc("/products", auth.UserCheck(api.ProductsHandler)).Methods("GET")
-	r.HandleFunc("/products/{id}", auth.UserCheck(api.ProductHandler)).Methods("GET")
-	r.HandleFunc("/manufacturers", auth.UserCheck(api.ManufacturersHandler)).Methods("GET")
-	r.HandleFunc("/manufacturers/{id}", auth.UserCheck(api.ManufacturerHandler)).Methods("GET")
-	r.HandleFunc("/tags", auth.UserCheck(api.TagsHandler)).Methods("GET")
-	r.HandleFunc("/tags/{id}", auth.UserCheck(api.TagHandler)).Methods("GET")
-	r.HandleFunc("/tasks", auth.UserCheck(api.TasksHandler)).Methods("GET", "POST")
-	r.HandleFunc("/tasks/{id}", auth.UserCheck(api.TaskHandler)).Methods("GET", "PUT")
-	r.HandleFunc("/tasktypes", auth.UserCheck(api.TaskTypesHandler)).Methods("GET")
-	r.HandleFunc("/tasktypes/{id}", auth.UserCheck(api.TaskTypeHandler)).Methods("GET")
+func UserRoutes(r *mux.Router, us users.Service) *mux.Router {
+	r.HandleFunc("/contacts", api.ContactsHandler).Methods("GET", "POST")
+	r.HandleFunc("/contacts/{id}", api.ContactHandler).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET", "POST")
+	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET", "PUT", "DELETE")
+	r.HandleFunc("/users", api.Users(us)).Methods("GET")
+	r.HandleFunc("/users/{id}", api.UserHandler).Methods("GET")
+	r.HandleFunc("/sources", api.SourcesHandler).Methods("GET")
+	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("GET")
+	r.HandleFunc("/roles", api.RolesHandler).Methods("GET")
+	r.HandleFunc("/roles/{id}", api.RoleHandler).Methods("GET")
+	r.HandleFunc("/steps", api.StepsHandler).Methods("GET")
+	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("GET")
+	r.HandleFunc("/products", api.ProductsHandler).Methods("GET")
+	r.HandleFunc("/products/{id}", api.ProductHandler).Methods("GET")
+	r.HandleFunc("/manufacturers", api.ManufacturersHandler).Methods("GET")
+	r.HandleFunc("/manufacturers/{id}", api.ManufacturerHandler).Methods("GET")
+	r.HandleFunc("/tags", api.TagsHandler).Methods("GET")
+	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("GET")
+	r.HandleFunc("/tasks", api.TasksHandler).Methods("GET", "POST")
+	r.HandleFunc("/tasks/{id}", api.TaskHandler).Methods("GET", "PUT")
+	r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("GET")
+	r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("GET")
+	r.HandleFunc("/files", files_api.FilesHandler).Methods("POST", "GET")
+	r.HandleFunc("/files/{id}", files_api.FileHandler).Methods("GET")
+
+	r.HandleFunc("/wallets", fin_api.WalletsHandler).Methods("GET")
+	r.HandleFunc("/transfers", fin_api.TransfersHandler).Methods("GET", "POST")
+	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler).Methods("PUT")
+	r.HandleFunc("/categories", fin_api.CategoriesHandler).Methods("GET")
+	r.HandleFunc("/analytics/categories", fin_api.CategoriesSumHandler).Methods("GET")
 	return r
 }

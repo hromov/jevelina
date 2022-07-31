@@ -119,29 +119,6 @@ type Analytics struct {
 	Domain string `gorm:"size:128"`
 }
 
-type User struct {
-	ID           uint64 `gorm:"primaryKey"`
-	CreatedAt    time.Time
-	UpdatedAt    time.Time
-	DeletedAt    gorm.DeletedAt `gorm:"index"`
-	Name         string         `gorm:"size:32"`
-	Email        string         `gorm:"size:128; unique"`
-	Hash         string         `gorm:"size:128; unique"`
-	Distribution float32        `gorm:"type:decimal(2,2);"`
-	// Events    []Event
-	RoleID *uint8
-	Role   Role `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;"`
-}
-
-type Role struct {
-	ID        uint8 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Priority  uint8
-	Role      string `gorm:"unique;size:32"`
-}
-
 type Step struct {
 	ID        uint8 `gorm:"primaryKey"`
 	CreatedAt time.Time

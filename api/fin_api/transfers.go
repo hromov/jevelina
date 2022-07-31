@@ -26,7 +26,7 @@ func CompleteTransferHandler(w http.ResponseWriter, r *http.Request) {
 	//or PUT?
 	if r.Method == "GET" {
 		user, err := auth.GetCurrentUser(r)
-		if err != nil || user == nil {
+		if err != nil || user.ID == 0 {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
@@ -61,7 +61,7 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		user, err := auth.GetCurrentUser(r)
-		if err != nil || user == nil {
+		if err != nil || user.ID == 0 {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
@@ -74,7 +74,7 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "DELETE":
 		user, err := auth.GetCurrentUser(r)
-		if err != nil || user == nil {
+		if err != nil || user.ID == 0 {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
@@ -101,7 +101,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		user, err := auth.GetCurrentUser(r)
-		if err != nil || user == nil {
+		if err != nil || user.ID == 0 {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

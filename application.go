@@ -8,6 +8,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/config"
+	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/routes"
 )
 
@@ -27,8 +28,10 @@ func main() {
 		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
 	db.SetBucket(bucketName)
-
-	router := routes.Base()
+	//TODO: repo
+	miscRepo := cdb.Misc()
+	us := users.NewService(miscRepo)
+	router := routes.Base(us)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

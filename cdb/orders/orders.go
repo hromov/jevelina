@@ -6,9 +6,10 @@ import (
 
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/domain/users"
 )
 
-func CreateOrGetContact(c *models.CreateLeadReq, user *models.User) (*models.Contact, error) {
+func CreateOrGetContact(c *models.CreateLeadReq, user users.User) (*models.Contact, error) {
 	contact, _ := cdb.Contacts().ByPhone(c.ClientPhone)
 	if contact == nil {
 		contact = &models.Contact{

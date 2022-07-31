@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/muser"
 )
 
@@ -18,20 +18,16 @@ func isUser(r *http.Request) (bool, error) {
 	if mail == "" {
 		return false, errors.New("Authorization required")
 	}
-	return cdb.Misc().UserExist(mail)
+	return cdb.Misc().UserExist(r.Context(), mail)
 }
 
 //GetCurrentUser - get currently loggined user from auth header
-func GetCurrentUser(r *http.Request) (*models.User, error) {
+func GetCurrentUser(r *http.Request) (users.User, error) {
 	mail, _ := muser.GetMailByToken(r)
 	if mail == "" {
-		return nil, errors.New("Authorization required")
+		return users.User{}, errors.New("Authorization required")
 	}
-	user, err := cdb.Misc().UserByEmail(mail)
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+	return cdb.Misc().UserByEmail(r.Context(), mail)
 }
 
 const AdminRoleName = "Admin"
@@ -41,11 +37,11 @@ func isAdmin(r *http.Request) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return user.Role.Role == AdminRoleName, nil
+	return user.Role == AdminRoleName, nil
 }
 
 //UserCheck - handler wraper to check access rights
-func UserCheck(h http.HandlerFunc) http.HandlerFunc {
+func UserCheck(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isHe, err := isUser(r); err != nil || !isHe {
 			http.Error(w, "User access required", http.StatusForbidden)
@@ -56,7 +52,7 @@ func UserCheck(h http.HandlerFunc) http.HandlerFunc {
 }
 
 //AdminCheck - handler wraper to check access rights
-func AdminCheck(h http.HandlerFunc) http.HandlerFunc {
+func AdminCheck(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if isHe, err := isAdmin(r); err != nil || !isHe {
 			http.Error(w, "Admin access required", http.StatusForbidden)

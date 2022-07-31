@@ -13,11 +13,13 @@ import (
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/cdb/orders"
+	d_users "github.com/hromov/jevelina/domain/users"
 )
 
 const randomUserEmail = "random@random.org"
 
 func OrderHandler(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	if r.URL.Path != "/orders" {
 		http.NotFound(w, r)
 		return
@@ -38,8 +40,8 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User Email and Hash are required", http.StatusBadRequest)
 		return
 	}
-	user, err := cdb.Misc().UserByEmail(c.UserEmail)
-	if err != nil || user == nil {
+	user, err := cdb.Misc().UserByEmail(ctx, c.UserEmail)
+	if err != nil || user.ID == 0 {
 		http.Error(w, "Cant find user with email: "+c.UserEmail, http.StatusBadRequest)
 		return
 	}
@@ -49,7 +51,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user.Email == randomUserEmail {
-		users, err := cdb.Misc().Users()
+		users, err := cdb.Misc().Users(ctx)
 		if err != nil {
 			http.Error(w, "Can't get users", http.StatusInternalServerError)
 			return
@@ -100,8 +102,8 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, string(b))
 }
 
-func getRandomUser(users []models.User) (*models.User, error) {
-	filtered := []models.User{}
+func getRandomUser(users []d_users.User) (d_users.User, error) {
+	filtered := []d_users.User{}
 	for _, u := range users {
 		if u.Distribution > 0.0 {
 			filtered = append(filtered, u)
@@ -109,12 +111,12 @@ func getRandomUser(users []models.User) (*models.User, error) {
 	}
 
 	if len(filtered) == 0 {
-		return nil, errors.New("no good users found")
+		return d_users.User{}, errors.New("no good users found")
 	}
 
 	r, err := rand.Int(rand.Reader, big.NewInt(int64(len(filtered))))
 	if err != nil {
-		return nil, err
+		return d_users.User{}, err
 	}
-	return &filtered[r.Int64()], nil
+	return filtered[r.Int64()], nil
 }
