@@ -13,7 +13,7 @@ func TestUserCheck(t *testing.T) {
 	}
 
 	rr := httptest.NewRecorder()
-	handler := http.HandlerFunc(UserCheck(nil))
+	handler := UserCheck(nil)
 
 	handler.ServeHTTP(rr, req)
 

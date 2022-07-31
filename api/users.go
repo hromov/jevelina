@@ -7,28 +7,126 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/domain/users"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-func UserHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
+type user struct {
+	ID           uint64
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
+	DeletedAt    time.Time
+	Name         string
+	Email        string
+	Hash         string
+	Distribution float32
+	Role         string
+}
+
+type changeUser struct {
+	ID           uint64
+	Name         string
+	Email        string
+	Hash         string
+	Distribution float32
+	RoleID       uint8
+}
+
+func fromUser(u users.User) user {
+	return user(u)
+}
+
+func (u changeUser) toDomain() users.ChangeUser {
+	return users.ChangeUser(u)
+}
+
+func CreateUser(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		newUser := changeUser{}
+		if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
+			log.Println("user decode error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		user, err := us.Create(r.Context(), newUser.toDomain())
+		if err != nil {
+			log.Println("create user error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		b, err := json.Marshal(user)
+		if err != nil {
+			log.Println("Can't json.Marshal(user) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, string(b))
 	}
+}
 
-	c := cdb.Misc()
-	var user *models.User
+func UpdateUser(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
 
-	switch r.Method {
-	case "GET":
-		user, err = c.User(ID)
+		newUser := changeUser{}
+		if err := json.NewDecoder(r.Body).Decode(&newUser); err != nil {
+			log.Println("user decode error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		if id != newUser.ID {
+			http.Error(w, "Route user ID and user.ID doesn't match", http.StatusBadRequest)
+			return
+		}
+
+		if err := us.Update(r.Context(), newUser.toDomain()); err != nil {
+			log.Println("update user error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func DeleteUser(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if err := us.Delete(r.Context(), id); err != nil {
+			log.Println("delete user error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func User(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		user, err := us.Get(r.Context(), id)
 		if err != nil {
 			log.Println("Can't get user error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -47,95 +145,34 @@ func UserHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprint(w, string(b))
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if uint64(user.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, user.ID), http.StatusBadRequest)
-			return
-		}
-
-		//channge to base.DB?
-		if err = c.DB.Omit(clause.Associations).Save(user).Error; err != nil {
-			log.Printf("Can't update user with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
-	case "DELETE":
-		if err = c.DB.Delete(&models.User{ID: ID}).Error; err != nil {
-			log.Printf("Can't delete user with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
 	}
-
 }
 
-func UsersHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/users" {
-		http.NotFound(w, r)
-		return
-	}
-
-	if r.Method == "POST" {
-		user := new(models.User)
-		if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		c := cdb.Misc()
-		//channge to base.DB?
-		if err := c.DB.Omit(clause.Associations).Create(user).Error; err != nil {
-			log.Printf("Can't create user. Error: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		//remove uint conversion when cdb updated
-		fullUser, err := c.User(user.ID)
+func Users(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		users, err := us.List(r.Context())
 		if err != nil {
-			log.Printf("User should be created but we wasn't able to get it back. Error: %s", err.Error())
+			log.Println("Can't get users error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		//it actually was created ......
-		b, err := json.Marshal(fullUser)
+		usersResponse := make([]user, len(users))
+		for i, u := range users {
+			usersResponse[i] = fromUser(u)
+		}
+
+		b, err := json.Marshal(usersResponse)
 		if err != nil {
-			log.Println("Can't json.Marshal(user) error: " + err.Error())
+			log.Println("Can't json.Marshal(users) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
+
+		total := strconv.Itoa(len(usersResponse))
+		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
+		w.Header().Set("X-Total-Count", total)
 		fmt.Fprint(w, string(b))
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
-		return
 	}
-
-	c := cdb.Misc()
-	usersResponse, err := c.Users()
-	if err != nil {
-		log.Println("Can't get users error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(usersResponse)
-	if err != nil {
-		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	total := strconv.Itoa(len(usersResponse))
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, string(b))
 }

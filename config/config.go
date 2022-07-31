@@ -15,6 +15,7 @@ const (
 
 type Config struct {
 	Env Environment
+	Dsn string
 }
 
 var defaultConfig = Config{

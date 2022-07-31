@@ -1,5 +1,7 @@
 runtime: go116  # or another supported version
 app_engine_apis: true
+env_variables:
+  DUNGEON_DSN: "_keys/db_google"
 
 handlers:
 - url: /.*

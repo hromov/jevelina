@@ -37,9 +37,9 @@ func GetInitRoles() []*models.Role {
 	return roles
 }
 
-func GetBaseRole() (*models.Role, error) {
-	return Misc().Role(UserRoleID)
-}
+// func GetBaseRole() (*models.Role, error) {
+// 	return Misc().Role(UserRoleID)
+// }
 
 func CreateInitUsers(db *gorm.DB) ([]*models.User, error) {
 	users := GetInitUsers()
