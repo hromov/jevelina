@@ -16,7 +16,7 @@ func Base(us users.Service) *mux.Router {
 	r = UserRoutes(r, us)
 	// TODO: uncoment for prod
 	// r.Use(auth.AdminCheck)
-	r = AdminRoutes(r)
+	r = AdminRoutes(r, us)
 
 	return r
 }

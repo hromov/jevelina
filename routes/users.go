@@ -14,7 +14,7 @@ func UserRoutes(r *mux.Router, us users.Service) *mux.Router {
 	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET", "POST")
 	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/users", api.Users(us)).Methods("GET")
-	r.HandleFunc("/users/{id}", api.UserHandler).Methods("GET")
+	r.HandleFunc("/users/{id}", api.User(us)).Methods("GET")
 	r.HandleFunc("/sources", api.SourcesHandler).Methods("GET")
 	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("GET")
 	r.HandleFunc("/roles", api.RolesHandler).Methods("GET")

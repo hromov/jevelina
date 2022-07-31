@@ -14,6 +14,15 @@ type User struct {
 	Role         string
 }
 
+type ChangeUser struct {
+	ID           uint64
+	Name         string
+	Email        string
+	Hash         string
+	Distribution float32
+	RoleID       uint8
+}
+
 type Role struct {
 	ID        uint8
 	CreatedAt time.Time

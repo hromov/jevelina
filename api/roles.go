@@ -11,6 +11,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/domain/users"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -24,11 +25,11 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := cdb.Misc()
-	var role *models.Role
+	var role users.Role
 
 	switch r.Method {
 	case "GET":
-		role, err = c.Role(uint8(ID))
+		role, err = c.Role(r.Context(), uint8(ID))
 		if err != nil {
 			log.Println("Can't get role error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -114,7 +115,7 @@ func RolesHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := cdb.Misc()
-	rolesResponse, err := c.Roles()
+	rolesResponse, err := c.Roles(r.Context())
 	if err != nil {
 		log.Println("Can't get roles error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

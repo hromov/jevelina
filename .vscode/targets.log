@@ -8,7 +8,7 @@ make: *** No rule to make target 'all'.  Stop.
 # This is free software: you are free to change and redistribute it.
 # There is NO WARRANTY, to the extent permitted by law.
 
-# Make data base, printed on Sun Jul 31 12:00:50 2022
+# Make data base, printed on Sun Jul 31 15:20:04 2022
 
 # Variables
 
@@ -237,6 +237,8 @@ GDK_BACKEND = x11
 # environment
 LC_PAPER = uk_UA.UTF-8
 # environment
+NO_AT_BRIDGE = 1
+# environment
 QT_ACCESSIBILITY = 1
 # environment
 DEFAULTS_PATH = /usr/share/gconf/ubuntu.default.path
@@ -277,7 +279,6 @@ WINDOWPATH = 2
 # default
 .INCLUDE_DIRS = /usr/include /usr/local/include /usr/include
 # environment
- 
 LC_IDENTIFICATION = uk_UA.UTF-8
 # environment
 AWS_REGION = eu-central-1
@@ -290,11 +291,11 @@ LANG = C
 # environment
 TERM = xterm-256color
 # environment
-VSCODE_PID = 9096
+VSCODE_PID = 75563
 # environment
 _CE_CONDA = 
 # variable set hash-table stats:
-# Load=140/1024=14%, Rehash=0, Collisions=20/165=12%
+# Load=141/1024=14%, Rehash=0, Collisions=20/166=12%
 
 # Pattern-specific Variable Values
 
@@ -309,6 +310,7 @@ _CE_CONDA =
 # Implicit Rules
 
 # No implicit rules.
+ 
 
 # Files
 
@@ -397,6 +399,6 @@ serve:
 # strcache performance: lookups = 63 / hit rate = 44%
 # hash-table stats:
 # Load=35/8192=0%, Rehash=0, Collisions=1/63=2%
-# Finished Make data base on Sun Jul 31 12:00:50 2022
+# Finished Make data base on Sun Jul 31 15:20:04 2022
 
  

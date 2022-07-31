@@ -6,11 +6,13 @@ import (
 	"github.com/hromov/jevelina/api/events_api"
 	"github.com/hromov/jevelina/api/files_api"
 	"github.com/hromov/jevelina/api/fin_api"
+	"github.com/hromov/jevelina/domain/users"
 )
 
-func AdminRoutes(r *mux.Router) *mux.Router {
-	r.HandleFunc("/users", api.UsersHandler).Methods("POST")
-	r.HandleFunc("/users/{id}", api.UserHandler).Methods("PUT", "DELETE")
+func AdminRoutes(r *mux.Router, us users.Service) *mux.Router {
+	r.HandleFunc("/users", api.CreateUser(us)).Methods("POST")
+	r.HandleFunc("/users/{id}", api.UpdateUser(us)).Methods("PUT")
+	r.HandleFunc("/users/{id}", api.DeleteUser(us)).Methods("DELETE")
 	r.HandleFunc("/sources", api.SourcesHandler).Methods("POST")
 	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("PUT", "DELETE")
 	r.HandleFunc("/roles", api.RolesHandler).Methods("POST")
