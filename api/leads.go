@@ -47,6 +47,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprint(w, string(b))
+		return
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&lead); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
