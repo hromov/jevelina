@@ -121,6 +121,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprint(w, string(b))
+		return
 	}
 
 	tResponse, err := fin.Transfers(api.FilterFromQuery(r.URL.Query()))
