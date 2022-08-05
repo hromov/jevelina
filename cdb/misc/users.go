@@ -44,26 +44,6 @@ func (m *Misc) UserByEmail(ctx context.Context, mail string) (users.User, error)
 	return user.ToDomain(), nil
 }
 
-func (m *Misc) Roles(ctx context.Context) ([]users.Role, error) {
-	var roles []models.Role
-	if result := m.DB.WithContext(ctx).Find(&roles); result.Error != nil {
-		return nil, result.Error
-	}
-	respRoles := make([]users.Role, len(roles))
-	for i, r := range roles {
-		respRoles[i] = r.ToDomain()
-	}
-	return respRoles, nil
-}
-
-func (m *Misc) Role(ctx context.Context, ID uint8) (users.Role, error) {
-	var role models.Role
-	if err := m.DB.WithContext(ctx).First(&role, ID).Error; err != nil {
-		return users.Role{}, err
-	}
-	return role.ToDomain(), nil
-}
-
 func (m *Misc) CreateUser(ctx context.Context, newUser users.ChangeUser) (users.User, error) {
 	dbUser := models.User{
 		Name:         newUser.Name,

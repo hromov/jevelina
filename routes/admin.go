@@ -15,7 +15,7 @@ func AdminRoutes(r *mux.Router, us users.Service) *mux.Router {
 	r.HandleFunc("/users/{id}", api.DeleteUser(us)).Methods("DELETE")
 	r.HandleFunc("/sources", api.SourcesHandler).Methods("POST")
 	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("PUT", "DELETE")
-	r.HandleFunc("/roles", api.RolesHandler).Methods("POST")
+	r.HandleFunc("/roles", api.CreateRole(us)).Methods("POST")
 	r.HandleFunc("/roles/{id}", api.RoleHandler).Methods("PUT", "DELETE")
 	r.HandleFunc("/steps", api.StepsHandler).Methods("POST")
 	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("PUT", "DELETE")

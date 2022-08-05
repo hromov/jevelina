@@ -13,8 +13,19 @@ import (
 	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/domain/users"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
+
+type createRoleRequest struct {
+	Priority uint8  `validate:"required"`
+	Role     string `validate:"required"`
+}
+
+func (c *createRoleRequest) toDomain() users.Role {
+	return users.Role{
+		Priority: c.Priority,
+		Role:     c.Role,
+	}
+}
 
 func RoleHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
@@ -81,39 +92,6 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RolesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/roles" {
-		http.NotFound(w, r)
-		return
-	}
-
-	if r.Method == "POST" {
-		role := new(models.Role)
-		if err := json.NewDecoder(r.Body).Decode(&role); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-		c := cdb.GetDB()
-		//channge to base.DB?
-		if err := c.DB.Omit(clause.Associations).Create(role).Error; err != nil {
-			log.Printf("Can't create role. Error: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-
-		//it actually was created ......
-		b, err := json.Marshal(role)
-		if err != nil {
-			log.Println("Can't json.Marshal(role) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
-		return
-	}
-
 	c := cdb.Misc()
 	rolesResponse, err := c.Roles(r.Context())
 	if err != nil {
@@ -133,4 +111,31 @@ func RolesHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprint(w, string(b))
+}
+
+func CreateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		createRequest := createRoleRequest{}
+		if err := json.NewDecoder(r.Body).Decode(&createRequest); err != nil {
+			log.Println("create role decode error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+		role, err := us.CreateRole(r.Context(), createRequest.toDomain())
+		if err != nil {
+			log.Println("create user error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
+			return
+		}
+		b, err := json.Marshal(role)
+		if err != nil {
+			log.Println("Can't json.Marshal(user) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		log.Println("new role was created: ", string(b))
+		w.WriteHeader(http.StatusAccepted)
+		fmt.Fprint(w, string(b))
+	}
 }
