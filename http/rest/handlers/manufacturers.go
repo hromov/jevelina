@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -23,7 +23,7 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	var manufacturer *models.Manufacturer
 
 	switch r.Method {
@@ -88,7 +88,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := cdb.GetDB()
+		c := mysql.GetDB()
 		if err := c.DB.Omit(clause.Associations).Create(manufacturer).Error; err != nil {
 			log.Printf("Can't create manufacturer. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -106,7 +106,7 @@ func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	manufacturersResponse, err := c.Manufacturers()
 	if err != nil {
 		log.Println("Can't get manufacturers error: " + err.Error())

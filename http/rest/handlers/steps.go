@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -23,7 +23,7 @@ func StepHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	var step *models.Step
 
 	switch r.Method {
@@ -91,7 +91,7 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := cdb.GetDB()
+		c := mysql.GetDB()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(step).Error; err != nil {
 			log.Printf("Can't create step. Error: %s", err.Error())
@@ -113,7 +113,7 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	stepsResponse, err := c.Steps()
 	if err != nil {
 		log.Println("Can't get steps error: " + err.Error())

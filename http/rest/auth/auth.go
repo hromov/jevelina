@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/muser"
 )
 
@@ -18,7 +18,7 @@ func isUser(r *http.Request) (bool, error) {
 	if mail == "" {
 		return false, errors.New("Authorization required")
 	}
-	return cdb.Misc().UserExist(r.Context(), mail)
+	return mysql.Misc().UserExist(r.Context(), mail)
 }
 
 //GetCurrentUser - get currently loggined user from auth header
@@ -27,7 +27,7 @@ func GetCurrentUser(r *http.Request) (users.User, error) {
 	if mail == "" {
 		return users.User{}, errors.New("Authorization required")
 	}
-	return cdb.Misc().UserByEmail(r.Context(), mail)
+	return mysql.Misc().UserByEmail(r.Context(), mail)
 }
 
 const AdminRoleName = "Admin"

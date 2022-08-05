@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	api "github.com/hromov/jevelina/http/rest/handlers"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 func ListHandler(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,7 @@ func ListHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	events := cdb.Events()
+	events := mysql.Events()
 	//TODO: write normal filter or use listFilter
 	listFilter := api.FilterFromQuery(r.URL.Query())
 	eventFilter := models.EventFilter{

@@ -1,11 +1,11 @@
-package cdb
+package mysql
 
 import (
 	"log"
 	"testing"
 
-	"github.com/hromov/jevelina/cdb/leads"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/leads"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 func BenchmarkLeads(b *testing.B) {

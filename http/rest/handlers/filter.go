@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 const defaultLimit = 50

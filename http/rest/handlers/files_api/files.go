@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	api "github.com/hromov/jevelina/http/rest/handlers"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 func FilesHandler(w http.ResponseWriter, r *http.Request) {
@@ -21,7 +21,7 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "File Decode Error: "+err.Error(), http.StatusBadRequest)
 			return
 		}
-		file, err := cdb.Files().Upload(fileAddRequest)
+		file, err := mysql.Files().Upload(fileAddRequest)
 		if err != nil {
 			http.Error(w, "File Uploading Error: "+err.Error(), http.StatusInternalServerError)
 			return
@@ -30,7 +30,7 @@ func FilesHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, string(b))
 		return
 	case "GET":
-		files, err := cdb.Files().List(api.FilterFromQuery(r.URL.Query()))
+		files, err := mysql.Files().List(api.FilterFromQuery(r.URL.Query()))
 		if err != nil {
 			log.Println("Can't get transfer error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -51,7 +51,7 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	switch r.Method {
 	case "GET":
-		url, err := cdb.Files().GetUrl(ID)
+		url, err := mysql.Files().GetUrl(ID)
 		if err != nil {
 			log.Println(err)
 			http.Error(w, "Can't get url error: "+err.Error(), http.StatusInternalServerError)
@@ -61,7 +61,7 @@ func FileHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "%q", url)
 		return
 	case "DELETE":
-		if err := cdb.Files().Delete(ID); err != nil {
+		if err := mysql.Files().Delete(ID); err != nil {
 			log.Println(err)
 			http.Error(w, "Can't delete file error: "+err.Error(), http.StatusInternalServerError)
 			return

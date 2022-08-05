@@ -6,10 +6,10 @@ import (
 	"os"
 
 	"github.com/gorilla/handlers"
-	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest"
+	"github.com/hromov/jevelina/storage/mysql"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
@@ -23,13 +23,13 @@ func main() {
 		log.Fatal(err)
 	}
 
-	db, err := cdb.OpenAndInit(string(dsn))
+	db, err := mysql.OpenAndInit(string(dsn))
 	if err != nil {
 		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
 	db.SetBucket(bucketName)
 	//TODO: repo
-	miscRepo := cdb.Misc()
+	miscRepo := mysql.Misc()
 	us := users.NewService(miscRepo)
 	router := rest.InitRouter(us)
 	credentials := handlers.AllowCredentials()

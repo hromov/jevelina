@@ -9,9 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/http/rest/auth"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -24,7 +24,7 @@ func TaskHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	var task *models.Task
 
 	switch r.Method {
@@ -111,14 +111,14 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		task.CreatedID = &user.ID
 
-		c := cdb.GetDB()
+		c := mysql.GetDB()
 		if err := c.DB.Omit(clause.Associations).Create(task).Error; err != nil {
 			log.Printf("Can't create task. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		fullTask, err := cdb.Misc().Task(task.ID)
+		fullTask, err := mysql.Misc().Task(task.ID)
 		if err != nil {
 			log.Printf("Task should be created but we wasn't able to get it back. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -137,7 +137,7 @@ func TasksHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 
 	tasksResponse, err := c.Tasks(FilterFromQuery(r.URL.Query()))
 	if err != nil {

@@ -1,11 +1,11 @@
-package cdb
+package mysql
 
 import (
 	"log"
 	"testing"
 
-	"github.com/hromov/jevelina/cdb/contacts"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/contacts"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 func BenchmarkContacts(b *testing.B) {

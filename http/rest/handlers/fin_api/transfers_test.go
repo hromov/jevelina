@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/finance"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/finance"
 )
 
 func TestCategories(t *testing.T) {
-	mock, err := cdb.InitMock()
+	mock, err := mysql.InitMock()
 	if err != nil {
 		t.Fatalf("Can't init mock error: %s", err.Error())
 	}
@@ -43,7 +43,7 @@ func TestCategories(t *testing.T) {
 		"cat 1",
 		"cat 2",
 	}
-	cdb.AssertJSON(w.Body.Bytes(), data, t)
+	mysql.AssertJSON(w.Body.Bytes(), data, t)
 
 	// we make sure that all expectations were met
 	if err := mock.ExpectationsWereMet(); err != nil {
@@ -52,7 +52,7 @@ func TestCategories(t *testing.T) {
 }
 
 func TestCategoriesSum(t *testing.T) {
-	mock, err := cdb.InitMock()
+	mock, err := mysql.InitMock()
 	if err != nil {
 		t.Fatalf("Can't init mock error: %s", err.Error())
 	}
@@ -95,7 +95,7 @@ func TestCategoriesSum(t *testing.T) {
 	}
 
 	data := finance.CategorisedCashflow{Incomes: incomes, Expenses: expenses}
-	cdb.AssertJSON(w.Body.Bytes(), data, t)
+	mysql.AssertJSON(w.Body.Bytes(), data, t)
 
 	// we make sure that all expectations were met
 	if err := mock.ExpectationsWereMet(); err != nil {

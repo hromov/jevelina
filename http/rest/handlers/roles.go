@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/storage/mysql"
 	"gorm.io/gorm"
 )
 
@@ -48,7 +48,7 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	var role users.Role
 
 	switch r.Method {
@@ -77,7 +77,7 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func RolesHandler(w http.ResponseWriter, r *http.Request) {
-	c := cdb.Misc()
+	c := mysql.Misc()
 	rolesResponse, err := c.Roles(r.Context())
 	if err != nil {
 		log.Println("Can't get roles error: " + err.Error())

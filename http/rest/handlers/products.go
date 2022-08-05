@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -23,7 +23,7 @@ func ProductHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	var product *models.Product
 
 	switch r.Method {
@@ -91,7 +91,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := cdb.GetDB()
+		c := mysql.GetDB()
 		if err := c.DB.Omit(clause.Associations).Create(product).Error; err != nil {
 			log.Printf("Can't create product. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -108,7 +108,7 @@ func ProductsHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprint(w, string(b))
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	productsResponse, err := c.Products()
 	if err != nil {
 		log.Println("Can't get products error: " + err.Error())

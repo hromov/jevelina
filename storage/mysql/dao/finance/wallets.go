@@ -3,8 +3,8 @@ package finance
 import (
 	"fmt"
 
-	"github.com/hromov/jevelina/cdb/events"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/events"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

@@ -1,4 +1,4 @@
-package cdb
+package mysql
 
 import (
 	"bytes"
@@ -11,17 +11,17 @@ import (
 	"gorm.io/gorm"
 )
 
-func OpenTest() (*CDB, error) {
+func OpenTest() (*DB, error) {
 	db, err := gorm.Open(mysql.Open(testDSN), &gorm.Config{
 		SkipDefaultTransaction: true,
 	})
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect database error: %s", err.Error())
 	}
-	return &CDB{DB: db}, nil
+	return &DB{DB: db}, nil
 }
 
-func OpenAndInitTest() (*CDB, error) {
+func OpenAndInitTest() (*DB, error) {
 	db, err := OpenTest()
 	if err != nil {
 		return nil, err
@@ -49,7 +49,7 @@ func InitMock() (sqlmock.Sqlmock, error) {
 		return nil, err
 	}
 
-	currentDB = &CDB{DB: gormDB}
+	currentDB = &DB{DB: gormDB}
 
 	return mock, nil
 }

@@ -5,8 +5,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/hromov/jevelina/cdb/misc"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/misc"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

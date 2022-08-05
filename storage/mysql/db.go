@@ -1,29 +1,29 @@
-package cdb
+package mysql
 
 import (
 	"fmt"
 
-	"github.com/hromov/jevelina/cdb/contacts"
-	"github.com/hromov/jevelina/cdb/events"
-	"github.com/hromov/jevelina/cdb/files"
-	"github.com/hromov/jevelina/cdb/finance"
-	"github.com/hromov/jevelina/cdb/leads"
-	"github.com/hromov/jevelina/cdb/misc"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/contacts"
+	"github.com/hromov/jevelina/storage/mysql/dao/events"
+	"github.com/hromov/jevelina/storage/mysql/dao/files"
+	"github.com/hromov/jevelina/storage/mysql/dao/finance"
+	"github.com/hromov/jevelina/storage/mysql/dao/leads"
+	"github.com/hromov/jevelina/storage/mysql/dao/misc"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
 
 const testDSN = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
-type CDB struct {
+type DB struct {
 	BucketName string
 	*gorm.DB
 }
 
-var currentDB *CDB
+var currentDB *DB
 
-func GetDB() *CDB {
+func GetDB() *DB {
 	return currentDB
 }
 
@@ -52,11 +52,11 @@ func Events() *events.EventService {
 	return &events.EventService{DB: currentDB.DB}
 }
 
-func (db *CDB) SetBucket(bucketName string) {
+func (db *DB) SetBucket(bucketName string) {
 	db.BucketName = bucketName
 }
 
-func Open(dsn string) (*CDB, error) {
+func Open(dsn string) (*DB, error) {
 	// db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	// 30% fester but not so safe... let's give it a try
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
@@ -65,10 +65,10 @@ func Open(dsn string) (*CDB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect database error: %s", err.Error())
 	}
-	return &CDB{DB: db}, nil
+	return &DB{DB: db}, nil
 }
 
-func OpenAndInit(dsn string) (*CDB, error) {
+func OpenAndInit(dsn string) (*DB, error) {
 	db, err := Open(dsn)
 	if err != nil {
 		return nil, err
@@ -76,7 +76,7 @@ func OpenAndInit(dsn string) (*CDB, error) {
 	return db, db.Init()
 }
 
-func (db *CDB) Init() error {
+func (db *DB) Init() error {
 
 	currentDB = db
 	// if table exist - do nothink, if not - create init structure with test data

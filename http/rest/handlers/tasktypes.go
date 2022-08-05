@@ -9,8 +9,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -23,7 +23,7 @@ func TaskTypeHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	var tasktype *models.TaskType
 
 	switch r.Method {
@@ -90,7 +90,7 @@ func TaskTypesHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := cdb.GetDB()
+		c := mysql.GetDB()
 		//channge to base.DB?
 		if err := c.DB.Omit(clause.Associations).Create(tasktype).Error; err != nil {
 			log.Printf("Can't create tasktype. Error: %s", err.Error())
@@ -112,7 +112,7 @@ func TaskTypesHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Misc()
+	c := mysql.Misc()
 	tasktypesResponse, err := c.TaskTypes()
 	if err != nil {
 		log.Println("Can't get tasktypes error: " + err.Error())

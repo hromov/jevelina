@@ -7,7 +7,7 @@ import (
 
 	"cloud.google.com/go/storage"
 	"github.com/google/uuid"
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"github.com/vincent-petithory/dataurl"
 	"gorm.io/gorm"
 )

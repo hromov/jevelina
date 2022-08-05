@@ -9,10 +9,10 @@ import (
 
 	"github.com/gorilla/mux"
 
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 func CompleteTransferHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,7 +23,7 @@ func CompleteTransferHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fin := cdb.Finance()
+	fin := mysql.Finance()
 	//or PUT?
 	if r.Method == "GET" {
 		user, err := auth.GetCurrentUser(r)
@@ -47,7 +47,7 @@ func TransferHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 		return
 	}
-	fin := cdb.Finance()
+	fin := mysql.Finance()
 	switch r.Method {
 	case "PUT":
 		var transfer *models.Transfer
@@ -94,7 +94,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fin := cdb.Finance()
+	fin := mysql.Finance()
 	if r.Method == "POST" {
 		item := new(models.Transfer)
 		if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
@@ -146,7 +146,7 @@ func TransfersHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
-	categories, err := cdb.Finance().Categories()
+	categories, err := mysql.Finance().Categories()
 	if err != nil {
 		http.Error(w, "Can't get transfer categories error: %s"+err.Error(), http.StatusInternalServerError)
 		return
@@ -156,7 +156,7 @@ func CategoriesHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func CategoriesSumHandler(w http.ResponseWriter, r *http.Request) {
-	sums, err := cdb.Finance().SumByCategory(api.FilterFromQuery(r.URL.Query()))
+	sums, err := mysql.Finance().SumByCategory(api.FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		http.Error(w, "Can't get sum by category error: %s"+err.Error(), http.StatusInternalServerError)
 		return

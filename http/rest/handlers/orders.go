@@ -10,10 +10,10 @@ import (
 	"math/big"
 	"net/http"
 
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
-	"github.com/hromov/jevelina/cdb/orders"
 	d_users "github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/orders"
 )
 
 const randomUserEmail = "random@random.org"
@@ -40,7 +40,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "User Email and Hash are required", http.StatusBadRequest)
 		return
 	}
-	user, err := cdb.Misc().UserByEmail(ctx, c.UserEmail)
+	user, err := mysql.Misc().UserByEmail(ctx, c.UserEmail)
 	if err != nil || user.ID == 0 {
 		http.Error(w, "Cant find user with email: "+c.UserEmail, http.StatusBadRequest)
 		return
@@ -51,7 +51,7 @@ func OrderHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if user.Email == randomUserEmail {
-		users, err := cdb.Misc().Users(ctx)
+		users, err := mysql.Misc().Users(ctx)
 		if err != nil {
 			http.Error(w, "Can't get users", http.StatusInternalServerError)
 			return

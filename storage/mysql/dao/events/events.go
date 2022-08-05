@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 )
 

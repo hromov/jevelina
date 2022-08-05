@@ -3,8 +3,8 @@ package misc
 import (
 	"context"
 
-	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm/clause"
 )
 

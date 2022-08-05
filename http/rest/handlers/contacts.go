@@ -9,9 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/http/rest/auth"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
@@ -24,7 +24,7 @@ func ContactHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Contacts()
+	c := mysql.Contacts()
 	var contact *models.Contact
 
 	switch r.Method {
@@ -88,7 +88,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
-		c := cdb.GetDB()
+		c := mysql.GetDB()
 
 		user, err := auth.GetCurrentUser(r)
 		if err != nil {
@@ -114,7 +114,7 @@ func ContactsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := cdb.Contacts()
+	c := mysql.Contacts()
 	contactsResponse, err := c.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get contacts error: " + err.Error())

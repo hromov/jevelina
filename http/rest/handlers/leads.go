@@ -11,9 +11,9 @@ import (
 	"github.com/gorilla/mux"
 	"gorm.io/gorm"
 
-	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/http/rest/auth"
+	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
 func LeadHandler(w http.ResponseWriter, r *http.Request) {
@@ -24,7 +24,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := cdb.Leads()
+	l := mysql.Leads()
 	lead := new(models.Lead)
 	switch r.Method {
 	case "GET":
@@ -98,7 +98,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		lead.ResponsibleID = &user.ID
 		lead.CreatedID = &user.ID
 
-		if lead, err = cdb.Leads().Save(lead); err != nil {
+		if lead, err = mysql.Leads().Save(lead); err != nil {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
@@ -115,7 +115,7 @@ func LeadsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	l := cdb.Leads()
+	l := mysql.Leads()
 	leadsResponse, err := l.List(FilterFromQuery(r.URL.Query()))
 	if err != nil {
 		log.Println("Can't get leads error: " + err.Error())
