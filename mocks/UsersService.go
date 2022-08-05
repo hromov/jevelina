@@ -70,6 +70,20 @@ func (_m *UsersService) Delete(_a0 context.Context, _a1 uint64) error {
 	return r0
 }
 
+// DeleteRole provides a mock function with given fields: ctx, id
+func (_m *UsersService) DeleteRole(ctx context.Context, id uint8) error {
+	ret := _m.Called(ctx, id)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint8) error); ok {
+		r0 = rf(ctx, id)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: _a0, _a1
 func (_m *UsersService) Get(_a0 context.Context, _a1 uint64) (users.User, error) {
 	ret := _m.Called(_a0, _a1)
@@ -120,6 +134,20 @@ func (_m *UsersService) Update(_a0 context.Context, _a1 users.ChangeUser) error 
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, users.ChangeUser) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateRole provides a mock function with given fields: _a0, _a1
+func (_m *UsersService) UpdateRole(_a0 context.Context, _a1 users.Role) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, users.Role) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)

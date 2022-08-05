@@ -10,7 +10,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/cdb"
-	"github.com/hromov/jevelina/cdb/models"
 	"github.com/hromov/jevelina/domain/users"
 	"gorm.io/gorm"
 )
@@ -20,10 +19,24 @@ type createRoleRequest struct {
 	Role     string `validate:"required"`
 }
 
+type updateRoleRequest struct {
+	ID       uint8  `validate:"required"`
+	Priority uint8  `validate:"required"`
+	Role     string `validate:"required"`
+}
+
 func (c *createRoleRequest) toDomain() users.Role {
 	return users.Role{
 		Priority: c.Priority,
 		Role:     c.Role,
+	}
+}
+
+func (role *updateRoleRequest) toDomain() users.Role {
+	return users.Role{
+		ID:       role.ID,
+		Priority: role.Priority,
+		Role:     role.Role,
 	}
 }
 
@@ -59,34 +72,6 @@ func RoleHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		fmt.Fprint(w, string(b))
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&role); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		//channge to base.DB?
-
-		if uint64(role.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, role.ID), http.StatusBadRequest)
-			return
-		}
-		if err = c.DB.Save(role).Error; err != nil {
-			log.Printf("Can't update role with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
-	case "DELETE":
-
-		if err = c.DB.Delete(&models.Role{ID: uint8(ID)}).Error; err != nil {
-			log.Printf("Can't delete role with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
 	}
 
 }
@@ -137,5 +122,51 @@ func CreateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 		log.Println("new role was created: ", string(b))
 		w.WriteHeader(http.StatusAccepted)
 		fmt.Fprint(w, string(b))
+	}
+}
+
+func UpdateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ID, err := getRouteID(r)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		updateRequest := updateRoleRequest{}
+		if err := json.NewDecoder(r.Body).Decode(&updateRequest); err != nil {
+			log.Println("create role decode error: ", err.Error())
+			http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+			return
+		}
+
+		if updateRequest.ID != uint8(ID) {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, updateRequest.ID), http.StatusBadRequest)
+			return
+		}
+
+		if err := us.UpdateRole(r.Context(), updateRequest.toDomain()); err != nil {
+			log.Println("can't update user role error: ", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func DeleteRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ID, err := getRouteID(r)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		if err := us.DeleteRole(r.Context(), uint8(ID)); err != nil {
+			log.Println("Can't delete role error: ", err.Error())
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusNoContent)
 	}
 }

@@ -9,6 +9,8 @@ type Repository interface {
 	UpdateUser(context.Context, ChangeUser) error
 	DeleteUser(context.Context, uint64) error
 	CreateRole(context.Context, Role) (Role, error)
+	UpdateRole(context.Context, Role) error
+	DeleteRole(ctx context.Context, id uint8) error
 }
 
 //go:generate mockery --name Service --filename UsersService.go --structname UsersService --output ../../mocks
@@ -19,6 +21,8 @@ type Service interface {
 	Update(context.Context, ChangeUser) error
 	Delete(context.Context, uint64) error
 	CreateRole(context.Context, Role) (Role, error)
+	UpdateRole(context.Context, Role) error
+	DeleteRole(ctx context.Context, id uint8) error
 }
 
 type service struct {
@@ -51,4 +55,12 @@ func (s *service) Delete(ctx context.Context, id uint64) error {
 
 func (s *service) CreateRole(ctx context.Context, role Role) (Role, error) {
 	return s.r.CreateRole(ctx, role)
+}
+
+func (s *service) UpdateRole(ctx context.Context, role Role) error {
+	return s.r.UpdateRole(ctx, role)
+}
+
+func (s *service) DeleteRole(ctx context.Context, id uint8) error {
+	return s.r.DeleteRole(ctx, id)
 }

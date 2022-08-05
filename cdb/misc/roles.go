@@ -38,3 +38,15 @@ func (m *Misc) CreateRole(ctx context.Context, role users.Role) (users.Role, err
 	}
 	return dbRole.ToDomain(), nil
 }
+
+func (m *Misc) UpdateRole(ctx context.Context, role users.Role) error {
+	dbRole := models.Role{
+		Priority: role.Priority,
+		Role:     role.Role,
+	}
+	return m.DB.WithContext(ctx).Model(&models.Role{ID: role.ID}).Updates(&dbRole).Error
+}
+
+func (m *Misc) DeleteRole(ctx context.Context, id uint8) error {
+	return m.DB.WithContext(ctx).Delete(&models.Role{ID: id}).Error
+}
