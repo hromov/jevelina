@@ -8,10 +8,11 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/api"
-	"github.com/hromov/jevelina/auth"
+
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/http/rest/auth"
+	api "github.com/hromov/jevelina/http/rest/handlers"
 )
 
 func CompleteTransferHandler(w http.ResponseWriter, r *http.Request) {

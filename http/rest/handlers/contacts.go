@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"encoding/json"
@@ -9,9 +9,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/auth"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	"github.com/hromov/jevelina/http/rest/auth"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )

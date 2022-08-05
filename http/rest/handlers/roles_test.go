@@ -1,4 +1,4 @@
-package api_test
+package handlers_test
 
 import (
 	"bytes"
@@ -9,8 +9,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/domain/users"
+	api "github.com/hromov/jevelina/http/rest/handlers"
 	"github.com/hromov/jevelina/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

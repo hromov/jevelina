@@ -1,4 +1,4 @@
-package api
+package handlers
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
+func ProductHandler(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	ID, err := strconv.ParseUint(vars["id"], 10, 32)
 	if err != nil {
@@ -24,13 +24,13 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := cdb.Misc()
-	var manufacturer *models.Manufacturer
+	var product *models.Product
 
 	switch r.Method {
 	case "GET":
-		manufacturer, err = c.Manufacturer(uint16(ID))
+		product, err = c.Product(uint32(ID))
 		if err != nil {
-			log.Println("Can't get manufacturer error: " + err.Error())
+			log.Println("Can't get product error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
 				http.NotFound(w, r)
 			} else {
@@ -39,89 +39,91 @@ func ManufacturerHandler(w http.ResponseWriter, r *http.Request) {
 			}
 			return
 		}
-		b, err := json.Marshal(manufacturer)
+		b, err := json.Marshal(product)
 		if err != nil {
-			log.Println("Can't json.Marshal(manufacturer) error: " + err.Error())
+			log.Println("Can't json.Marshal(product) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
 		fmt.Fprint(w, string(b))
 	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&manufacturer); err != nil {
+		if err = json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
-		if uint64(manufacturer.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, manufacturer.ID), http.StatusBadRequest)
+		if uint64(product.ID) != ID {
+			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, product.ID), http.StatusBadRequest)
 			return
 		}
 
-		if err = c.DB.Omit(clause.Associations).Save(manufacturer).Error; err != nil {
-			log.Printf("Can't update manufacturer with ID = %d. Error: %s", ID, err.Error())
+		//channge to base.DB?
+		if err = c.DB.Omit(clause.Associations).Save(product).Error; err != nil {
+			log.Printf("Can't update product with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
+		// w.WriteHeader(http.StatusOK)
 		return
 	case "DELETE":
 
-		if err = c.DB.Delete(&models.Manufacturer{ID: uint16(ID)}).Error; err != nil {
-			log.Printf("Can't delete manufacturer with ID = %d. Error: %s", ID, err.Error())
+		if err = c.DB.Delete(&models.Product{ID: uint32(ID)}).Error; err != nil {
+			log.Printf("Can't delete product with ID = %d. Error: %s", ID, err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
+		// w.WriteHeader(http.StatusOK)
 		return
 	}
 
 }
 
-func ManufacturersHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/manufacturers" {
+func ProductsHandler(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/products" {
 		http.NotFound(w, r)
 		return
 	}
 
 	if r.Method == "POST" {
-		manufacturer := new(models.Manufacturer)
-		if err := json.NewDecoder(r.Body).Decode(&manufacturer); err != nil {
+		product := new(models.Product)
+		if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 		c := cdb.GetDB()
-		if err := c.DB.Omit(clause.Associations).Create(manufacturer).Error; err != nil {
-			log.Printf("Can't create manufacturer. Error: %s", err.Error())
+		if err := c.DB.Omit(clause.Associations).Create(product).Error; err != nil {
+			log.Printf("Can't create product. Error: %s", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		b, err := json.Marshal(manufacturer)
+		b, err := json.Marshal(product)
 		if err != nil {
-			log.Println("Can't json.Marshal(manufacturer) error: " + err.Error())
+			log.Println("Can't json.Marshal(product) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
 		fmt.Fprint(w, string(b))
-		return
 	}
 
 	c := cdb.Misc()
-	manufacturersResponse, err := c.Manufacturers()
+	productsResponse, err := c.Products()
 	if err != nil {
-		log.Println("Can't get manufacturers error: " + err.Error())
+		log.Println("Can't get products error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 	}
-
-	b, err := json.Marshal(manufacturersResponse)
+	// log.Println("banks in main: ", banks)
+	b, err := json.Marshal(productsResponse)
 	if err != nil {
 		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),
 			http.StatusInternalServerError)
 		return
 	}
-	total := strconv.Itoa(len(manufacturersResponse))
+	total := strconv.Itoa(len(productsResponse))
 	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 	w.Header().Set("X-Total-Count", total)
 	fmt.Fprint(w, string(b))

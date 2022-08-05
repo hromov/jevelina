@@ -8,9 +8,9 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	api "github.com/hromov/jevelina/http/rest/handlers"
 )
 
 func FilesHandler(w http.ResponseWriter, r *http.Request) {

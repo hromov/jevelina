@@ -9,7 +9,7 @@ import (
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/domain/users"
-	"github.com/hromov/jevelina/routes"
+	"github.com/hromov/jevelina/http/rest"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
@@ -31,7 +31,7 @@ func main() {
 	//TODO: repo
 	miscRepo := cdb.Misc()
 	us := users.NewService(miscRepo)
-	router := routes.Base(us)
+	router := rest.InitRouter(us)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

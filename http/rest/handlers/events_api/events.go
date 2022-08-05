@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hromov/jevelina/api"
 	"github.com/hromov/jevelina/cdb"
 	"github.com/hromov/jevelina/cdb/models"
+	api "github.com/hromov/jevelina/http/rest/handlers"
 )
 
 func ListHandler(w http.ResponseWriter, r *http.Request) {
