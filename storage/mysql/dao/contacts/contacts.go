@@ -1,11 +1,13 @@
 package contacts
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"log"
 	"unicode"
 
+	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
@@ -28,9 +30,9 @@ func digitsOnly(s string) bool {
 	return true
 }
 
-func (c *Contacts) List(filter models.ListFilter) (*models.ContactsResponse, error) {
+func (c *Contacts) Contacts(ctx context.Context, filter contacts.Filter) (contacts.ContactsResponse, error) {
 	cr := &models.ContactsResponse{}
-	q := c.DB.Preload(clause.Associations).Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
+	q := c.DB.WithContext(ctx).Preload(clause.Associations).Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
 	if filter.Query != "" {
 		searchType := ""
 		if digitsOnly(filter.Query) {
@@ -48,39 +50,66 @@ func (c *Contacts) List(filter models.ListFilter) (*models.ContactsResponse, err
 		q.Find(&cr.Contacts)
 	}
 
-	if result := q.Count(&cr.Total); result.Error != nil {
-		return nil, result.Error
+	if err := q.Count(&cr.Total).Error; err != nil {
+		return contacts.ContactsResponse{}, err
 	}
-	return cr, nil
+	resp := contacts.ContactsResponse{
+		Contacts: make([]contacts.Contact, len(cr.Contacts)),
+		Total:    cr.Total,
+	}
+	for i, contact := range cr.Contacts {
+		resp.Contacts[i] = contact.ToDomain()
+	}
+	return resp, nil
 }
 
-func (c *Contacts) ByID(ID uint64) (*models.Contact, error) {
-	// log.Println(limit, offset, query, query == "")
+func (c *Contacts) ByID(ctx context.Context, ID uint64) (contacts.Contact, error) {
 	var contact models.Contact
 
 	if result := c.DB.Unscoped().Preload(clause.Associations).First(&contact, ID); result.Error != nil {
-		return nil, result.Error
+		return contacts.Contact{}, result.Error
 	}
-	return &contact, nil
+
+	return contact.ToDomain(), nil
 }
 
-func (c *Contacts) ByPhone(phone string) (*models.Contact, error) {
+func (c *Contacts) ByPhone(ctx context.Context, phone string) (contacts.Contact, error) {
 	if phone == "" || len(phone) < 6 {
-		return nil, errors.New("Phone should be at least 6 char length")
+		return contacts.Contact{}, errors.New("Phone should be at least 6 char length")
 	}
-	contact := new(models.Contact)
+	var contact models.Contact
 	if err := c.DB.Where(phonesOnly, sql.Named("query", phone)).First(contact).Error; err != nil {
-		return nil, err
+		return contacts.Contact{}, err
 	}
-	return contact, nil
+	return contact.ToDomain(), nil
 }
 
-func (c *Contacts) Delete(ID uint64) error {
-	if err := c.DB.Delete(&models.Contact{ID: ID}).Error; err != nil {
+func (c *Contacts) DeleteUser(ctx context.Context, id uint64) error {
+	if err := c.DB.Delete(&models.Contact{ID: id}).Error; err != nil {
 		return err
 	}
-	if err := misc.DeleteTaskByParent(c.DB, ID); err != nil {
+	if err := misc.DeleteTaskByParent(c.DB, id); err != nil {
 		log.Printf("Error while deliting tasks for contact: %s", err.Error())
+	}
+	return nil
+}
+
+func (c *Contacts) CreateUser(ctx context.Context, newContact contacts.ContactRequest) (contacts.Contact, error) {
+	dbContact := models.Contact{
+		// TODO: converter
+	}
+	if err := c.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbContact).Error; err != nil {
+		return contacts.Contact{}, err
+	}
+	return c.ByID(ctx, dbContact.ID)
+}
+
+func (c *Contacts) UpdateUser(ctx context.Context, newContact contacts.ContactRequest) error {
+	dbContact := models.Contact{
+		// TODO: converter
+	}
+	if err := c.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbContact).Error; err != nil {
+		return err
 	}
 	return nil
 }

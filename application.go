@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/handlers"
 	"github.com/hromov/jevelina/config"
+	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest"
 	"github.com/hromov/jevelina/storage/mysql"
@@ -31,7 +32,9 @@ func main() {
 	//TODO: repo
 	miscRepo := mysql.Misc()
 	us := users.NewService(miscRepo)
-	router := rest.InitRouter(us)
+	contactsRepo := mysql.Contacts()
+	cs := contacts.NewService(contactsRepo)
+	router := rest.InitRouter(us, cs)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

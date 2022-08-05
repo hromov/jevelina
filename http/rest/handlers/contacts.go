@@ -9,128 +9,166 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/misc"
 	"github.com/hromov/jevelina/http/rest/auth"
-	"github.com/hromov/jevelina/storage/mysql"
-	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-func ContactHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
+type contactRequest struct {
+	ID            uint64
+	Name          string
+	SecondName    string
+	ResponsibleID uint64
+	CreatedID     uint64
+	Phone         string
+	SecondPhone   string
+	Email         string
+	SecondEmail   string
+	URL           string
+
+	City    string
+	Address string
+
+	SourceID uint8
+	Position string
+
+	Analytics misc.Analytics
+}
+
+func (c *contactRequest) toDomain() contacts.ContactRequest {
+	return contacts.ContactRequest{
+		ID:            c.ID,
+		Name:          c.Name,
+		SecondName:    c.SecondName,
+		ResponsibleID: c.ResponsibleID,
+		CreatedID:     c.CreatedID,
+		Phone:         c.Phone,
+		SecondPhone:   c.SecondPhone,
+		Email:         c.Email,
+		SecondEmail:   c.SecondEmail,
+		URL:           c.URL,
+
+		City:    c.City,
+		Address: c.Address,
+
+		SourceID: c.SourceID,
+		Position: c.Position,
+
+		Analytics: c.Analytics,
 	}
+}
 
-	c := mysql.Contacts()
-	var contact *models.Contact
-
-	switch r.Method {
-	case "GET":
-		contact, err = c.ByID(ID)
+func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		id, err := strconv.ParseUint(vars["id"], 10, 32)
 		if err != nil {
-			log.Println("Can't get contact error: " + err.Error())
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.NotFound(w, r)
-			} else {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			contact, err := cs.Get(r.Context(), id)
+			if err != nil {
+				log.Println("Can't get contact error: " + err.Error())
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					http.NotFound(w, r)
+				} else {
+					http.Error(w, http.StatusText(http.StatusInternalServerError),
+						http.StatusInternalServerError)
+				}
+				return
+			}
+			b, err := json.Marshal(contact)
+			if err != nil {
+				log.Println("Can't json.Marshal(contact) error: " + err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprint(w, string(b))
+		case "PUT":
+			contact := contactRequest{}
+			if err = json.NewDecoder(r.Body).Decode(&contact); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if contact.ID != id {
+				http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", id, contact.ID), http.StatusBadRequest)
+				return
+			}
+
+			if err := cs.Update(r.Context(), contact.toDomain()); err != nil {
+				log.Printf("Can't update contact with ID = %d. Error: %s", id, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		case "DELETE":
+			if err := cs.Delete(r.Context(), id); err != nil {
+				log.Printf("Can't delete contact with ID = %d. Error: %s", id, err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
 			return
 		}
-		b, err := json.Marshal(contact)
-		if err != nil {
-			log.Println("Can't json.Marshal(contact) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&contact); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if uint64(contact.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, contact.ID), http.StatusBadRequest)
-			return
-		}
-
-		if err = c.DB.Omit(clause.Associations).Save(contact).Error; err != nil {
-			log.Printf("Can't update contact with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		return
-	case "DELETE":
-		if err = c.Delete(ID); err != nil {
-			log.Printf("Can't delete contact with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		return
 	}
-
 }
 
-func ContactsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/contacts" {
-		http.NotFound(w, r)
-		return
-	}
+func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			contact := contactRequest{}
+			if err := json.NewDecoder(r.Body).Decode(&contact); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
 
-	if r.Method == "POST" {
-		contact := new(models.Contact)
-		if err := json.NewDecoder(r.Body).Decode(&contact); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			user, err := auth.GetCurrentUser(r)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			}
+			contact.CreatedID = user.ID
+
+			createdContact, err := cs.Create(r.Context(), contact.toDomain())
+			if err != nil {
+				log.Printf("Can't create contact. Error: %s", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+
+			//it actually was created ......
+			b, err := json.Marshal(createdContact)
+			if err != nil {
+				log.Println("Can't json.Marshal(contact) error: " + err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprint(w, string(b))
 			return
 		}
-		c := mysql.GetDB()
 
-		user, err := auth.GetCurrentUser(r)
+		contactsResponse, err := cs.List(r.Context(), ContactsFilter(r.URL.Query()))
 		if err != nil {
-			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
-		}
-		contact.CreatedID = &user.ID
-
-		if err := c.DB.Omit(clause.Associations).Create(contact).Error; err != nil {
-			log.Printf("Can't create contact. Error: %s", err.Error())
+			log.Println("Can't get contacts error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-
-		//it actually was created ......
-		b, err := json.Marshal(contact)
+		// log.Println("banks in main: ", banks)
+		b, err := json.Marshal(contactsResponse.Contacts)
 		if err != nil {
-			log.Println("Can't json.Marshal(contact) error: " + err.Error())
+			log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
+		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
+		w.Header().Set("X-Total-Count", strconv.FormatInt(contactsResponse.Total, 10))
+
 		fmt.Fprint(w, string(b))
-		return
 	}
-
-	c := mysql.Contacts()
-	contactsResponse, err := c.List(FilterFromQuery(r.URL.Query()))
-	if err != nil {
-		log.Println("Can't get contacts error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(contactsResponse.Contacts)
-	if err != nil {
-		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", strconv.FormatInt(contactsResponse.Total, 10))
-
-	fmt.Fprint(w, string(b))
 }

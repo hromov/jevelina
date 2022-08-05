@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
@@ -88,6 +89,28 @@ func FilterFromQuery(u url.Values) models.ListFilter {
 	if stepID := u.Get("step"); stepID != "" {
 		step64, _ := strconv.ParseUint(stepID, 10, 64)
 		filter.StepID = uint8(step64)
+	}
+	return filter
+}
+
+func ContactsFilter(u url.Values) contacts.Filter {
+	filter := contacts.Filter{}
+
+	if query := u.Get("query"); query != "" {
+		filter.Query = query
+	}
+	if limit := u.Get("limit"); limit != "" {
+		filter.Limit, _ = strconv.Atoi(limit)
+	} else {
+		filter.Limit = defaultLimit
+	}
+	if offset := u.Get("offset"); offset != "" {
+		filter.Offset, _ = strconv.Atoi(offset)
+	}
+
+	if tagID := u.Get("tag"); tagID != "" {
+		tag64, _ := strconv.ParseUint(tagID, 10, 64)
+		filter.TagID = uint8(tag64)
 	}
 	return filter
 }

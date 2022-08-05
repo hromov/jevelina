@@ -68,44 +68,6 @@ type LeadsResponse struct {
 	Total int64
 }
 
-type Contact struct {
-	ID        uint64 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	//or company
-	IsPerson   bool
-	Name       string `gorm:"size:32"`
-	SecondName string `gorm:"size:32"`
-	//implement
-	ResponsibleID *uint64
-	Responsible   User `gorm:"foreignKey:ResponsibleID"`
-	CreatedID     *uint64
-	Created       User `gorm:"foreignKey:CreatedID"`
-
-	Tags []Tag `gorm:"many2many:contacts_tags;"`
-	// Tasks       []Task
-	Phone       string `gorm:"size:32"`
-	SecondPhone string `gorm:"size:32"`
-	Email       string `gorm:"size:128"`
-	SecondEmail string `gorm:"size:128"`
-	URL         string `gorm:"size:128"`
-
-	City    string `gorm:"size:128"`
-	Address string `gorm:"size:256"`
-
-	SourceID *uint8
-	Source   Source `gorm:"foreignKey:SourceID"`
-	Position string `gorm:"size:128"`
-
-	Analytics Analytics `gorm:"embedded;embeddedPrefix:analytics_"`
-}
-
-type ContactsResponse struct {
-	Contacts []Contact
-	Total    int64
-}
-
 type Analytics struct {
 	CID string `gorm:"size:64"`
 	UID string `gorm:"size:64"`
@@ -170,14 +132,6 @@ type TasksResponse struct {
 }
 
 type TaskType struct {
-	ID        uint8 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"size:32;unique"`
-}
-
-type Source struct {
 	ID        uint8 `gorm:"primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time

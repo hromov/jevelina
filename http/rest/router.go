@@ -2,6 +2,7 @@ package rest
 
 import (
 	"github.com/gorilla/mux"
+	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
@@ -10,13 +11,13 @@ import (
 	"github.com/hromov/jevelina/http/rest/handlers/fin_api"
 )
 
-func InitRouter(us users.Service) *mux.Router {
+func InitRouter(us users.Service, cs contacts.Service) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
-	r.HandleFunc("/orders", api.OrderHandler).Methods("POST")
+	r.HandleFunc("/orders", api.Order(cs)).Methods("POST")
 	// TODO: uncoment for prod
 	// r.Use(auth.UserCheck)
-	r = UserRoutes(r, us)
+	r = UserRoutes(r, us, cs)
 	// TODO: uncoment for prod
 	// r.Use(auth.AdminCheck)
 	r = AdminRoutes(r, us)
@@ -56,9 +57,9 @@ func AdminRoutes(r *mux.Router, us users.Service) *mux.Router {
 	return r
 }
 
-func UserRoutes(r *mux.Router, us users.Service) *mux.Router {
-	r.HandleFunc("/contacts", api.ContactsHandler).Methods("GET", "POST")
-	r.HandleFunc("/contacts/{id}", api.ContactHandler).Methods("GET", "PUT", "DELETE")
+func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service) *mux.Router {
+	r.HandleFunc("/contacts", api.Contacts(cs)).Methods("GET", "POST")
+	r.HandleFunc("/contacts/{id}", api.Contact(cs)).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/leads", api.LeadsHandler).Methods("GET", "POST")
 	r.HandleFunc("/leads/{id}", api.LeadHandler).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/users", api.Users(us)).Methods("GET")
