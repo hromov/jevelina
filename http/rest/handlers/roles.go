@@ -8,9 +8,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/users"
-	"github.com/hromov/jevelina/storage/mysql"
 	"gorm.io/gorm"
 )
 
@@ -38,64 +36,6 @@ func (role *updateRoleRequest) toDomain() users.Role {
 		Priority: role.Priority,
 		Role:     role.Role,
 	}
-}
-
-func RoleHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	c := mysql.Misc()
-	var role users.Role
-
-	switch r.Method {
-	case "GET":
-		role, err = c.Role(r.Context(), uint8(ID))
-		if err != nil {
-			log.Println("Can't get role error: " + err.Error())
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.NotFound(w, r)
-			} else {
-				http.Error(w, http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
-			}
-			return
-		}
-		b, err := json.Marshal(role)
-		if err != nil {
-			log.Println("Can't json.Marshal(role) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-	}
-
-}
-
-func RolesHandler(w http.ResponseWriter, r *http.Request) {
-	c := mysql.Misc()
-	rolesResponse, err := c.Roles(r.Context())
-	if err != nil {
-		log.Println("Can't get roles error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(rolesResponse)
-	if err != nil {
-		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	total := strconv.Itoa(len(rolesResponse))
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, string(b))
 }
 
 func CreateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
@@ -127,7 +67,7 @@ func CreateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 
 func UpdateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ID, err := getRouteID(r)
+		ID, err := getID(r)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -157,7 +97,7 @@ func UpdateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 
 func DeleteRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		ID, err := getRouteID(r)
+		ID, err := getID(r)
 		if err != nil {
 			w.WriteHeader(http.StatusBadRequest)
 			return
@@ -168,5 +108,59 @@ func DeleteRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		w.WriteHeader(http.StatusNoContent)
+	}
+}
+
+func Role(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ID, err := getID(r)
+		if err != nil {
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+
+		role, err := us.GetRole(r.Context(), uint8(ID))
+		if err != nil {
+			log.Println("Can't get role error: " + err.Error())
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				http.NotFound(w, r)
+			} else {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		}
+
+		b, err := json.Marshal(role)
+		if err != nil {
+			log.Println("Can't json.Marshal(role) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+		fmt.Fprint(w, string(b))
+	}
+}
+
+func Roles(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		roles, err := us.ListRoles(r.Context())
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		b, err := json.Marshal(roles)
+		if err != nil {
+			log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
+			http.Error(w, http.StatusText(http.StatusInternalServerError),
+				http.StatusInternalServerError)
+			return
+		}
+
+		total := strconv.Itoa(len(roles))
+		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
+		w.Header().Set("X-Total-Count", total)
+		fmt.Fprint(w, string(b))
 	}
 }

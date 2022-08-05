@@ -105,6 +105,27 @@ func (_m *UsersService) Get(_a0 context.Context, _a1 uint64) (users.User, error)
 	return r0, r1
 }
 
+// GetRole provides a mock function with given fields: _a0, _a1
+func (_m *UsersService) GetRole(_a0 context.Context, _a1 uint8) (users.Role, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 users.Role
+	if rf, ok := ret.Get(0).(func(context.Context, uint8) users.Role); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(users.Role)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint8) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // List provides a mock function with given fields: _a0
 func (_m *UsersService) List(_a0 context.Context) ([]users.User, error) {
 	ret := _m.Called(_a0)
@@ -115,6 +136,29 @@ func (_m *UsersService) List(_a0 context.Context) ([]users.User, error) {
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]users.User)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// ListRoles provides a mock function with given fields: _a0
+func (_m *UsersService) ListRoles(_a0 context.Context) ([]users.Role, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []users.Role
+	if rf, ok := ret.Get(0).(func(context.Context) []users.Role); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]users.Role)
 		}
 	}
 
