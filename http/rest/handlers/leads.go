@@ -50,6 +50,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	case "PUT":
 		if err = json.NewDecoder(r.Body).Decode(&lead); err != nil {
+			log.Println("Lead decode error: ", err.Error())
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
@@ -60,6 +61,7 @@ func LeadHandler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if _, err := l.Save(lead); err != nil {
+			log.Println("Can't save lead error: ", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return

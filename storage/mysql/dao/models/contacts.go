@@ -72,3 +72,28 @@ func (c *Contact) ToDomain() contacts.Contact {
 		Analytics: misc.Analytics(c.Analytics),
 	}
 }
+
+func ContactFromDomain(c contacts.ContactRequest) Contact {
+	contact := Contact{
+		IsPerson:      true,
+		Name:          c.Name,
+		SecondName:    c.SecondName,
+		ResponsibleID: OrNil(c.ResponsibleID),
+		CreatedID:     OrNil(c.CreatedID),
+
+		Phone:       c.Phone,
+		SecondPhone: c.SecondPhone,
+		Email:       c.Email,
+		SecondEmail: c.SecondEmail,
+		URL:         c.URL,
+
+		City:    c.City,
+		Address: c.Address,
+
+		Position: c.Position,
+		SourceID: OrNil(c.SourceID),
+
+		Analytics: Analytics(c.Analytics),
+	}
+	return contact
+}

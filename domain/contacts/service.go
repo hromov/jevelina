@@ -8,9 +8,9 @@ type Repository interface {
 	ByID(context.Context, uint64) (Contact, error)
 	ByPhone(context.Context, string) (Contact, error)
 	Contacts(context.Context, Filter) (ContactsResponse, error)
-	DeleteUser(context.Context, uint64) error
-	UpdateUser(context.Context, ContactRequest) error
-	CreateUser(context.Context, ContactRequest) (Contact, error)
+	DeleteContact(context.Context, uint64) error
+	UpdateContact(context.Context, ContactRequest) error
+	CreateContact(context.Context, ContactRequest) (Contact, error)
 }
 
 //go:generate mockery --name Service --filename ContactsService.go --structname ContactsService --output ../../mocks
@@ -45,15 +45,15 @@ func (s *service) GetByPhone(ctx context.Context, phone string) (Contact, error)
 }
 
 func (s *service) Update(ctx context.Context, contact ContactRequest) error {
-	return s.r.UpdateUser(ctx, contact)
+	return s.r.UpdateContact(ctx, contact)
 }
 
 func (s *service) Delete(ctx context.Context, id uint64) error {
-	return s.r.DeleteUser(ctx, id)
+	return s.r.DeleteContact(ctx, id)
 }
 
 func (s *service) Create(ctx context.Context, contact ContactRequest) (Contact, error) {
-	return s.r.CreateUser(ctx, contact)
+	return s.r.CreateContact(ctx, contact)
 }
 
 func (s *service) CreateOrGet(ctx context.Context, c ContactRequest) (Contact, error) {

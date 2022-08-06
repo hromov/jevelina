@@ -54,3 +54,13 @@ func (r *Role) ToDomain() users.Role {
 		Role:      r.Role,
 	}
 }
+
+func UserFromDomain(user users.ChangeUser) User {
+	return User{
+		Name:         user.Name,
+		Email:        user.Email,
+		Hash:         user.Hash,
+		Distribution: user.Distribution,
+		RoleID:       &user.RoleID,
+	}
+}

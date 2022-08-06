@@ -84,7 +84,7 @@ func (c *Contacts) ByPhone(ctx context.Context, phone string) (contacts.Contact,
 	return contact.ToDomain(), nil
 }
 
-func (c *Contacts) DeleteUser(ctx context.Context, id uint64) error {
+func (c *Contacts) DeleteContact(ctx context.Context, id uint64) error {
 	if err := c.DB.Delete(&models.Contact{ID: id}).Error; err != nil {
 		return err
 	}
@@ -94,21 +94,17 @@ func (c *Contacts) DeleteUser(ctx context.Context, id uint64) error {
 	return nil
 }
 
-func (c *Contacts) CreateUser(ctx context.Context, newContact contacts.ContactRequest) (contacts.Contact, error) {
-	dbContact := models.Contact{
-		// TODO: converter
-	}
+func (c *Contacts) CreateContact(ctx context.Context, newContact contacts.ContactRequest) (contacts.Contact, error) {
+	dbContact := models.ContactFromDomain(newContact)
 	if err := c.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbContact).Error; err != nil {
 		return contacts.Contact{}, err
 	}
 	return c.ByID(ctx, dbContact.ID)
 }
 
-func (c *Contacts) UpdateUser(ctx context.Context, newContact contacts.ContactRequest) error {
-	dbContact := models.Contact{
-		// TODO: converter
-	}
-	if err := c.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbContact).Error; err != nil {
+func (c *Contacts) UpdateContact(ctx context.Context, contact contacts.ContactRequest) error {
+	dbContact := models.ContactFromDomain(contact)
+	if err := c.DB.Debug().WithContext(ctx).Omit(clause.Associations).Model(&models.Contact{}).Where("id", contact.ID).Updates(&dbContact).Error; err != nil {
 		return err
 	}
 	return nil

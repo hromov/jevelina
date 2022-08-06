@@ -174,7 +174,7 @@ func Orders(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		c := CreateLeadReq{}
-		if err := json.NewDecoder(r.Body).Decode(c); err != nil {
+		if err := json.NewDecoder(r.Body).Decode(&c); err != nil {
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

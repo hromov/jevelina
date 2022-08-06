@@ -7,10 +7,12 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/misc"
+	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	"gorm.io/gorm"
 )
@@ -59,6 +61,58 @@ func (c *contactRequest) toDomain() contacts.ContactRequest {
 	}
 }
 
+type contact struct {
+	ID        uint64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt *time.Time
+
+	Name        string
+	SecondName  string
+	Responsible users.User
+	Created     users.User
+	Phone       string
+	SecondPhone string
+	Email       string
+	SecondEmail string
+	URL         string
+
+	City    string
+	Address string
+
+	Source   misc.Source
+	Position string
+
+	Analytics misc.Analytics
+}
+
+func contactFromDomain(c contacts.Contact) contact {
+	return contact{
+		ID:        c.ID,
+		CreatedAt: c.CreatedAt,
+		UpdatedAt: c.UpdatedAt,
+		DeletedAt: timeOrNull(c.DeletedAt),
+
+		Name:        c.Name,
+		SecondName:  c.SecondName,
+		Responsible: c.Responsible,
+		Created:     c.Created,
+		Phone:       c.Phone,
+		SecondPhone: c.SecondPhone,
+		Email:       c.Email,
+		SecondEmail: c.SecondEmail,
+		URL:         c.URL,
+
+		City:    c.City,
+		Address: c.Address,
+
+		Source:   c.Source,
+		Position: c.Position,
+
+		Analytics: c.Analytics,
+	}
+}
+
 func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
@@ -81,14 +135,7 @@ func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			b, err := json.Marshal(contact)
-			if err != nil {
-				log.Println("Can't json.Marshal(contact) error: " + err.Error())
-				http.Error(w, http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
-				return
-			}
-			fmt.Fprint(w, string(b))
+			encode(w, contactFromDomain(contact))
 		case "PUT":
 			contact := contactRequest{}
 			if err = json.NewDecoder(r.Body).Decode(&contact); err != nil {
@@ -140,15 +187,7 @@ func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) 
 					http.StatusInternalServerError)
 			}
 
-			//it actually was created ......
-			b, err := json.Marshal(createdContact)
-			if err != nil {
-				log.Println("Can't json.Marshal(contact) error: " + err.Error())
-				http.Error(w, http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
-				return
-			}
-			fmt.Fprint(w, string(b))
+			encode(w, contactFromDomain(createdContact))
 			return
 		}
 
@@ -158,17 +197,15 @@ func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		// log.Println("banks in main: ", banks)
-		b, err := json.Marshal(contactsResponse.Contacts)
-		if err != nil {
-			log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
+
+		contacts := make([]contact, len(contactsResponse.Contacts))
+		for i, c := range contactsResponse.Contacts {
+			contacts[i] = contactFromDomain(c)
 		}
+
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", strconv.FormatInt(contactsResponse.Total, 10))
 
-		fmt.Fprint(w, string(b))
+		encode(w, contacts)
 	}
 }

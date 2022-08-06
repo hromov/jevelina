@@ -44,14 +44,8 @@ func (m *Misc) UserByEmail(ctx context.Context, mail string) (users.User, error)
 	return user.ToDomain(), nil
 }
 
-func (m *Misc) CreateUser(ctx context.Context, newUser users.ChangeUser) (users.User, error) {
-	dbUser := models.User{
-		Name:         newUser.Name,
-		Email:        newUser.Email,
-		Hash:         newUser.Hash,
-		Distribution: newUser.Distribution,
-		RoleID:       &newUser.RoleID,
-	}
+func (m *Misc) CreateUser(ctx context.Context, user users.ChangeUser) (users.User, error) {
+	dbUser := models.UserFromDomain(user)
 	if err := m.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbUser).Error; err != nil {
 		return users.User{}, err
 	}
@@ -59,13 +53,7 @@ func (m *Misc) CreateUser(ctx context.Context, newUser users.ChangeUser) (users.
 }
 
 func (m *Misc) UpdateUser(ctx context.Context, user users.ChangeUser) error {
-	dbUser := models.User{
-		Name:         user.Name,
-		Email:        user.Email,
-		Hash:         user.Hash,
-		Distribution: user.Distribution,
-		RoleID:       &user.RoleID,
-	}
+	dbUser := models.UserFromDomain(user)
 	return m.DB.WithContext(ctx).Model(&models.User{ID: user.ID}).Updates(&dbUser).Error
 }
 
