@@ -15,7 +15,7 @@ type Source struct {
 	Name      string         `gorm:"size:32;unique"`
 }
 
-func (s *Source) toDomain() misc.Source {
+func (s *Source) ToDomain() misc.Source {
 	return misc.Source{
 		ID:   s.ID,
 		Name: s.Name,

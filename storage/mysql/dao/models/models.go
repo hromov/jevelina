@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hromov/jevelina/domain/misc"
 	"gorm.io/gorm"
 )
 
@@ -27,47 +28,6 @@ type ListFilter struct {
 	Wallet        uint16
 	Completed     bool
 }
-
-type Lead struct {
-	ID        uint64 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	ClosedAt  *time.Time     `gorm:"index"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"size:64"`
-	Budget    uint32
-	Profit    int32
-
-	//implement
-	ContactID *uint64
-	Contact   Contact `gorm:"foreignKey:ContactID"`
-
-	ResponsibleID *uint64
-	Responsible   User `gorm:"foreignKey:ResponsibleID"`
-	CreatedID     *uint64
-	Created       User `gorm:"foreignKey:CreatedID"`
-	StepID        *uint8
-	Step          Step
-	//implement
-	ProductID *uint32
-	Product   Product
-	//implement
-	ManufacturerID *uint16
-	Manufacturer   Manufacturer
-	SourceID       *uint8
-	Source         Source
-	//google analytics
-	Tags []Tag `gorm:"many2many:leads_tags;"`
-	// Tasks []Task
-
-	Analytics Analytics `gorm:"embedded;embeddedPrefix:analytics_"`
-}
-
-type LeadsResponse struct {
-	Leads []Lead
-	Total int64
-}
-
 type Analytics struct {
 	CID string `gorm:"size:64"`
 	UID string `gorm:"size:64"`
@@ -79,16 +39,6 @@ type Analytics struct {
 	UtmCampaign string `gorm:"size:64"`
 
 	Domain string `gorm:"size:128"`
-}
-
-type Step struct {
-	ID        uint8 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"unique;size:32"`
-	Order     uint8
-	Active    bool `gorm:"index"`
 }
 
 type Tag struct {
@@ -147,6 +97,13 @@ type Product struct {
 	Name      string         `gorm:"size:64;unique"`
 }
 
+func (p *Product) ToDomain() misc.Product {
+	return misc.Product{
+		ID:   p.ID,
+		Name: p.Name,
+	}
+}
+
 type Manufacturer struct {
 	ID        uint16 `gorm:"primaryKey"`
 	CreatedAt time.Time
@@ -155,32 +112,11 @@ type Manufacturer struct {
 	Name      string         `gorm:"size:32;unique"`
 }
 
-type CreateLeadReq struct {
-	Name        string `json:"name"`
-	Price       int    `json:"price"`
-	Description string `json:"description,omitempty"`
-
-	ClientName  string `json:"clientname"`
-	ClientEmail string `json:"clientemail,omitempty"`
-	ClientPhone string `json:"clientphone,omitempty"`
-
-	Source       string `json:"source,omitempty"`
-	Product      string `json:"product,omitempty"`
-	Manufacturer string `json:"manufacturer,omitempty"`
-
-	UserEmail string `json:"user_email,omitempty"`
-	UserHash  string `json:"user_hash,omitempty"`
-
-	CID string `gorm:"size:64"`
-	UID string `gorm:"size:64"`
-	TID string `gorm:"size:64"`
-
-	UtmID       string `gorm:"size:64"`
-	UtmSource   string `gorm:"size:64"`
-	UtmMedium   string `gorm:"size:64"`
-	UtmCampaign string `gorm:"size:64"`
-
-	Domain string `gorm:"size:128"`
+func (m *Manufacturer) ToDomain() misc.Manufacturer {
+	return misc.Manufacturer{
+		ID:   m.ID,
+		Name: m.Name,
+	}
 }
 
 type Wallet struct {

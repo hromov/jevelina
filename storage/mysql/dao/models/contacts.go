@@ -66,7 +66,7 @@ func (c *Contact) ToDomain() contacts.Contact {
 		City:    c.City,
 		Address: c.Address,
 
-		Source:   c.Source.toDomain(),
+		Source:   c.Source.ToDomain(),
 		Position: c.Position,
 
 		Analytics: misc.Analytics(c.Analytics),

@@ -97,12 +97,12 @@ func (m *Misc) Step(ID uint8) (*models.Step, error) {
 	return &item, nil
 }
 
-func (m *Misc) DefaultStep() (*models.Step, error) {
+func (m *Misc) DefaultStep() (models.Step, error) {
 	var item models.Step
 	if result := m.DB.Where("`order` = 0").First(&item); result.Error != nil {
-		return nil, result.Error
+		return models.Step{}, result.Error
 	}
-	return &item, nil
+	return item, nil
 }
 
 func (m *Misc) Tags() ([]models.Tag, error) {

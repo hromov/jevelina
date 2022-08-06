@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/misc"
 	"github.com/hromov/jevelina/domain/users"
@@ -115,8 +114,7 @@ func contactFromDomain(c contacts.Contact) contact {
 
 func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		vars := mux.Vars(r)
-		id, err := strconv.ParseUint(vars["id"], 10, 32)
+		id, err := getID(r)
 		if err != nil {
 			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
 			return

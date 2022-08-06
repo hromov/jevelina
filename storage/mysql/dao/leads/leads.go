@@ -1,10 +1,13 @@
 package leads
 
 import (
+	"context"
 	"fmt"
 	"log"
-	"time"
 
+	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/leads"
+	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
@@ -13,30 +16,6 @@ import (
 
 type Leads struct {
 	*gorm.DB
-}
-
-func (l *Leads) Save(lead *models.Lead) (*models.Lead, error) {
-	log.Printf("%+v", lead)
-	if !lead.Step.Active && lead.ClosedAt == nil {
-		cTime := time.Now()
-		lead.ClosedAt = &cTime
-	}
-	if lead.Step.Active && lead.ClosedAt != nil {
-		lead.ClosedAt = nil
-	}
-	q := l.DB.Omit(clause.Associations)
-	if lead.ID == 0 {
-		if err := q.Create(&lead).Error; err != nil {
-			log.Printf("Can't create lead. Error: %s", err.Error())
-			return nil, err
-		}
-	} else {
-		if err := q.Save(&lead).Error; err != nil {
-			log.Printf("Can't update lead with ID = %d. Error: %s", lead.ID, err.Error())
-			return nil, err
-		}
-	}
-	return lead, nil
 }
 
 func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
@@ -107,22 +86,68 @@ func (l *Leads) List(filter models.ListFilter) (*models.LeadsResponse, error) {
 	return cr, nil
 }
 
-func (l *Leads) ByID(ID uint64) (*models.Lead, error) {
-	// log.Println(limit, offset, query, query == "")
-	var lead models.Lead
+// TODO: move to some domain
+func (l *Leads) CreateLead(ctx context.Context, lr leads.LeadRequest, contact contacts.Contact) (leads.Lead, error) {
+	lead := models.LeadFromRequest(lr, contact)
 
-	if result := l.DB.Unscoped().Preload(clause.Associations).First(&lead, ID); result.Error != nil {
-		return nil, result.Error
+	if step, _ := mysql.Misc().DefaultStep(); step.ID != 0 {
+		lead.StepID = &step.ID
 	}
-	return &lead, nil
+	if lr.Source != "" {
+		if source, _ := mysql.Misc().SourceByName(lr.Source); source != nil {
+			lead.SourceID = &source.ID
+		}
+	}
+	if lr.Product != "" {
+		if product, _ := mysql.Misc().ProductByName(lr.Product); product != nil {
+			lead.ProductID = &product.ID
+		}
+	}
+	if lr.Manufacturer != "" {
+		if manuf, _ := mysql.Misc().ManufacturerByName(lr.Manufacturer); manuf != nil {
+			lead.ManufacturerID = &manuf.ID
+		}
+	}
+
+	if err := l.DB.WithContext(ctx).Omit(clause.Associations).Create(&lead).Error; err != nil {
+		return leads.Lead{}, err
+	}
+
+	return l.GetLead(ctx, lead.ID)
 }
 
-func (l *Leads) Delete(ID uint64) error {
-	if err := l.DB.Delete(&models.Lead{ID: ID}).Error; err != nil {
+func (l *Leads) GetLead(ctx context.Context, id uint64) (leads.Lead, error) {
+	var lead models.Lead
+	if err := l.DB.Unscoped().Preload(clause.Associations).First(&lead, id).Error; err != nil {
+		return leads.Lead{}, err
+	}
+
+	return lead.ToDomain(), nil
+}
+
+func (l *Leads) DeleteLead(ctx context.Context, id uint64) error {
+	if err := l.DB.WithContext(ctx).Delete(&models.Lead{ID: id}).Error; err != nil {
 		return err
 	}
-	if err := misc.DeleteTaskByParent(l.DB, ID); err != nil {
+	if err := misc.DeleteTaskByParent(l.DB, id); err != nil {
 		log.Printf("Error while deliting tasks for lead: %s", err.Error())
 	}
 	return nil
+}
+
+func (l *Leads) SaveLead(ctx context.Context, lead leads.Lead) (leads.Lead, error) {
+	dbLead := models.LeadFromDomain(lead)
+	q := l.DB.WithContext(ctx).Omit(clause.Associations)
+	if lead.ID == 0 {
+		if err := q.Create(&dbLead).Error; err != nil {
+			log.Printf("Can't create lead. Error: %s", err.Error())
+			return leads.Lead{}, err
+		}
+	} else {
+		if err := q.Save(&dbLead).Error; err != nil {
+			log.Printf("Can't update lead with ID = %d. Error: %s", lead.ID, err.Error())
+			return leads.Lead{}, err
+		}
+	}
+	return l.GetLead(ctx, dbLead.ID)
 }
