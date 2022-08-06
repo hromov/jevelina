@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/domain/misc"
 	d_users "github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/storage/mysql"
@@ -135,14 +136,14 @@ func Order(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		lead, err := orders.CreateLead(models.CreateLeadReq(c), contact)
+		lead, err := orders.CreateOrder(r.Context(), leads.LeadRequest(c), contact)
 		if err != nil {
 			log.Println("Can't create lead error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
-		if err = orders.CreateTask(models.CreateLeadReq(c), lead); err != nil {
+		if err = orders.CreateTask(models.CreateLeadReq(c), models.LeadFromDomain(lead)); err != nil {
 			log.Println("Can't create task error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -221,14 +222,14 @@ func Orders(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		lead, err := orders.CreateLead(models.CreateLeadReq(c), contact)
+		lead, err := orders.CreateOrder(r.Context(), leads.LeadRequest(c), contact)
 		if err != nil {
 			log.Println("Can't create lead error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
-		if err = orders.CreateTask(models.CreateLeadReq(c), lead); err != nil {
+		if err = orders.CreateTask(models.CreateLeadReq(c), models.LeadFromDomain(lead)); err != nil {
 			log.Println("Can't create task error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)

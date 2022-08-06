@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
@@ -111,6 +112,65 @@ func ContactsFilter(u url.Values) contacts.Filter {
 	if tagID := u.Get("tag"); tagID != "" {
 		tag64, _ := strconv.ParseUint(tagID, 10, 64)
 		filter.TagID = uint8(tag64)
+	}
+	return filter
+}
+
+func LeadsFilter(u url.Values) leads.Filter {
+	filter := leads.Filter{}
+	if IDs := u.Get("ids"); IDs != "" {
+		filter.IDs = make([]uint64, 0)
+		slice := strings.Split(IDs, ",")
+		for _, IDstring := range slice {
+			if IDnumber, err := strconv.ParseUint(IDstring, 10, 64); err == nil {
+				filter.IDs = append(filter.IDs, IDnumber)
+			}
+
+		}
+	}
+	if steps := u.Get("steps"); steps != "" {
+		filter.Steps = make([]uint8, 0)
+		slice := strings.Split(steps, ",")
+		for _, stepString := range slice {
+			if stepID, err := strconv.ParseUint(stepString, 10, 8); err == nil {
+				filter.Steps = append(filter.Steps, uint8(stepID))
+			}
+		}
+	}
+	if query := u.Get("query"); query != "" {
+		filter.Query = query
+	}
+	if limit := u.Get("limit"); limit != "" {
+		filter.Limit, _ = strconv.Atoi(limit)
+	} else {
+		filter.Limit = defaultLimit
+	}
+	if offset := u.Get("offset"); offset != "" {
+		filter.Offset, _ = strconv.Atoi(offset)
+	}
+	if contactID := u.Get("contact"); contactID != "" {
+		filter.ContactID, _ = strconv.ParseUint(contactID, 10, 64)
+	}
+	if completed := u.Get("completed"); completed != "" {
+		filter.Completed, _ = strconv.ParseBool(completed)
+	}
+	if respID := u.Get("responsible"); respID != "" {
+		filter.ResponsibleID, _ = strconv.ParseUint(respID, 10, 64)
+	}
+	if active := u.Get("active"); active != "" {
+		filter.Active = true
+	}
+	const timeForm = "Jan-02-2006"
+	if minDate := u.Get("min_date"); minDate != "" {
+		filter.MinDate, _ = time.Parse(timeForm, minDate)
+	}
+	if maxDate := u.Get("max_date"); maxDate != "" {
+		filter.MaxDate, _ = time.Parse(timeForm, maxDate)
+	}
+
+	if stepID := u.Get("step"); stepID != "" {
+		step64, _ := strconv.ParseUint(stepID, 10, 64)
+		filter.StepID = uint8(step64)
 	}
 	return filter
 }
