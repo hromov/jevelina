@@ -120,5 +120,5 @@ func (l *Leads) CreateLead(ctx context.Context, lead leads.Lead) (leads.Lead, er
 
 func (l *Leads) UpdateLead(ctx context.Context, lead leads.Lead) error {
 	dbLead := models.LeadFromDomain(lead)
-	return l.DB.WithContext(ctx).Omit(clause.Associations).Save(&dbLead).Error
+	return l.DB.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
 }

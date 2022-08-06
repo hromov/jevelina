@@ -38,6 +38,29 @@ type lead struct {
 	Analytics    misc.Analytics
 }
 
+func leadFromDomain(l leads.Lead) lead {
+	return lead{
+		ID:        l.ID,
+		CreatedAt: l.CreatedAt,
+		UpdatedAt: l.UpdatedAt,
+		ClosedAt:  timeOrNull(l.ClosedAt),
+		DeletedAt: timeOrNull(l.DeletedAt),
+		Name:      l.Name,
+		Budget:    l.Budget,
+		Profit:    l.Profit,
+
+		Contact:     contactFromDomain(l.Contact),
+		Responsible: l.Responsible,
+		Created:     l.Created,
+		Step:        l.Step,
+
+		Product:      l.Product,
+		Manufacturer: l.Manufacturer,
+		Source:       l.Source,
+		Analytics:    l.Analytics,
+	}
+}
+
 func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id, err := getID(r)
@@ -59,7 +82,7 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			_ = json.NewEncoder(w).Encode(lead)
+			_ = json.NewEncoder(w).Encode(leadFromDomain(lead))
 			return
 		case "PUT":
 			lead := leads.Lead{}
@@ -117,7 +140,7 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			_ = json.NewEncoder(w).Encode(lead)
+			_ = json.NewEncoder(w).Encode(leadFromDomain(lead))
 			return
 		}
 
@@ -128,8 +151,13 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 		}
 
+		leads := make([]lead, len(leadsResponse.Leads))
+		for i, l := range leadsResponse.Leads {
+			leads[i] = leadFromDomain(l)
+		}
+
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", strconv.FormatInt(leadsResponse.Total, 10))
-		_ = json.NewEncoder(w).Encode(leadsResponse.Leads)
+		_ = json.NewEncoder(w).Encode(leads)
 	}
 }
