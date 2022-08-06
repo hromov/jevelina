@@ -114,11 +114,15 @@ func LeadFromRequest(lr leads.LeadRequest, contact contacts.Contact) Lead {
 }
 
 func (l *Lead) ToDomain() leads.Lead {
+	closedAt := time.Time{}
+	if l.ClosedAt != nil {
+		closedAt = *l.ClosedAt
+	}
 	return leads.Lead{
 		ID:        l.ID,
 		CreatedAt: l.CreatedAt,
 		UpdatedAt: l.UpdatedAt,
-		ClosedAt:  *l.ClosedAt,
+		ClosedAt:  closedAt,
 		DeletedAt: l.DeletedAt.Time,
 		Name:      l.Name,
 		Budget:    l.Budget,

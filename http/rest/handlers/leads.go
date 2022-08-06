@@ -7,12 +7,36 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"gorm.io/gorm"
 
 	"github.com/hromov/jevelina/domain/leads"
+	"github.com/hromov/jevelina/domain/misc"
+	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 )
+
+type lead struct {
+	ID        uint64
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	ClosedAt  *time.Time
+	DeletedAt *time.Time
+	Name      string
+	Budget    uint32
+	Profit    int32
+
+	Contact     contact
+	Responsible users.User
+	Created     users.User
+	Step        leads.Step
+
+	Product      misc.Product
+	Manufacturer misc.Manufacturer
+	Source       misc.Source
+	Analytics    misc.Analytics
+}
 
 func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
