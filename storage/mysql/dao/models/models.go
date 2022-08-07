@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hromov/jevelina/domain/misc"
 	"gorm.io/gorm"
 )
 
@@ -47,21 +46,6 @@ type Tag struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"size:32;unique"`
-}
-
-type Manufacturer struct {
-	ID        uint16 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"size:32;unique"`
-}
-
-func (m *Manufacturer) ToDomain() misc.Manufacturer {
-	return misc.Manufacturer{
-		ID:   m.ID,
-		Name: m.Name,
-	}
 }
 
 type Wallet struct {

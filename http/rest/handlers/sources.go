@@ -6,129 +6,84 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/storage/mysql"
-	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/domain/misc"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-func SourceHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	c := mysql.Misc()
-	var source *models.Source
-
-	switch r.Method {
-	case "GET":
-		source, err = c.Source(uint8(ID))
+func Source(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := getID(r)
 		if err != nil {
-			log.Println("Can't get source error: " + err.Error())
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.NotFound(w, r)
-			} else {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			source, err := ms.GetSource(r.Context(), uint32(id))
+			if err != nil {
+				log.Println("Can't get source error: " + err.Error())
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					http.NotFound(w, r)
+				} else {
+					http.Error(w, http.StatusText(http.StatusInternalServerError),
+						http.StatusInternalServerError)
+				}
+				return
+			}
+			json.NewEncoder(w).Encode(source)
+			return
+		case "PUT":
+			source := misc.Source{}
+			if err = json.NewDecoder(r.Body).Decode(&source); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if uint64(source.ID) != id {
+				http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", id, source.ID), http.StatusBadRequest)
+				return
+			}
+
+			if err := ms.UpdateSource(r.Context(), source); err != nil {
+				log.Printf("Can't update source with ID = %d. Error: %s", id, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		case "DELETE":
+			if err := ms.DeleteSource(r.Context(), uint32(id)); err != nil {
+				log.Printf("Can't delete source with ID = %d. Error: %s", id, err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
 			return
 		}
-		b, err := json.Marshal(source)
-		if err != nil {
-			log.Println("Can't json.Marshal(source) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&source); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if uint64(source.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, source.ID), http.StatusBadRequest)
-			return
-		}
-		//channge to base.DB?
-		if err = c.DB.Save(source).Error; err != nil {
-			log.Printf("Can't update source with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
-	case "DELETE":
-
-		if err = c.DB.Delete(&models.Source{ID: uint8(ID)}).Error; err != nil {
-			log.Printf("Can't delete source with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
 	}
-
 }
 
-func SourcesHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/sources" {
-		http.NotFound(w, r)
-		return
-	}
-
-	if r.Method == "POST" {
-		source := new(models.Source)
-		if err := json.NewDecoder(r.Body).Decode(&source); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+func Sources(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			source := misc.Source{}
+			if err := json.NewDecoder(r.Body).Decode(&source); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			source, err := ms.CreateSource(r.Context(), source)
+			if err != nil {
+				log.Println("Can't create source error: ", err.Error())
+				http.Error(w, "Can't create source error", http.StatusInternalServerError)
+			}
 			return
 		}
-		c := mysql.GetDB()
-		//channge to base.DB?
-		if err := c.DB.Omit(clause.Associations).Create(source).Error; err != nil {
-			log.Printf("Can't create source. Error: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
 
-		//it actually was created ......
-		b, err := json.Marshal(source)
+		sources, err := ms.ListSources(r.Context())
 		if err != nil {
-			log.Println("Can't json.Marshal(source) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
+			log.Println("Can't get sources error: ", err)
+			http.Error(w, "Can't get sources list", http.StatusInternalServerError)
 		}
-		fmt.Fprint(w, string(b))
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
-		return
+		json.NewEncoder(w).Encode(sources)
 	}
-
-	c := mysql.Misc()
-	sourcesResponse, err := c.Sources()
-	if err != nil {
-		log.Println("Can't get sources error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(sourcesResponse)
-	if err != nil {
-		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	total := strconv.Itoa(len(sourcesResponse))
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, string(b))
 }

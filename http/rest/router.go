@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
+	"github.com/hromov/jevelina/domain/misc"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
@@ -13,35 +14,35 @@ import (
 	"github.com/hromov/jevelina/useCases/orders"
 )
 
-func InitRouter(us users.Service, cs contacts.Service, ls leads.Service, os orders.Service) *mux.Router {
+func InitRouter(us users.Service, cs contacts.Service, ls leads.Service, os orders.Service, ms misc.Service) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
 	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
 	// r.Use(auth.UserCheck)
-	r = UserRoutes(r, us, cs, ls)
+	r = UserRoutes(r, us, cs, ls, ms)
 	// TODO: uncoment for prod
 	// r.Use(auth.AdminCheck)
-	r = AdminRoutes(r, us)
+	r = AdminRoutes(r, us, ms)
 
 	return r
 }
 
-func AdminRoutes(r *mux.Router, us users.Service) *mux.Router {
+func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service) *mux.Router {
 	r.HandleFunc("/users", api.CreateUser(us)).Methods("POST")
 	r.HandleFunc("/users/{id}", api.UpdateUser(us)).Methods("PUT")
 	r.HandleFunc("/users/{id}", api.DeleteUser(us)).Methods("DELETE")
-	r.HandleFunc("/sources", api.SourcesHandler).Methods("POST")
-	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("PUT", "DELETE")
+	r.HandleFunc("/sources", api.Sources(ms)).Methods("POST")
+	r.HandleFunc("/sources/{id}", api.Source(ms)).Methods("PUT", "DELETE")
 	r.HandleFunc("/roles", api.CreateRole(us)).Methods("POST")
 	r.HandleFunc("/roles/{id}", api.UpdateRole(us)).Methods("PUT")
 	r.HandleFunc("/roles/{id}", api.DeleteRole(us)).Methods("DELETE")
 	r.HandleFunc("/steps", api.StepsHandler).Methods("POST")
 	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("PUT", "DELETE")
-	r.HandleFunc("/products", api.ProductsHandler).Methods("POST")
-	r.HandleFunc("/products/{id}", api.ProductHandler).Methods("PUT", "DELETE")
-	r.HandleFunc("/manufacturers", api.ManufacturersHandler).Methods("POST")
-	r.HandleFunc("/manufacturers/{id}", api.ManufacturerHandler).Methods("PUT", "DELETE")
+	r.HandleFunc("/products", api.Products(ms)).Methods("POST")
+	r.HandleFunc("/products/{id}", api.Product(ms)).Methods("PUT", "DELETE")
+	r.HandleFunc("/manufacturers", api.Manufacturers(ms)).Methods("POST")
+	r.HandleFunc("/manufacturers/{id}", api.Manufacturer(ms)).Methods("PUT", "DELETE")
 	r.HandleFunc("/tags", api.TagsHandler).Methods("POST")
 	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("PUT", "DELETE")
 	r.HandleFunc("/tasks/{id}", api.TaskHandler).Methods("DELETE")
@@ -59,23 +60,23 @@ func AdminRoutes(r *mux.Router, us users.Service) *mux.Router {
 	return r
 }
 
-func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.Service) *mux.Router {
+func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.Service, ms misc.Service) *mux.Router {
 	r.HandleFunc("/contacts", api.Contacts(cs)).Methods("GET", "POST")
 	r.HandleFunc("/contacts/{id}", api.Contact(cs)).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/leads", api.Leads(ls)).Methods("GET", "POST")
 	r.HandleFunc("/leads/{id}", api.Lead(ls)).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/users", api.Users(us)).Methods("GET")
 	r.HandleFunc("/users/{id}", api.User(us)).Methods("GET")
-	r.HandleFunc("/sources", api.SourcesHandler).Methods("GET")
-	r.HandleFunc("/sources/{id}", api.SourceHandler).Methods("GET")
+	r.HandleFunc("/sources", api.Sources(ms)).Methods("GET")
+	r.HandleFunc("/sources/{id}", api.Source(ms)).Methods("GET")
 	r.HandleFunc("/roles", api.Roles(us)).Methods("GET")
 	r.HandleFunc("/roles/{id}", api.Role(us)).Methods("GET")
 	r.HandleFunc("/steps", api.StepsHandler).Methods("GET")
 	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("GET")
-	r.HandleFunc("/products", api.ProductsHandler).Methods("GET")
-	r.HandleFunc("/products/{id}", api.ProductHandler).Methods("GET")
-	r.HandleFunc("/manufacturers", api.ManufacturersHandler).Methods("GET")
-	r.HandleFunc("/manufacturers/{id}", api.ManufacturerHandler).Methods("GET")
+	r.HandleFunc("/products", api.Products(ms)).Methods("GET")
+	r.HandleFunc("/products/{id}", api.Product(ms)).Methods("GET")
+	r.HandleFunc("/manufacturers", api.Manufacturers(ms)).Methods("GET")
+	r.HandleFunc("/manufacturers/{id}", api.Manufacturer(ms)).Methods("GET")
 	r.HandleFunc("/tags", api.TagsHandler).Methods("GET")
 	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("GET")
 	r.HandleFunc("/tasks", api.TasksHandler).Methods("GET", "POST")
