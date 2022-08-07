@@ -9,6 +9,7 @@ import (
 	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
+	"github.com/hromov/jevelina/domain/orders"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest"
 	"github.com/hromov/jevelina/storage/mysql"
@@ -34,7 +35,8 @@ func main() {
 	us := users.NewService(mysql.Misc())
 	cs := contacts.NewService(mysql.Contacts())
 	ls := leads.NewService(mysql.Leads())
-	router := rest.InitRouter(us, cs, ls)
+	ordersService := orders.NewService(cs, ls, us)
+	router := rest.InitRouter(us, cs, ls, ordersService)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

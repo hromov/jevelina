@@ -4,6 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
+	"github.com/hromov/jevelina/domain/orders"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
@@ -12,10 +13,10 @@ import (
 	"github.com/hromov/jevelina/http/rest/handlers/fin_api"
 )
 
-func InitRouter(us users.Service, cs contacts.Service, ls leads.Service) *mux.Router {
+func InitRouter(us users.Service, cs contacts.Service, ls leads.Service, os orders.Service) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
-	r.HandleFunc("/orders", api.Order(cs)).Methods("POST")
+	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
 	// r.Use(auth.UserCheck)
 	r = UserRoutes(r, us, cs, ls)

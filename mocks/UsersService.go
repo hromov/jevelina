@@ -105,6 +105,27 @@ func (_m *UsersService) Get(_a0 context.Context, _a1 uint64) (users.User, error)
 	return r0, r1
 }
 
+// GetByEmail provides a mock function with given fields: ctx, mail
+func (_m *UsersService) GetByEmail(ctx context.Context, mail string) (users.User, error) {
+	ret := _m.Called(ctx, mail)
+
+	var r0 users.User
+	if rf, ok := ret.Get(0).(func(context.Context, string) users.User); ok {
+		r0 = rf(ctx, mail)
+	} else {
+		r0 = ret.Get(0).(users.User)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, mail)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // GetRole provides a mock function with given fields: _a0, _a1
 func (_m *UsersService) GetRole(_a0 context.Context, _a1 uint8) (users.Role, error) {
 	ret := _m.Called(_a0, _a1)

@@ -5,6 +5,7 @@ import "context"
 type Repository interface {
 	Users(context.Context) ([]User, error)
 	User(context.Context, uint64) (User, error)
+	UserByEmail(ctx context.Context, mail string) (User, error)
 	CreateUser(context.Context, ChangeUser) (User, error)
 	UpdateUser(context.Context, ChangeUser) error
 	DeleteUser(context.Context, uint64) error
@@ -19,6 +20,7 @@ type Repository interface {
 type Service interface {
 	List(context.Context) ([]User, error)
 	Get(context.Context, uint64) (User, error)
+	GetByEmail(ctx context.Context, mail string) (User, error)
 	Create(context.Context, ChangeUser) (User, error)
 	Update(context.Context, ChangeUser) error
 	Delete(context.Context, uint64) error
@@ -75,4 +77,8 @@ func (s *service) ListRoles(ctx context.Context) ([]Role, error) {
 
 func (s *service) GetRole(ctx context.Context, id uint8) (Role, error) {
 	return s.r.Role(ctx, id)
+}
+
+func (s *service) GetByEmail(ctx context.Context, email string) (User, error) {
+	return s.r.UserByEmail(ctx, email)
 }

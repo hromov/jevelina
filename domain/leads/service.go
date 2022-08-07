@@ -11,6 +11,7 @@ type Repository interface {
 	CreateLead(context.Context, LeadData) (Lead, error)
 	UpdateLead(context.Context, LeadData) error
 	DeleteLead(context.Context, uint64) error
+	CreateTask(context.Context, TaskData) error
 }
 
 //go:generate mockery --name Service --filename LeadsService.go --structname LeadsService --output ../../mocks
@@ -20,6 +21,7 @@ type Service interface {
 	Create(context.Context, LeadData) (Lead, error)
 	Update(context.Context, LeadData) error
 	Delete(context.Context, uint64) error
+	CreateTask(context.Context, TaskData) error
 }
 
 type service struct {
@@ -54,4 +56,8 @@ func (s *service) Delete(ctx context.Context, id uint64) error {
 
 func (s *service) Create(ctx context.Context, lead LeadData) (Lead, error) {
 	return s.r.CreateLead(ctx, lead)
+}
+
+func (s *service) CreateTask(ctx context.Context, t TaskData) error {
+	return s.r.CreateTask(ctx, t)
 }

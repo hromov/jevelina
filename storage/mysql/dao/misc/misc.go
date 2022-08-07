@@ -81,30 +81,6 @@ func (m *Misc) ManufacturerByName(name string) (*models.Manufacturer, error) {
 	return &item, nil
 }
 
-func (m *Misc) Steps() ([]models.Step, error) {
-	var items []models.Step
-	if result := m.DB.Order("`order`").Find(&items); result.Error != nil {
-		return nil, result.Error
-	}
-	return items, nil
-}
-
-func (m *Misc) Step(ID uint8) (*models.Step, error) {
-	var item models.Step
-	if result := m.DB.First(&item, ID); result.Error != nil {
-		return nil, result.Error
-	}
-	return &item, nil
-}
-
-func (m *Misc) DefaultStep() (models.Step, error) {
-	var item models.Step
-	if result := m.DB.Where("`order` = 0").First(&item); result.Error != nil {
-		return models.Step{}, result.Error
-	}
-	return item, nil
-}
-
 func (m *Misc) Tags() ([]models.Tag, error) {
 	var items []models.Tag
 	if result := m.DB.Find(&items); result.Error != nil {

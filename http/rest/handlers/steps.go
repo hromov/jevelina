@@ -23,12 +23,12 @@ func StepHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := mysql.Misc()
+	c := mysql.Leads()
 	var step *models.Step
 
 	switch r.Method {
 	case "GET":
-		step, err = c.Step(uint8(ID))
+		step, err = c.Step(r.Context(), uint8(ID))
 		if err != nil {
 			log.Println("Can't get step error: " + err.Error())
 			if errors.Is(err, gorm.ErrRecordNotFound) {
@@ -113,8 +113,8 @@ func StepsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	c := mysql.Misc()
-	stepsResponse, err := c.Steps()
+	c := mysql.Leads()
+	stepsResponse, err := c.Steps(r.Context())
 	if err != nil {
 		log.Println("Can't get steps error: " + err.Error())
 		http.Error(w, http.StatusText(http.StatusInternalServerError),

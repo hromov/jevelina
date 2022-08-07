@@ -32,9 +32,9 @@ func CreateTask(c models.CreateLeadReq, lead models.Lead) error {
 func CreateOrder(ctx context.Context, lr leads.LeadRequest, contact contacts.Contact) (leads.Lead, error) {
 	lead := models.LeadFromRequest(lr, contact)
 
-	if step, _ := mysql.Misc().DefaultStep(); step.ID != 0 {
-		lead.StepID = &step.ID
-	}
+	// if step, _ := mysql.  ..DefaultStep(context.TODO()); step.ID != 0 {
+	// 	lead.StepID = &step.ID
+	// }
 	if lr.Source != "" {
 		if source, _ := mysql.Misc().SourceByName(lr.Source); source != nil {
 			lead.SourceID = &source.ID
