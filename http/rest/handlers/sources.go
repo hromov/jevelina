@@ -32,7 +32,7 @@ func Source(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			json.NewEncoder(w).Encode(source)
+			_ = json.NewEncoder(w).Encode(source)
 			return
 		case "PUT":
 			source := misc.Source{}
@@ -84,6 +84,6 @@ func Sources(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
 			log.Println("Can't get sources error: ", err)
 			http.Error(w, "Can't get sources list", http.StatusInternalServerError)
 		}
-		json.NewEncoder(w).Encode(sources)
+		_ = json.NewEncoder(w).Encode(sources)
 	}
 }

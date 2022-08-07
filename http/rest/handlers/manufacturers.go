@@ -32,7 +32,7 @@ func Manufacturer(ms misc.Service) func(w http.ResponseWriter, r *http.Request) 
 				}
 				return
 			}
-			json.NewEncoder(w).Encode(manufacturer)
+			_ = json.NewEncoder(w).Encode(manufacturer)
 			return
 		case "PUT":
 			manufacturer := misc.Manufacturer{}
@@ -84,6 +84,6 @@ func Manufacturers(ms misc.Service) func(w http.ResponseWriter, r *http.Request)
 			log.Println("Can't get manufacturers error: ", err)
 			http.Error(w, "Can't get manufacturers list", http.StatusInternalServerError)
 		}
-		json.NewEncoder(w).Encode(manufacturers)
+		_ = json.NewEncoder(w).Encode(manufacturers)
 	}
 }
