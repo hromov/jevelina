@@ -68,6 +68,15 @@ func (s Step) ToDomain() leads.Step {
 	}
 }
 
+func StepFromDomain(s leads.Step) Step {
+	return Step{
+		ID:     s.ID,
+		Name:   s.Name,
+		Order:  s.Order,
+		Active: s.Active,
+	}
+}
+
 func LeadFromDomain(l leads.LeadData) Lead {
 
 	return Lead{

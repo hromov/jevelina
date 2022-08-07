@@ -56,6 +56,27 @@ func (_m *MiscService) CreateProduct(_a0 context.Context, _a1 misc.Product) (mis
 	return r0, r1
 }
 
+// CreateSource provides a mock function with given fields: _a0, _a1
+func (_m *MiscService) CreateSource(_a0 context.Context, _a1 misc.Source) (misc.Source, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 misc.Source
+	if rf, ok := ret.Get(0).(func(context.Context, misc.Source) misc.Source); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(misc.Source)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, misc.Source) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // DeleteManufacturer provides a mock function with given fields: _a0, _a1
 func (_m *MiscService) DeleteManufacturer(_a0 context.Context, _a1 uint32) error {
 	ret := _m.Called(_a0, _a1)
@@ -72,6 +93,20 @@ func (_m *MiscService) DeleteManufacturer(_a0 context.Context, _a1 uint32) error
 
 // DeleteProduct provides a mock function with given fields: _a0, _a1
 func (_m *MiscService) DeleteProduct(_a0 context.Context, _a1 uint32) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// DeleteSource provides a mock function with given fields: _a0, _a1
+func (_m *MiscService) DeleteSource(_a0 context.Context, _a1 uint32) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
@@ -168,6 +203,48 @@ func (_m *MiscService) GetProductByName(_a0 context.Context, _a1 string) (misc.P
 	return r0, r1
 }
 
+// GetSource provides a mock function with given fields: _a0, _a1
+func (_m *MiscService) GetSource(_a0 context.Context, _a1 uint32) (misc.Source, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 misc.Source
+	if rf, ok := ret.Get(0).(func(context.Context, uint32) misc.Source); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(misc.Source)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint32) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetSourceByName provides a mock function with given fields: _a0, _a1
+func (_m *MiscService) GetSourceByName(_a0 context.Context, _a1 string) (misc.Source, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 misc.Source
+	if rf, ok := ret.Get(0).(func(context.Context, string) misc.Source); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(misc.Source)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListManufacturers provides a mock function with given fields: _a0
 func (_m *MiscService) ListManufacturers(_a0 context.Context) ([]misc.Manufacturer, error) {
 	ret := _m.Called(_a0)
@@ -214,6 +291,29 @@ func (_m *MiscService) ListProducts(_a0 context.Context) ([]misc.Product, error)
 	return r0, r1
 }
 
+// ListSources provides a mock function with given fields: _a0
+func (_m *MiscService) ListSources(_a0 context.Context) ([]misc.Source, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []misc.Source
+	if rf, ok := ret.Get(0).(func(context.Context) []misc.Source); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]misc.Source)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // UpdateManufacturer provides a mock function with given fields: _a0, _a1
 func (_m *MiscService) UpdateManufacturer(_a0 context.Context, _a1 misc.Manufacturer) error {
 	ret := _m.Called(_a0, _a1)
@@ -234,6 +334,20 @@ func (_m *MiscService) UpdateProduct(_a0 context.Context, _a1 misc.Product) erro
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, misc.Product) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateSource provides a mock function with given fields: _a0, _a1
+func (_m *MiscService) UpdateSource(_a0 context.Context, _a1 misc.Source) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, misc.Source) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)

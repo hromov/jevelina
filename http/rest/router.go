@@ -23,12 +23,12 @@ func InitRouter(us users.Service, cs contacts.Service, ls leads.Service, os orde
 	r = UserRoutes(r, us, cs, ls, ms)
 	// TODO: uncoment for prod
 	// r.Use(auth.AdminCheck)
-	r = AdminRoutes(r, us, ms)
+	r = AdminRoutes(r, us, ms, ls)
 
 	return r
 }
 
-func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service) *mux.Router {
+func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Service) *mux.Router {
 	r.HandleFunc("/users", api.CreateUser(us)).Methods("POST")
 	r.HandleFunc("/users/{id}", api.UpdateUser(us)).Methods("PUT")
 	r.HandleFunc("/users/{id}", api.DeleteUser(us)).Methods("DELETE")
@@ -37,8 +37,8 @@ func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service) *mux.Router {
 	r.HandleFunc("/roles", api.CreateRole(us)).Methods("POST")
 	r.HandleFunc("/roles/{id}", api.UpdateRole(us)).Methods("PUT")
 	r.HandleFunc("/roles/{id}", api.DeleteRole(us)).Methods("DELETE")
-	r.HandleFunc("/steps", api.StepsHandler).Methods("POST")
-	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("PUT", "DELETE")
+	r.HandleFunc("/steps", api.Steps(ls)).Methods("POST")
+	r.HandleFunc("/steps/{id}", api.Step(ls)).Methods("PUT", "DELETE")
 	r.HandleFunc("/products", api.Products(ms)).Methods("POST")
 	r.HandleFunc("/products/{id}", api.Product(ms)).Methods("PUT", "DELETE")
 	r.HandleFunc("/manufacturers", api.Manufacturers(ms)).Methods("POST")
@@ -71,8 +71,8 @@ func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.S
 	r.HandleFunc("/sources/{id}", api.Source(ms)).Methods("GET")
 	r.HandleFunc("/roles", api.Roles(us)).Methods("GET")
 	r.HandleFunc("/roles/{id}", api.Role(us)).Methods("GET")
-	r.HandleFunc("/steps", api.StepsHandler).Methods("GET")
-	r.HandleFunc("/steps/{id}", api.StepHandler).Methods("GET")
+	r.HandleFunc("/steps", api.Steps(ls)).Methods("GET")
+	r.HandleFunc("/steps/{id}", api.Step(ls)).Methods("GET")
 	r.HandleFunc("/products", api.Products(ms)).Methods("GET")
 	r.HandleFunc("/products/{id}", api.Product(ms)).Methods("GET")
 	r.HandleFunc("/manufacturers", api.Manufacturers(ms)).Methods("GET")
