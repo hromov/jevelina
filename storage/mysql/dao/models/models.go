@@ -49,21 +49,6 @@ type Tag struct {
 	Name      string         `gorm:"size:32;unique"`
 }
 
-type Product struct {
-	ID        uint32 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"size:64;unique"`
-}
-
-func (p *Product) ToDomain() misc.Product {
-	return misc.Product{
-		ID:   p.ID,
-		Name: p.Name,
-	}
-}
-
 type Manufacturer struct {
 	ID        uint16 `gorm:"primaryKey"`
 	CreatedAt time.Time

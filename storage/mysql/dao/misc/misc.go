@@ -33,29 +33,21 @@ func (m *Misc) SourceByName(name string) (*models.Source, error) {
 	return &source, nil
 }
 
-func (m *Misc) Products() ([]models.Product, error) {
-	var items []models.Product
-	if result := m.DB.Find(&items); result.Error != nil {
-		return nil, result.Error
-	}
-	return items, nil
-}
+// func (m *Misc) Product(ID uint32) (*models.Product, error) {
+// 	var item models.Product
+// 	if result := m.DB.First(&item, ID); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return &item, nil
+// }
 
-func (m *Misc) Product(ID uint32) (*models.Product, error) {
-	var item models.Product
-	if result := m.DB.First(&item, ID); result.Error != nil {
-		return nil, result.Error
-	}
-	return &item, nil
-}
-
-func (m *Misc) ProductByName(name string) (*models.Product, error) {
-	var item models.Product
-	if result := m.DB.Where("name LIKE ?", name).First(&item); result.Error != nil {
-		return nil, result.Error
-	}
-	return &item, nil
-}
+// func (m *Misc) ProductByName(name string) (*models.Product, error) {
+// 	var item models.Product
+// 	if result := m.DB.Where("name LIKE ?", name).First(&item); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return &item, nil
+// }
 
 func (m *Misc) Manufacturers() ([]models.Manufacturer, error) {
 	var items []models.Manufacturer
