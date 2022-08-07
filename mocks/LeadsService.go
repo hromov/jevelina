@@ -35,6 +35,27 @@ func (_m *LeadsService) Create(_a0 context.Context, _a1 leads.LeadData) (leads.L
 	return r0, r1
 }
 
+// CreateStep provides a mock function with given fields: _a0, _a1
+func (_m *LeadsService) CreateStep(_a0 context.Context, _a1 leads.Step) (leads.Step, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 leads.Step
+	if rf, ok := ret.Get(0).(func(context.Context, leads.Step) leads.Step); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(leads.Step)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, leads.Step) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // CreateTask provides a mock function with given fields: _a0, _a1
 func (_m *LeadsService) CreateTask(_a0 context.Context, _a1 leads.TaskData) error {
 	ret := _m.Called(_a0, _a1)
@@ -63,6 +84,20 @@ func (_m *LeadsService) Delete(_a0 context.Context, _a1 uint64) error {
 	return r0
 }
 
+// DeleteStep provides a mock function with given fields: _a0, _a1
+func (_m *LeadsService) DeleteStep(_a0 context.Context, _a1 uint8) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, uint8) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Get provides a mock function with given fields: _a0, _a1
 func (_m *LeadsService) Get(_a0 context.Context, _a1 uint64) (leads.Lead, error) {
 	ret := _m.Called(_a0, _a1)
@@ -77,6 +112,50 @@ func (_m *LeadsService) Get(_a0 context.Context, _a1 uint64) (leads.Lead, error)
 	var r1 error
 	if rf, ok := ret.Get(1).(func(context.Context, uint64) error); ok {
 		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetStep provides a mock function with given fields: _a0, _a1
+func (_m *LeadsService) GetStep(_a0 context.Context, _a1 uint8) (leads.Step, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 leads.Step
+	if rf, ok := ret.Get(0).(func(context.Context, uint8) leads.Step); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(leads.Step)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, uint8) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// GetSteps provides a mock function with given fields: _a0
+func (_m *LeadsService) GetSteps(_a0 context.Context) ([]leads.Step, error) {
+	ret := _m.Called(_a0)
+
+	var r0 []leads.Step
+	if rf, ok := ret.Get(0).(func(context.Context) []leads.Step); ok {
+		r0 = rf(_a0)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]leads.Step)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(_a0)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -111,6 +190,20 @@ func (_m *LeadsService) Update(_a0 context.Context, _a1 leads.LeadData) error {
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(context.Context, leads.LeadData) error); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// UpdateStep provides a mock function with given fields: _a0, _a1
+func (_m *LeadsService) UpdateStep(_a0 context.Context, _a1 leads.Step) error {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, leads.Step) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)

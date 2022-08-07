@@ -6,130 +6,90 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/storage/mysql"
-	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/domain/leads"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-func StepHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	c := mysql.Leads()
-	var step *models.Step
-
-	switch r.Method {
-	case "GET":
-		step, err = c.Step(r.Context(), uint8(ID))
+func Step(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := getID(r)
 		if err != nil {
-			log.Println("Can't get step error: " + err.Error())
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.NotFound(w, r)
-			} else {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			step, err := ls.GetStep(r.Context(), uint8(id))
+			if err != nil {
+				log.Println("Can't get step error: " + err.Error())
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					http.NotFound(w, r)
+				} else {
+					http.Error(w, http.StatusText(http.StatusInternalServerError),
+						http.StatusInternalServerError)
+				}
+				return
+			}
+			json.NewEncoder(w).Encode(step)
+			return
+		case "PUT":
+			step := leads.Step{}
+			if err = json.NewDecoder(r.Body).Decode(&step); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if uint64(step.ID) != id {
+				http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", id, step.ID), http.StatusBadRequest)
+				return
+			}
+
+			if err = ls.UpdateStep(r.Context(), step); err != nil {
+				log.Printf("Can't update step with ID = %d. Error: %s", id, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		case "DELETE":
+			if err = ls.DeleteStep(r.Context(), uint8(id)); err != nil {
+				log.Printf("Can't delete step with ID = %d. Error: %s", id, err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
 			return
 		}
-		b, err := json.Marshal(step)
-		if err != nil {
-			log.Println("Can't json.Marshal(step) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&step); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if uint64(step.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, step.ID), http.StatusBadRequest)
-			return
-		}
-
-		//channge to base.DB?
-		if err = c.DB.Omit(clause.Associations).Save(step).Error; err != nil {
-			log.Printf("Can't update step with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
-	case "DELETE":
-
-		if err = c.DB.Delete(&models.Step{ID: uint8(ID)}).Error; err != nil {
-			log.Printf("Can't delete step with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
 	}
-
 }
 
-func StepsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/steps" {
-		http.NotFound(w, r)
-		return
-	}
+func Steps(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "POST" {
-		step := new(models.Step)
-		if err := json.NewDecoder(r.Body).Decode(&step); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		if r.Method == "POST" {
+			step := leads.Step{}
+			if err := json.NewDecoder(r.Body).Decode(&step); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			step, err := ls.CreateStep(r.Context(), step)
+			if err != nil {
+				log.Println("Can't create new step error: ", err.Error())
+				http.Error(w, "Can't create step", http.StatusInternalServerError)
+				return
+			}
+
+			json.NewEncoder(w).Encode(step)
 			return
 		}
-		c := mysql.GetDB()
-		//channge to base.DB?
-		if err := c.DB.Omit(clause.Associations).Create(step).Error; err != nil {
-			log.Printf("Can't create step. Error: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
 
-		//it actually was created ......
-		b, err := json.Marshal(step)
+		steps, err := ls.GetSteps(r.Context())
 		if err != nil {
-			log.Println("Can't json.Marshal(step) error: " + err.Error())
+			log.Println("Can't get steps error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
-			return
 		}
-		fmt.Fprint(w, string(b))
-		// it said that its already ok now
-		// w.WriteHeader(http.StatusOK)
-		return
+		json.NewEncoder(w).Encode(steps)
 	}
-
-	c := mysql.Leads()
-	stepsResponse, err := c.Steps(r.Context())
-	if err != nil {
-		log.Println("Can't get steps error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(stepsResponse)
-	if err != nil {
-		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	total := strconv.Itoa(len(stepsResponse))
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, string(b))
 }

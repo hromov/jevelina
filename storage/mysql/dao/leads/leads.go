@@ -126,30 +126,6 @@ func (l *Leads) UpdateLead(ctx context.Context, lead leads.LeadData) error {
 	return l.DB.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
 }
 
-func (l *Leads) Steps(ctx context.Context) ([]models.Step, error) {
-	var items []models.Step
-	if result := l.DB.WithContext(ctx).Order("`order`").Find(&items); result.Error != nil {
-		return nil, result.Error
-	}
-	return items, nil
-}
-
-func (l *Leads) Step(ctx context.Context, id uint8) (*models.Step, error) {
-	var item models.Step
-	if result := l.DB.WithContext(ctx).First(&item, id); result.Error != nil {
-		return nil, result.Error
-	}
-	return &item, nil
-}
-
-func (l *Leads) DefaultStep(ctx context.Context) (models.Step, error) {
-	var item models.Step
-	if err := l.DB.WithContext(ctx).Where("`order` = 0").First(&item).Error; err != nil {
-		return models.Step{}, err
-	}
-	return item, nil
-}
-
 // TODO: move or return Task (make full crud)
 func (l *Leads) CreateTask(ctx context.Context, t leads.TaskData) error {
 	dbTask := models.TaskFromTaskData(t)
