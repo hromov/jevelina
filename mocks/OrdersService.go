@@ -5,7 +5,7 @@ package mocks
 import (
 	context "context"
 
-	orders "github.com/hromov/jevelina/domain/orders"
+	orders "github.com/hromov/jevelina/useCases/orders"
 	mock "github.com/stretchr/testify/mock"
 
 	users "github.com/hromov/jevelina/domain/users"

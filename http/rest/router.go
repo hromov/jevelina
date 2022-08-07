@@ -4,13 +4,13 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
-	"github.com/hromov/jevelina/domain/orders"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
 	"github.com/hromov/jevelina/http/rest/handlers/events_api"
 	"github.com/hromov/jevelina/http/rest/handlers/files_api"
 	"github.com/hromov/jevelina/http/rest/handlers/fin_api"
+	"github.com/hromov/jevelina/useCases/orders"
 )
 
 func InitRouter(us users.Service, cs contacts.Service, ls leads.Service, os orders.Service) *mux.Router {

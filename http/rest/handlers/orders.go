@@ -6,8 +6,8 @@ import (
 
 	"net/http"
 
-	orderss "github.com/hromov/jevelina/domain/orders"
 	"github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/useCases/orders"
 )
 
 const randomUserEmail = "random@random.org"
@@ -40,9 +40,9 @@ type CreateLeadReq struct {
 	Domain string
 }
 
-func (c *CreateLeadReq) ToOrder() orderss.Order {
+func (c *CreateLeadReq) ToOrder() orders.Order {
 	//TODO: some how get prodID, ManufID, SourceID by name
-	return orderss.Order{
+	return orders.Order{
 		Name:        c.Name,
 		Price:       c.Price,
 		Description: c.Description,
@@ -68,7 +68,7 @@ func (c *CreateLeadReq) ToOrder() orderss.Order {
 	}
 }
 
-func Order(us users.Service, os orderss.Service) func(w http.ResponseWriter, r *http.Request) {
+func Order(us users.Service, os orders.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		c := CreateLeadReq{}

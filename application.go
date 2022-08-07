@@ -9,10 +9,10 @@ import (
 	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
-	"github.com/hromov/jevelina/domain/orders"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest"
 	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/useCases/orders"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"

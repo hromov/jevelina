@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/hromov/jevelina/domain/orders"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/mocks"
+	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
