@@ -6,125 +6,84 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"strconv"
 
-	"github.com/gorilla/mux"
-	"github.com/hromov/jevelina/storage/mysql"
-	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/domain/misc"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-func ProductHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	c := mysql.Misc()
-	var product *models.Product
-
-	switch r.Method {
-	case "GET":
-		product, err = c.Product(uint32(ID))
+func Product(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := getID(r)
 		if err != nil {
-			log.Println("Can't get product error: " + err.Error())
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.NotFound(w, r)
-			} else {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			product, err := ms.GetProduct(r.Context(), uint32(id))
+			if err != nil {
+				log.Println("Can't get product error: " + err.Error())
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					http.NotFound(w, r)
+				} else {
+					http.Error(w, http.StatusText(http.StatusInternalServerError),
+						http.StatusInternalServerError)
+				}
+				return
+			}
+			json.NewEncoder(w).Encode(product)
+			return
+		case "PUT":
+			product := misc.Product{}
+			if err = json.NewDecoder(r.Body).Decode(&product); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if uint64(product.ID) != id {
+				http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", id, product.ID), http.StatusBadRequest)
+				return
+			}
+
+			if err := ms.UpdateProduct(r.Context(), product); err != nil {
+				log.Printf("Can't update product with ID = %d. Error: %s", id, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		case "DELETE":
+			if err := ms.DeleteProduct(r.Context(), uint32(id)); err != nil {
+				log.Printf("Can't delete product with ID = %d. Error: %s", id, err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
 			return
 		}
-		b, err := json.Marshal(product)
-		if err != nil {
-			log.Println("Can't json.Marshal(product) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&product); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if uint64(product.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, product.ID), http.StatusBadRequest)
-			return
-		}
-
-		//channge to base.DB?
-		if err = c.DB.Omit(clause.Associations).Save(product).Error; err != nil {
-			log.Printf("Can't update product with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
-	case "DELETE":
-
-		if err = c.DB.Delete(&models.Product{ID: uint32(ID)}).Error; err != nil {
-			log.Printf("Can't delete product with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		// w.WriteHeader(http.StatusOK)
-		return
 	}
-
 }
 
-func ProductsHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/products" {
-		http.NotFound(w, r)
-		return
-	}
-
-	if r.Method == "POST" {
-		product := new(models.Product)
-		if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+func Products(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			product := misc.Product{}
+			if err := json.NewDecoder(r.Body).Decode(&product); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			product, err := ms.CreateProduct(r.Context(), product)
+			if err != nil {
+				log.Println("Can't create product error: ", err.Error())
+				http.Error(w, "Can't create product error", http.StatusInternalServerError)
+			}
 			return
 		}
-		c := mysql.GetDB()
-		if err := c.DB.Omit(clause.Associations).Create(product).Error; err != nil {
-			log.Printf("Can't create product. Error: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
 
-		b, err := json.Marshal(product)
+		products, err := ms.ListProducts(r.Context())
 		if err != nil {
-			log.Println("Can't json.Marshal(product) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
+			log.Println("Can't get products error: ", err)
+			http.Error(w, "Can't get products list", http.StatusInternalServerError)
 		}
-		fmt.Fprint(w, string(b))
+		json.NewEncoder(w).Encode(products)
 	}
-
-	c := mysql.Misc()
-	productsResponse, err := c.Products()
-	if err != nil {
-		log.Println("Can't get products error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(productsResponse)
-	if err != nil {
-		log.Println("Can't json.Marshal(contatcts) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	total := strconv.Itoa(len(productsResponse))
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, string(b))
 }

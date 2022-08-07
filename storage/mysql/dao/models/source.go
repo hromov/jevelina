@@ -21,3 +21,10 @@ func (s *Source) ToDomain() misc.Source {
 		Name: s.Name,
 	}
 }
+
+func SourceFromDomain(p misc.Source) Source {
+	return Source{
+		ID:   p.ID,
+		Name: p.Name,
+	}
+}
