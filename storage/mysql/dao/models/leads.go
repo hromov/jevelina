@@ -68,7 +68,28 @@ func (s Step) ToDomain() leads.Step {
 	}
 }
 
-func LeadFromDomain(l leads.Lead) Lead {
+func LeadFromDomain(l leads.LeadData) Lead {
+
+	return Lead{
+		ID:     l.ID,
+		Name:   l.Name,
+		Budget: l.Budget,
+		Profit: l.Profit,
+
+		ContactID:      OrNil(l.ContactID),
+		ResponsibleID:  OrNil(l.ResponsibleID),
+		CreatedID:      OrNil(l.CreatedID),
+		StepID:         OrNil(l.StepID),
+		ProductID:      OrNil(l.ProductID),
+		ManufacturerID: OrNil(l.ManufacturerID),
+		SourceID:       OrNil(l.SourceID),
+		ClosedAt:       TimeOrNil(l.ClosedAt),
+
+		Analytics: Analytics(l.Analytics),
+	}
+}
+
+func LeadFromFullDomain(l leads.Lead) Lead {
 
 	return Lead{
 		ID:     l.ID,

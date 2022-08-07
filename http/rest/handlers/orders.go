@@ -143,7 +143,7 @@ func Order(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		if err = orders.CreateTask(models.CreateLeadReq(c), models.LeadFromDomain(lead)); err != nil {
+		if err = orders.CreateTask(models.CreateLeadReq(c), models.LeadFromFullDomain(lead)); err != nil {
 			log.Println("Can't create task error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
@@ -229,7 +229,7 @@ func Orders(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.StatusInternalServerError)
 			return
 		}
-		if err = orders.CreateTask(models.CreateLeadReq(c), models.LeadFromDomain(lead)); err != nil {
+		if err = orders.CreateTask(models.CreateLeadReq(c), models.LeadFromFullDomain(lead)); err != nil {
 			log.Println("Can't create task error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)

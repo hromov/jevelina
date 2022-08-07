@@ -85,7 +85,7 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 			_ = json.NewEncoder(w).Encode(leadFromDomain(lead))
 			return
 		case "PUT":
-			lead := leads.Lead{}
+			lead := leads.LeadData{}
 			if err = json.NewDecoder(r.Body).Decode(&lead); err != nil {
 				log.Println("Lead decode error: ", err.Error())
 				http.Error(w, err.Error(), http.StatusBadRequest)
@@ -121,7 +121,7 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "POST" {
-			lead := leads.Lead{}
+			lead := leads.LeadData{}
 			if err := json.NewDecoder(r.Body).Decode(&lead); err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
@@ -131,16 +131,17 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			}
-			lead.Responsible = user
-			lead.Created = user
+			lead.ResponsibleID = user.ID
+			lead.CreatedID = user.ID
 
-			if lead, err = ls.Create(r.Context(), lead); err != nil {
+			createdLead, err := ls.Create(r.Context(), lead)
+			if err != nil {
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 				return
 			}
 
-			_ = json.NewEncoder(w).Encode(leadFromDomain(lead))
+			_ = json.NewEncoder(w).Encode(leadFromDomain(createdLead))
 			return
 		}
 

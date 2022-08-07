@@ -110,7 +110,7 @@ func (l *Leads) DeleteLead(ctx context.Context, id uint64) error {
 	return nil
 }
 
-func (l *Leads) CreateLead(ctx context.Context, lead leads.Lead) (leads.Lead, error) {
+func (l *Leads) CreateLead(ctx context.Context, lead leads.LeadData) (leads.Lead, error) {
 	dbLead := models.LeadFromDomain(lead)
 	if err := l.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbLead).Error; err != nil {
 		return leads.Lead{}, err
@@ -118,7 +118,7 @@ func (l *Leads) CreateLead(ctx context.Context, lead leads.Lead) (leads.Lead, er
 	return l.GetLead(ctx, dbLead.ID)
 }
 
-func (l *Leads) UpdateLead(ctx context.Context, lead leads.Lead) error {
+func (l *Leads) UpdateLead(ctx context.Context, lead leads.LeadData) error {
 	dbLead := models.LeadFromDomain(lead)
 	return l.DB.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
 }

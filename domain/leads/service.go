@@ -8,8 +8,8 @@ import (
 type Repository interface {
 	GetLead(context.Context, uint64) (Lead, error)
 	GetLeads(context.Context, Filter) (LeadsResponse, error)
-	CreateLead(context.Context, Lead) (Lead, error)
-	UpdateLead(context.Context, Lead) error
+	CreateLead(context.Context, LeadData) (Lead, error)
+	UpdateLead(context.Context, LeadData) error
 	DeleteLead(context.Context, uint64) error
 }
 
@@ -17,8 +17,8 @@ type Repository interface {
 type Service interface {
 	Get(context.Context, uint64) (Lead, error)
 	List(context.Context, Filter) (LeadsResponse, error)
-	Create(context.Context, Lead) (Lead, error)
-	Update(context.Context, Lead) error
+	Create(context.Context, LeadData) (Lead, error)
+	Update(context.Context, LeadData) error
 	Delete(context.Context, uint64) error
 }
 
@@ -38,7 +38,7 @@ func (s *service) List(ctx context.Context, f Filter) (LeadsResponse, error) {
 	return s.r.GetLeads(ctx, f)
 }
 
-func (s *service) Update(ctx context.Context, lead Lead) error {
+func (s *service) Update(ctx context.Context, lead LeadData) error {
 	if !lead.Step.Active && lead.ClosedAt.IsZero() {
 		lead.ClosedAt = time.Now()
 	}
@@ -52,6 +52,6 @@ func (s *service) Delete(ctx context.Context, id uint64) error {
 	return s.r.DeleteLead(ctx, id)
 }
 
-func (s *service) Create(ctx context.Context, lead Lead) (Lead, error) {
+func (s *service) Create(ctx context.Context, lead LeadData) (Lead, error) {
 	return s.r.CreateLead(ctx, lead)
 }

@@ -89,3 +89,21 @@ type LeadRequest struct {
 
 	Domain string
 }
+
+type LeadData struct {
+	ID       uint64
+	ClosedAt time.Time
+	Name     string
+	Budget   uint32
+	Profit   int32
+
+	ContactID      uint64
+	ResponsibleID  uint64
+	CreatedID      uint64
+	StepID         uint8
+	ProductID      uint32
+	ManufacturerID uint16
+	SourceID       uint8
+	Step           Step
+	Analytics      misc.Analytics
+}
