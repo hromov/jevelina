@@ -78,7 +78,7 @@ func Task(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Tasks(ts tasks.Service, us users.Service) func(w http.ResponseWriter, r *http.Request) {
+func Tasks(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "POST" {
@@ -92,10 +92,11 @@ func Tasks(ts tasks.Service, us users.Service) func(w http.ResponseWriter, r *ht
 				return
 			}
 
-			// TODO: move create to events too
-			user, err := auth.GetCurrentUser(r, us)
-			if err != nil {
-				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
+				return
 			}
 			task.CreatedID = user.ID
 

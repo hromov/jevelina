@@ -6,3 +6,4 @@ application
 /broken
 .env
 .vscode
+*.out
