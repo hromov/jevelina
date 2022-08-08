@@ -14,31 +14,38 @@ import (
 	"github.com/hromov/jevelina/http/rest"
 	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/jevelina/useCases/orders"
+	"github.com/hromov/jevelina/useCases/tasks"
 )
 
-// const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
+// const dns = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 const bucketName = "jevelina"
 
 func main() {
 	cfg := config.Get()
 	log.Println(cfg)
-	dsn, err := os.ReadFile(cfg.Dsn)
+	dns, err := os.ReadFile(cfg.Dsn)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	db, err := mysql.OpenAndInit(string(dsn))
+	// TODO: remove after all transition finished on storage and services
+	db, err := mysql.OpenAndInit(string(dns))
 	if err != nil {
 		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
 	db.SetBucket(bucketName)
-	//TODO: repo
-	us := users.NewService(mysql.Misc())
-	cs := contacts.NewService(mysql.Contacts())
-	ls := leads.NewService(mysql.Leads())
-	ordersService := orders.NewService(cs, ls, us)
-	ms := misc.Service(mysql.Misc())
-	router := rest.InitRouter(us, cs, ls, ordersService, ms)
+
+	storage, err := mysql.NewStorage(string(dns))
+	if err != nil {
+		log.Fatal("Can't init storage error: ", err.Error())
+	}
+
+	cs := contacts.NewService(storage)
+	ls := leads.NewService(storage)
+	us := users.NewService(storage)
+	ts := tasks.NewService(storage)
+	ms := misc.Service(storage)
+	ordersService := orders.NewService(cs, ls, us, ts)
+	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

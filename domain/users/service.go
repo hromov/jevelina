@@ -6,6 +6,7 @@ type Repository interface {
 	Users(context.Context) ([]User, error)
 	User(context.Context, uint64) (User, error)
 	UserByEmail(ctx context.Context, mail string) (User, error)
+	UserExist(ctx context.Context, mail string) (bool, error)
 	CreateUser(context.Context, ChangeUser) (User, error)
 	UpdateUser(context.Context, ChangeUser) error
 	DeleteUser(context.Context, uint64) error
@@ -21,6 +22,7 @@ type Service interface {
 	List(context.Context) ([]User, error)
 	Get(context.Context, uint64) (User, error)
 	GetByEmail(ctx context.Context, mail string) (User, error)
+	UserExist(ctx context.Context, mail string) (bool, error)
 	Create(context.Context, ChangeUser) (User, error)
 	Update(context.Context, ChangeUser) error
 	Delete(context.Context, uint64) error
@@ -81,4 +83,8 @@ func (s *service) GetRole(ctx context.Context, id uint8) (Role, error) {
 
 func (s *service) GetByEmail(ctx context.Context, email string) (User, error) {
 	return s.r.UserByEmail(ctx, email)
+}
+
+func (s *service) UserExist(ctx context.Context, mail string) (bool, error) {
+	return s.r.UserExist(ctx, mail)
 }

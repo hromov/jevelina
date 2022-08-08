@@ -15,6 +15,27 @@ type ContactsService struct {
 	mock.Mock
 }
 
+// Contacts provides a mock function with given fields: _a0, _a1
+func (_m *ContactsService) Contacts(_a0 context.Context, _a1 contacts.Filter) (contacts.ContactsResponse, error) {
+	ret := _m.Called(_a0, _a1)
+
+	var r0 contacts.ContactsResponse
+	if rf, ok := ret.Get(0).(func(context.Context, contacts.Filter) contacts.ContactsResponse); ok {
+		r0 = rf(_a0, _a1)
+	} else {
+		r0 = ret.Get(0).(contacts.ContactsResponse)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, contacts.Filter) error); ok {
+		r1 = rf(_a0, _a1)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Create provides a mock function with given fields: _a0, _a1
 func (_m *ContactsService) Create(_a0 context.Context, _a1 contacts.ContactRequest) (contacts.Contact, error) {
 	ret := _m.Called(_a0, _a1)

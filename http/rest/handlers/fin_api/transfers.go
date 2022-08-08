@@ -9,140 +9,147 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
 	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
-func CompleteTransferHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 64)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	fin := mysql.Finance()
-	//or PUT?
-	if r.Method == "GET" {
-		user, err := auth.GetCurrentUser(r)
-		if err != nil || user.ID == 0 {
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
+func CompleteTransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.ParseUint(vars["id"], 10, 64)
+		if err != nil {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
 		}
 
-		if err := fin.CompleteTransfer(ID, user.ID); err != nil {
-			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
+		fin := mysql.Finance()
+		//or PUT?
+		if r.Method == "GET" {
+			user, err := auth.GetCurrentUser(r, us)
+			if err != nil || user.ID == 0 {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+
+			if err := fin.CompleteTransfer(ID, user.ID); err != nil {
+				log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
 		}
 	}
 }
 
-func TransferHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-	fin := mysql.Finance()
-	switch r.Method {
-	case "PUT":
-		var transfer *models.Transfer
-		if err = json.NewDecoder(r.Body).Decode(&transfer); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+func TransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		ID, err := strconv.ParseUint(vars["id"], 10, 32)
+		if err != nil {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+		fin := mysql.Finance()
+		switch r.Method {
+		case "PUT":
+			var transfer *models.Transfer
+			if err = json.NewDecoder(r.Body).Decode(&transfer); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if uint64(transfer.ID) != ID {
+				http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, transfer.ID), http.StatusBadRequest)
+				return
+			}
+
+			user, err := auth.GetCurrentUser(r, us)
+			if err != nil || user.ID == 0 {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+
+			if err = fin.UpdateTransfer(user.ID, transfer); err != nil {
+				log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		case "DELETE":
+			user, err := auth.GetCurrentUser(r, us)
+			if err != nil || user.ID == 0 {
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			if err := fin.DeleteTransfer(ID, user.ID); err != nil {
+				log.Printf("Can't delete item with ID = %d. Error: %s", ID, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
 			return
 		}
 
-		if uint64(transfer.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, transfer.ID), http.StatusBadRequest)
-			return
-		}
-
-		user, err := auth.GetCurrentUser(r)
-		if err != nil || user.ID == 0 {
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-
-		if err = fin.UpdateTransfer(user.ID, transfer); err != nil {
-			log.Printf("Can't save item with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		return
-	case "DELETE":
-		user, err := auth.GetCurrentUser(r)
-		if err != nil || user.ID == 0 {
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		if err := fin.DeleteTransfer(ID, user.ID); err != nil {
-			log.Printf("Can't delete item with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		return
 	}
-
 }
 
-func TransfersHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/transfers" {
-		http.NotFound(w, r)
-		return
-	}
-	fin := mysql.Finance()
-	if r.Method == "POST" {
-		item := new(models.Transfer)
-		if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+func TransfersHandler(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/transfers" {
+			http.NotFound(w, r)
 			return
 		}
-		user, err := auth.GetCurrentUser(r)
-		if err != nil || user.ID == 0 {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		fin := mysql.Finance()
+		if r.Method == "POST" {
+			item := new(models.Transfer)
+			if err := json.NewDecoder(r.Body).Decode(&item); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			user, err := auth.GetCurrentUser(r, us)
+			if err != nil || user.ID == 0 {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			item.CreatedBy = user.ID
+			item, err = fin.CreateTransfer(item)
+			if err != nil {
+				log.Printf("Can't create transfer. Error: %s", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+
+			b, err := json.Marshal(item)
+			if err != nil {
+				log.Println("Can't json.Marshal(transfer) error: " + err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			fmt.Fprint(w, string(b))
 			return
 		}
-		item.CreatedBy = user.ID
-		item, err = fin.CreateTransfer(item)
+
+		tResponse, err := fin.Transfers(api.FilterFromQuery(r.URL.Query()))
 		if err != nil {
-			log.Printf("Can't create transfer. Error: %s", err.Error())
+			log.Println("Can't get transfer error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
 
-		b, err := json.Marshal(item)
+		b, err := json.Marshal(tResponse.Transfers)
 		if err != nil {
-			log.Println("Can't json.Marshal(transfer) error: " + err.Error())
+			log.Println("Can't json.Marshal(transfers) error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 			return
 		}
+		total := strconv.Itoa(int(tResponse.Total))
+		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
+		w.Header().Set("X-Total-Count", total)
 		fmt.Fprint(w, string(b))
-		return
 	}
-
-	tResponse, err := fin.Transfers(api.FilterFromQuery(r.URL.Query()))
-	if err != nil {
-		log.Println("Can't get transfer error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-
-	b, err := json.Marshal(tResponse.Transfers)
-	if err != nil {
-		log.Println("Can't json.Marshal(transfers) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	total := strconv.Itoa(int(tResponse.Total))
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", total)
-	fmt.Fprint(w, string(b))
 }
 
 func CategoriesHandler(w http.ResponseWriter, r *http.Request) {

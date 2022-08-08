@@ -56,20 +56,6 @@ func (_m *LeadsService) CreateStep(_a0 context.Context, _a1 leads.Step) (leads.S
 	return r0, r1
 }
 
-// CreateTask provides a mock function with given fields: _a0, _a1
-func (_m *LeadsService) CreateTask(_a0 context.Context, _a1 leads.TaskData) error {
-	ret := _m.Called(_a0, _a1)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(context.Context, leads.TaskData) error); ok {
-		r0 = rf(_a0, _a1)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
 // Delete provides a mock function with given fields: _a0, _a1
 func (_m *LeadsService) Delete(_a0 context.Context, _a1 uint64) error {
 	ret := _m.Called(_a0, _a1)

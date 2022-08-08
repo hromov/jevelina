@@ -6,19 +6,28 @@ import (
 	"log"
 
 	"github.com/hromov/jevelina/domain/leads"
-	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
 type Leads struct {
-	*gorm.DB
+	db *gorm.DB
+}
+
+func NewLeads(db *gorm.DB) *Leads {
+	if err := db.AutoMigrate(&models.Lead{}); err != nil {
+		log.Println("Can't megrate leads error: ", err.Error())
+	}
+	if err := db.AutoMigrate(&models.Step{}); err != nil {
+		log.Println("Can't megrate leads error: ", err.Error())
+	}
+	return &Leads{db}
 }
 
 func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsResponse, error) {
 	cr := &models.LeadsResponse{}
-	q := l.DB.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
+	q := l.db.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 
 	// if IDs providen - return here
 	if len(filter.IDs) > 0 {
@@ -29,6 +38,7 @@ func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsR
 		if len(filter.Steps) > 0 {
 			search := ""
 			for i, step := range filter.Steps {
+				//TODO: it has to be always number or find a solution to avoid fmt.Sprintf()
 				search += fmt.Sprintf("step_id = %d", step)
 				if i < (len(filter.Steps) - 1) {
 					search += " OR "
@@ -54,12 +64,14 @@ func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsR
 		}
 		dateSearh := ""
 		if !filter.MinDate.IsZero() {
+			//TODO: it has to be always Time or find a solution to avoid fmt.Sprintf()
 			dateSearh += fmt.Sprintf("closed_at >= '%s'", filter.MinDate)
 		}
 		if !filter.MaxDate.IsZero() {
 			if dateSearh != "" {
 				dateSearh += " AND "
 			}
+			//TODO: it has to be always Time or find a solution to avoid fmt.Sprintf()
 			dateSearh += fmt.Sprintf("closed_at < '%s'", filter.MaxDate)
 		}
 		//then we have to return datet or null
@@ -71,7 +83,7 @@ func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsR
 		// old version delete if works without
 		// if filter.TagID != 0 {
 		// 	IDs := []uint{}
-		// 	l.DB.Raw("select lead_id from leads_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
+		// 	l.db.Raw("select lead_id from leads_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
 		// 	q.Find(&cr.Leads, IDs)
 		// } else {
 		// 	q.Find(&cr.Leads)
@@ -93,7 +105,7 @@ func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsR
 
 func (l *Leads) GetLead(ctx context.Context, id uint64) (leads.Lead, error) {
 	var lead models.Lead
-	if err := l.DB.Unscoped().Preload(clause.Associations).First(&lead, id).Error; err != nil {
+	if err := l.db.Unscoped().Preload(clause.Associations).First(&lead, id).Error; err != nil {
 		return leads.Lead{}, err
 	}
 
@@ -101,12 +113,13 @@ func (l *Leads) GetLead(ctx context.Context, id uint64) (leads.Lead, error) {
 }
 
 func (l *Leads) DeleteLead(ctx context.Context, id uint64) error {
-	if err := l.DB.WithContext(ctx).Delete(&models.Lead{ID: id}).Error; err != nil {
+	if err := l.db.WithContext(ctx).Delete(&models.Lead{ID: id}).Error; err != nil {
 		return err
 	}
-	if err := misc.DeleteTaskByParent(l.DB, id); err != nil {
-		log.Printf("Error while deliting tasks for lead: %s", err.Error())
-	}
+	// TODO: do with hooks ?
+	// if err := misc.DeleteTaskByParent(l.db, id); err != nil {
+	// 	log.Printf("Error while deliting tasks for lead: %s", err.Error())
+	// }
 	return nil
 }
 
@@ -115,7 +128,7 @@ func (l *Leads) CreateLead(ctx context.Context, lead leads.LeadData) (leads.Lead
 		lead.StepID = step.ID
 	}
 	dbLead := models.LeadFromDomain(lead)
-	if err := l.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbLead).Error; err != nil {
+	if err := l.db.WithContext(ctx).Omit(clause.Associations).Create(&dbLead).Error; err != nil {
 		return leads.Lead{}, err
 	}
 	return l.GetLead(ctx, dbLead.ID)
@@ -123,14 +136,5 @@ func (l *Leads) CreateLead(ctx context.Context, lead leads.LeadData) (leads.Lead
 
 func (l *Leads) UpdateLead(ctx context.Context, lead leads.LeadData) error {
 	dbLead := models.LeadFromDomain(lead)
-	return l.DB.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
-}
-
-// TODO: move or return Task (make full crud)
-func (l *Leads) CreateTask(ctx context.Context, t leads.TaskData) error {
-	dbTask := models.TaskFromTaskData(t)
-	if err := l.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbTask).Error; err != nil {
-		return err
-	}
-	return nil
+	return l.db.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
 }

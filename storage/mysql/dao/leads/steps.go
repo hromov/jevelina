@@ -10,7 +10,7 @@ import (
 
 func (l *Leads) GetSteps(ctx context.Context) ([]leads.Step, error) {
 	var items []models.Step
-	if result := l.DB.WithContext(ctx).Order("`order`").Find(&items); result.Error != nil {
+	if result := l.db.WithContext(ctx).Order("`order`").Find(&items); result.Error != nil {
 		return nil, result.Error
 	}
 	steps := make([]leads.Step, len(items))
@@ -22,7 +22,7 @@ func (l *Leads) GetSteps(ctx context.Context) ([]leads.Step, error) {
 
 func (l *Leads) GetStep(ctx context.Context, id uint8) (leads.Step, error) {
 	var item models.Step
-	if err := l.DB.WithContext(ctx).First(&item, id).Error; err != nil {
+	if err := l.db.WithContext(ctx).First(&item, id).Error; err != nil {
 		return leads.Step{}, err
 	}
 	return item.ToDomain(), nil
@@ -30,7 +30,7 @@ func (l *Leads) GetStep(ctx context.Context, id uint8) (leads.Step, error) {
 
 func (l *Leads) DefaultStep(ctx context.Context) (leads.Step, error) {
 	var item models.Step
-	if err := l.DB.WithContext(ctx).Where("`order` = 0").First(&item).Error; err != nil {
+	if err := l.db.WithContext(ctx).Where("`order` = 0").First(&item).Error; err != nil {
 		return leads.Step{}, err
 	}
 	return item.ToDomain(), nil
@@ -38,7 +38,7 @@ func (l *Leads) DefaultStep(ctx context.Context) (leads.Step, error) {
 
 func (l *Leads) CreateStep(ctx context.Context, s leads.Step) (leads.Step, error) {
 	step := models.StepFromDomain(s)
-	if err := l.DB.WithContext(ctx).Omit(clause.Associations).Create(&step).Error; err != nil {
+	if err := l.db.WithContext(ctx).Omit(clause.Associations).Create(&step).Error; err != nil {
 		return leads.Step{}, err
 	}
 	return step.ToDomain(), nil
@@ -46,11 +46,11 @@ func (l *Leads) CreateStep(ctx context.Context, s leads.Step) (leads.Step, error
 
 func (l *Leads) UpdateStep(ctx context.Context, s leads.Step) error {
 	step := models.StepFromDomain(s)
-	return l.DB.WithContext(ctx).Omit(clause.Associations).Where("id", s.ID).Updates(&step).Error
+	return l.db.WithContext(ctx).Omit(clause.Associations).Where("id", s.ID).Updates(&step).Error
 }
 
 func (l *Leads) DeleteStep(ctx context.Context, id uint8) error {
-	if err := l.DB.WithContext(ctx).Delete(&models.Step{ID: id}).Error; err != nil {
+	if err := l.db.WithContext(ctx).Delete(&models.Step{ID: id}).Error; err != nil {
 		return err
 	}
 	return nil

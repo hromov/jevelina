@@ -11,7 +11,6 @@ type Repository interface {
 	CreateLead(context.Context, LeadData) (Lead, error)
 	UpdateLead(context.Context, LeadData) error
 	DeleteLead(context.Context, uint64) error
-	CreateTask(context.Context, TaskData) error
 	GetStep(context.Context, uint8) (Step, error)
 	GetSteps(context.Context) ([]Step, error)
 	CreateStep(context.Context, Step) (Step, error)
@@ -28,7 +27,6 @@ type Service interface {
 	Delete(context.Context, uint64) error
 	GetStep(context.Context, uint8) (Step, error)
 	GetSteps(context.Context) ([]Step, error)
-	CreateTask(context.Context, TaskData) error
 	CreateStep(context.Context, Step) (Step, error)
 	UpdateStep(context.Context, Step) error
 	DeleteStep(context.Context, uint8) error
@@ -68,9 +66,6 @@ func (s *service) Create(ctx context.Context, lead LeadData) (Lead, error) {
 	return s.r.CreateLead(ctx, lead)
 }
 
-func (s *service) CreateTask(ctx context.Context, t TaskData) error {
-	return s.r.CreateTask(ctx, t)
-}
 func (s *service) CreateStep(ctx context.Context, step Step) (Step, error) {
 	return s.r.CreateStep(ctx, step)
 }

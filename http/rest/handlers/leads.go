@@ -117,7 +117,7 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
+func Leads(ls leads.Service, us users.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		if r.Method == "POST" {
@@ -127,7 +127,8 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			user, err := auth.GetCurrentUser(r)
+			//TODO: move to context
+			user, err := auth.GetCurrentUser(r, us)
 			if err != nil {
 				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			}
