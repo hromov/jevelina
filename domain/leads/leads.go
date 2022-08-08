@@ -107,11 +107,3 @@ type LeadData struct {
 	Step           Step
 	Analytics      misc.Analytics
 }
-
-type TaskData struct {
-	ParentID      uint64
-	DeadLine      time.Time
-	Description   string
-	ResponsibleID uint64
-	CreatedID     uint64
-}
