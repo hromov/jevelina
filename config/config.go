@@ -14,12 +14,14 @@ const (
 )
 
 type Config struct {
-	Env Environment
-	Dsn string
+	Env        Environment
+	Dsn        string
+	BucketName string
 }
 
 var defaultConfig = Config{
-	Env: EnvLocal,
+	Env:        EnvLocal,
+	BucketName: "jevelina",
 }
 
 func Get() Config {

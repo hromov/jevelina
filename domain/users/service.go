@@ -3,7 +3,7 @@ package users
 import "context"
 
 type Repository interface {
-	Users(context.Context) ([]User, error)
+	GetUsers(context.Context) ([]User, error)
 	User(context.Context, uint64) (User, error)
 	UserByEmail(ctx context.Context, mail string) (User, error)
 	UserExist(ctx context.Context, mail string) (bool, error)
@@ -42,7 +42,7 @@ func NewService(r Repository) *service {
 }
 
 func (s *service) List(ctx context.Context) ([]User, error) {
-	return s.r.Users(ctx)
+	return s.r.GetUsers(ctx)
 }
 
 func (s *service) Get(ctx context.Context, id uint64) (User, error) {

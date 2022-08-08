@@ -3,7 +3,7 @@ package tasks
 import (
 	"time"
 
-	"github.com/hromov/jevelina/domain/files"
+	"github.com/hromov/jevelina/domain/misc/files"
 	"github.com/hromov/jevelina/domain/users"
 )
 

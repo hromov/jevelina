@@ -57,7 +57,7 @@ func (t *Task) ToDomain() tasks.Task {
 		DeadLine:  *t.DeadLine,
 		Completed: t.Completed,
 
-		Files:       filesToDomain(t.Files),
+		Files:       FilesToDomain(t.Files),
 		Description: t.Description,
 		Results:     t.Results,
 
