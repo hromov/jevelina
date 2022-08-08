@@ -20,7 +20,7 @@ func InitRouter(
 	os orders.Service, ms misc.Service, ts tasks.Service,
 ) *mux.Router {
 	r := mux.NewRouter()
-	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
+	r.HandleFunc("/usercheck", auth.UserCheckHandler(us)).Methods("GET")
 	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
 	// r.Use(auth.UserCheck)
@@ -47,8 +47,8 @@ func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Serv
 	r.HandleFunc("/products/{id}", api.Product(ms)).Methods("PUT", "DELETE")
 	r.HandleFunc("/manufacturers", api.Manufacturers(ms)).Methods("POST")
 	r.HandleFunc("/manufacturers/{id}", api.Manufacturer(ms)).Methods("PUT", "DELETE")
-	r.HandleFunc("/tags", api.TagsHandler).Methods("POST")
-	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("PUT", "DELETE")
+	// r.HandleFunc("/tags", api.TagsHandler).Methods("POST")
+	// r.HandleFunc("/tags/{id}", api.TagHandler).Methods("PUT", "DELETE")
 	r.HandleFunc("/tasks/{id}", api.Task(ts)).Methods("DELETE")
 	// r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("POST")
 	// r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("PUT", "DELETE")
@@ -59,15 +59,15 @@ func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Serv
 	r.HandleFunc("/wallets/{id}", fin_api.WalletHandler).Methods("PUT", "DELETE")
 	r.HandleFunc("/wallets/{id}/close", fin_api.CloseWalletHandler).Methods("GET")
 	r.HandleFunc("/wallets/{id}/open", fin_api.OpenWalletHandler).Methods("GET")
-	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler).Methods("DELETE")
-	r.HandleFunc("/transfers/{id}/complete", fin_api.CompleteTransferHandler).Methods("GET")
+	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler(us)).Methods("DELETE")
+	r.HandleFunc("/transfers/{id}/complete", fin_api.CompleteTransferHandler(us)).Methods("GET")
 	return r
 }
 
 func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.Service, ms misc.Service, ts tasks.Service) *mux.Router {
-	r.HandleFunc("/contacts", api.Contacts(cs)).Methods("GET", "POST")
+	r.HandleFunc("/contacts", api.Contacts(cs, us)).Methods("GET", "POST")
 	r.HandleFunc("/contacts/{id}", api.Contact(cs)).Methods("GET", "PUT", "DELETE")
-	r.HandleFunc("/leads", api.Leads(ls)).Methods("GET", "POST")
+	r.HandleFunc("/leads", api.Leads(ls, us)).Methods("GET", "POST")
 	r.HandleFunc("/leads/{id}", api.Lead(ls)).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/users", api.Users(us)).Methods("GET")
 	r.HandleFunc("/users/{id}", api.User(us)).Methods("GET")
@@ -81,9 +81,9 @@ func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.S
 	r.HandleFunc("/products/{id}", api.Product(ms)).Methods("GET")
 	r.HandleFunc("/manufacturers", api.Manufacturers(ms)).Methods("GET")
 	r.HandleFunc("/manufacturers/{id}", api.Manufacturer(ms)).Methods("GET")
-	r.HandleFunc("/tags", api.TagsHandler).Methods("GET")
-	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("GET")
-	r.HandleFunc("/tasks", api.Tasks(ts)).Methods("GET", "POST")
+	// r.HandleFunc("/tags", api.TagsHandler).Methods("GET")
+	// r.HandleFunc("/tags/{id}", api.TagHandler).Methods("GET")
+	r.HandleFunc("/tasks", api.Tasks(ts, us)).Methods("GET", "POST")
 	r.HandleFunc("/tasks/{id}", api.Task(ts)).Methods("GET", "PUT")
 	// r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("GET")
 	// r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("GET")
@@ -91,8 +91,8 @@ func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.S
 	r.HandleFunc("/files/{id}", files_api.FileHandler).Methods("GET")
 
 	r.HandleFunc("/wallets", fin_api.WalletsHandler).Methods("GET")
-	r.HandleFunc("/transfers", fin_api.TransfersHandler).Methods("GET", "POST")
-	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler).Methods("PUT")
+	r.HandleFunc("/transfers", fin_api.TransfersHandler(us)).Methods("GET", "POST")
+	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler(us)).Methods("PUT")
 	r.HandleFunc("/categories", fin_api.CategoriesHandler).Methods("GET")
 	r.HandleFunc("/analytics/categories", fin_api.CategoriesSumHandler).Methods("GET")
 	return r

@@ -163,7 +163,7 @@ func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
+func Contacts(cs contacts.Service, us users.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			contact := contactRequest{}
@@ -172,7 +172,8 @@ func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) 
 				return
 			}
 
-			user, err := auth.GetCurrentUser(r)
+			//TODO: move to context
+			user, err := auth.GetCurrentUser(r, us)
 			if err != nil {
 				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
 			}

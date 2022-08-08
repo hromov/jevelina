@@ -221,6 +221,27 @@ func (_m *UsersService) UpdateRole(_a0 context.Context, _a1 users.Role) error {
 	return r0
 }
 
+// UserExist provides a mock function with given fields: ctx, mail
+func (_m *UsersService) UserExist(ctx context.Context, mail string) (bool, error) {
+	ret := _m.Called(ctx, mail)
+
+	var r0 bool
+	if rf, ok := ret.Get(0).(func(context.Context, string) bool); ok {
+		r0 = rf(ctx, mail)
+	} else {
+		r0 = ret.Get(0).(bool)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string) error); ok {
+		r1 = rf(ctx, mail)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 type mockConstructorTestingTNewUsersService interface {
 	mock.TestingT
 	Cleanup(func())

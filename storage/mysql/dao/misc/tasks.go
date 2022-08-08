@@ -10,7 +10,7 @@ import (
 
 func (m *Misc) GetTasks(ctx context.Context, filter tasks.Filter) (tasks.TasksResponse, error) {
 	cr := &models.TasksResponse{}
-	q := m.DB.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
+	q := m.db.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 	if filter.Query != "" {
 		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}
@@ -42,23 +42,23 @@ func (m *Misc) GetTasks(ctx context.Context, filter tasks.Filter) (tasks.TasksRe
 
 func (m *Misc) GetTask(ctx context.Context, id uint64) (tasks.Task, error) {
 	var item models.Task
-	if result := m.DB.WithContext(ctx).Preload(clause.Associations).First(&item, id); result.Error != nil {
+	if result := m.db.WithContext(ctx).Preload(clause.Associations).First(&item, id); result.Error != nil {
 		return tasks.Task{}, result.Error
 	}
 	return item.ToDomain(), nil
 }
 
 func (m *Misc) DeleteTaskByParent(ctx context.Context, parentID uint64) error {
-	return m.DB.WithContext(ctx).Delete(&models.Task{}, "parent_id = ?", parentID).Error
+	return m.db.WithContext(ctx).Delete(&models.Task{}, "parent_id = ?", parentID).Error
 }
 
 func (m *Misc) DeleteTask(ctx context.Context, id uint64) error {
-	return m.DB.WithContext(ctx).Delete(&models.Task{ID: id}).Error
+	return m.db.WithContext(ctx).Delete(&models.Task{ID: id}).Error
 }
 
 func (m *Misc) CreateTask(ctx context.Context, task tasks.TaskData) (tasks.Task, error) {
 	dbTask := models.TaskFromTaskData(task)
-	if err := m.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbTask).Error; err != nil {
+	if err := m.db.WithContext(ctx).Omit(clause.Associations).Create(&dbTask).Error; err != nil {
 		return tasks.Task{}, err
 	}
 	return dbTask.ToDomain(), nil
@@ -66,13 +66,13 @@ func (m *Misc) CreateTask(ctx context.Context, task tasks.TaskData) (tasks.Task,
 
 func (m *Misc) UpdateTask(ctx context.Context, task tasks.TaskData) error {
 	dbTask := models.TaskFromTaskData(task)
-	return m.DB.WithContext(ctx).Model(&models.Task{}).Where("id", task.ID).Updates(&dbTask).Error
+	return m.db.WithContext(ctx).Model(&models.Task{}).Where("id", task.ID).Updates(&dbTask).Error
 }
 
 // TODO: don't use task types rn
 // func (m *Misc) TaskTypes() ([]models.TaskType, error) {
 // 	var items []models.TaskType
-// 	if result := m.DB.Find(&items); result.Error != nil {
+// 	if result := m.db.Find(&items); result.Error != nil {
 // 		return nil, result.Error
 // 	}
 // 	return items, nil
@@ -80,7 +80,7 @@ func (m *Misc) UpdateTask(ctx context.Context, task tasks.TaskData) error {
 
 // func (m *Misc) TaskType(ID uint8) (*models.TaskType, error) {
 // 	var item models.TaskType
-// 	if result := m.DB.First(&item, ID); result.Error != nil {
+// 	if result := m.db.First(&item, ID); result.Error != nil {
 // 		return nil, result.Error
 // 	}
 // 	return &item, nil
