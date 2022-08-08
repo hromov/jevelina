@@ -7,7 +7,7 @@ import (
 type Repository interface {
 	ByID(context.Context, uint64) (Contact, error)
 	ByPhone(context.Context, string) (Contact, error)
-	Contacts(context.Context, Filter) (ContactsResponse, error)
+	List(context.Context, Filter) (ContactsResponse, error)
 	DeleteContact(context.Context, uint64) error
 	UpdateContact(context.Context, ContactRequest) error
 	CreateContact(context.Context, ContactRequest) (Contact, error)
@@ -37,7 +37,7 @@ func (s *service) Get(ctx context.Context, id uint64) (Contact, error) {
 }
 
 func (s *service) List(ctx context.Context, f Filter) (ContactsResponse, error) {
-	return s.r.Contacts(ctx, f)
+	return s.r.List(ctx, f)
 }
 
 func (s *service) GetByPhone(ctx context.Context, phone string) (Contact, error) {

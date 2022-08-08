@@ -27,7 +27,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
+	// TODO: remove after all transition finished on storage and services
 	db, err := mysql.OpenAndInit(string(dns))
 	if err != nil {
 		log.Fatalf("Cant open and init data base error: %s", err.Error())
@@ -38,10 +38,9 @@ func main() {
 	if err != nil {
 		log.Fatal("Can't init storage error: ", err.Error())
 	}
-	//TODO: repo
-	cs := contacts.NewService(mysql.Contacts())
-	ls := leads.NewService(mysql.Leads())
 
+	cs := contacts.NewService(storage)
+	ls := leads.NewService(storage)
 	us := users.NewService(storage)
 	ts := tasks.NewService(storage)
 	ms := misc.Service(storage)

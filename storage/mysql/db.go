@@ -3,11 +3,9 @@ package mysql
 import (
 	"fmt"
 
-	"github.com/hromov/jevelina/storage/mysql/dao/contacts"
 	"github.com/hromov/jevelina/storage/mysql/dao/events"
 	"github.com/hromov/jevelina/storage/mysql/dao/files"
 	"github.com/hromov/jevelina/storage/mysql/dao/finance"
-	"github.com/hromov/jevelina/storage/mysql/dao/leads"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -27,13 +25,13 @@ func GetDB() *DB {
 }
 
 //test part
-func Contacts() *contacts.Contacts {
-	return &contacts.Contacts{DB: currentDB.DB}
-}
+// func Contacts() *contacts.Contacts {
+// 	return &contacts.Contacts{DB: currentDB.DB}
+// }
 
-func Leads() *leads.Leads {
-	return &leads.Leads{DB: currentDB.DB}
-}
+// func Leads() *leads.Leads {
+// 	return &leads.Leads{DB: currentDB.DB}
+// }
 
 // func Misc() *misc.Misc {
 // 	return &misc.Misc{DB: currentDB.DB}
@@ -84,17 +82,17 @@ func (db *DB) Init() error {
 	// 		return err
 	// 	}
 	// }
-	if !currentDB.DB.Migrator().HasTable("contacts") {
-		if err := db.AutoMigrate(&models.Contact{}); err != nil {
-			return err
-		}
-	}
+	// if !currentDB.DB.Migrator().HasTable("contacts") {
+	// 	if err := db.AutoMigrate(&models.Contact{}); err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	if !currentDB.DB.Migrator().HasTable("leads") {
-		if err := db.AutoMigrate(&models.Lead{}); err != nil {
-			return err
-		}
-	}
+	// if !currentDB.DB.Migrator().HasTable("leads") {
+	// 	if err := db.AutoMigrate(&models.Lead{}); err != nil {
+	// 		return err
+	// 	}
+	// }
 
 	// if !currentDB.DB.Migrator().HasTable("tasks") {
 	// 	if err := db.AutoMigrate(&models.Task{}); err != nil {

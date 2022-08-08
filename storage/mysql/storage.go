@@ -3,6 +3,8 @@ package mysql
 import (
 	"fmt"
 
+	"github.com/hromov/jevelina/storage/mysql/dao/contacts"
+	"github.com/hromov/jevelina/storage/mysql/dao/leads"
 	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -10,6 +12,8 @@ import (
 
 type Storage struct {
 	*misc.Misc
+	*leads.Leads
+	*contacts.Contacts
 }
 
 func NewStorage(dns string) (*Storage, error) {
@@ -21,5 +25,7 @@ func NewStorage(dns string) (*Storage, error) {
 	}
 	return &Storage{
 		misc.NewMisc(db),
+		leads.NewLeads(db),
+		contacts.NewContacts(db),
 	}, nil
 }

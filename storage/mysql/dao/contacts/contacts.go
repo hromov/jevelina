@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 	"unicode"
 
 	"github.com/hromov/jevelina/domain/contacts"
@@ -16,7 +17,14 @@ const fullSearch = "name LIKE @query OR second_name LIKE @query OR phone LIKE @q
 const phonesOnly = "phone LIKE @query OR second_phone LIKE @query"
 
 type Contacts struct {
-	*gorm.DB
+	db *gorm.DB
+}
+
+func NewContacts(db *gorm.DB) *Contacts {
+	if err := db.AutoMigrate(&models.Contact{}); err != nil {
+		log.Println("Can't megrate leads error: ", err.Error())
+	}
+	return &Contacts{db}
 }
 
 func digitsOnly(s string) bool {
@@ -28,9 +36,9 @@ func digitsOnly(s string) bool {
 	return true
 }
 
-func (c *Contacts) Contacts(ctx context.Context, filter contacts.Filter) (contacts.ContactsResponse, error) {
+func (c *Contacts) List(ctx context.Context, filter contacts.Filter) (contacts.ContactsResponse, error) {
 	cr := &models.ContactsResponse{}
-	q := c.DB.WithContext(ctx).Preload(clause.Associations).Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
+	q := c.db.WithContext(ctx).Preload(clause.Associations).Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
 	if filter.Query != "" {
 		searchType := ""
 		if digitsOnly(filter.Query) {
@@ -42,7 +50,7 @@ func (c *Contacts) Contacts(ctx context.Context, filter contacts.Filter) (contac
 	}
 	if filter.TagID != 0 {
 		IDs := []uint{}
-		c.DB.Raw("select contact_id from contacts_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
+		c.db.Raw("select contact_id from contacts_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
 		q.Find(&cr.Contacts, IDs)
 	} else {
 		q.Find(&cr.Contacts)
@@ -64,7 +72,7 @@ func (c *Contacts) Contacts(ctx context.Context, filter contacts.Filter) (contac
 func (c *Contacts) ByID(ctx context.Context, ID uint64) (contacts.Contact, error) {
 	var contact models.Contact
 
-	if result := c.DB.Unscoped().Preload(clause.Associations).First(&contact, ID); result.Error != nil {
+	if result := c.db.Unscoped().Preload(clause.Associations).First(&contact, ID); result.Error != nil {
 		return contacts.Contact{}, result.Error
 	}
 
@@ -76,18 +84,18 @@ func (c *Contacts) ByPhone(ctx context.Context, phone string) (contacts.Contact,
 		return contacts.Contact{}, errors.New("Phone should be at least 6 char length")
 	}
 	var contact models.Contact
-	if err := c.DB.Where(phonesOnly, sql.Named("query", phone)).First(contact).Error; err != nil {
+	if err := c.db.Where(phonesOnly, sql.Named("query", phone)).First(contact).Error; err != nil {
 		return contacts.Contact{}, err
 	}
 	return contact.ToDomain(), nil
 }
 
 func (c *Contacts) DeleteContact(ctx context.Context, id uint64) error {
-	if err := c.DB.Delete(&models.Contact{ID: id}).Error; err != nil {
+	if err := c.db.Delete(&models.Contact{ID: id}).Error; err != nil {
 		return err
 	}
 	// TODO: do with hooks ?
-	// if err := misc.DeleteTaskByParent(c.DB, id); err != nil {
+	// if err := misc.DeleteTaskByParent(c.db, id); err != nil {
 	// 	log.Printf("Error while deliting tasks for contact: %s", err.Error())
 	// }
 	return nil
@@ -95,7 +103,7 @@ func (c *Contacts) DeleteContact(ctx context.Context, id uint64) error {
 
 func (c *Contacts) CreateContact(ctx context.Context, newContact contacts.ContactRequest) (contacts.Contact, error) {
 	dbContact := models.ContactFromDomain(newContact)
-	if err := c.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbContact).Error; err != nil {
+	if err := c.db.WithContext(ctx).Omit(clause.Associations).Create(&dbContact).Error; err != nil {
 		return contacts.Contact{}, err
 	}
 	return c.ByID(ctx, dbContact.ID)
@@ -103,7 +111,7 @@ func (c *Contacts) CreateContact(ctx context.Context, newContact contacts.Contac
 
 func (c *Contacts) UpdateContact(ctx context.Context, contact contacts.ContactRequest) error {
 	dbContact := models.ContactFromDomain(contact)
-	if err := c.DB.Debug().WithContext(ctx).Omit(clause.Associations).Model(&models.Contact{}).Where("id", contact.ID).Updates(&dbContact).Error; err != nil {
+	if err := c.db.Debug().WithContext(ctx).Omit(clause.Associations).Model(&models.Contact{}).Where("id", contact.ID).Updates(&dbContact).Error; err != nil {
 		return err
 	}
 	return nil
