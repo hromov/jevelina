@@ -16,7 +16,7 @@ import (
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 )
 
-func CompleteTransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+func CompleteTransferHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		ID, err := strconv.ParseUint(vars["id"], 10, 64)
@@ -28,10 +28,11 @@ func CompleteTransferHandler(us users.Service) func(w http.ResponseWriter, r *ht
 		fin := mysql.Finance()
 		//or PUT?
 		if r.Method == "GET" {
-			user, err := auth.GetCurrentUser(r, us)
-			if err != nil || user.ID == 0 {
-				http.Error(w, http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
+				return
 			}
 
 			if err := fin.CompleteTransfer(ID, user.ID); err != nil {
@@ -43,7 +44,7 @@ func CompleteTransferHandler(us users.Service) func(w http.ResponseWriter, r *ht
 	}
 }
 
-func TransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+func TransferHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		ID, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -65,10 +66,11 @@ func TransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Reque
 				return
 			}
 
-			user, err := auth.GetCurrentUser(r, us)
-			if err != nil || user.ID == 0 {
-				http.Error(w, http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
+				return
 			}
 
 			if err = fin.UpdateTransfer(user.ID, transfer); err != nil {
@@ -78,10 +80,11 @@ func TransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Reque
 			}
 			return
 		case "DELETE":
-			user, err := auth.GetCurrentUser(r, us)
-			if err != nil || user.ID == 0 {
-				http.Error(w, http.StatusText(http.StatusInternalServerError),
-					http.StatusInternalServerError)
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
+				return
 			}
 			if err := fin.DeleteTransfer(ID, user.ID); err != nil {
 				log.Printf("Can't delete item with ID = %d. Error: %s", ID, err.Error())
@@ -94,7 +97,7 @@ func TransferHandler(us users.Service) func(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func TransfersHandler(us users.Service) func(w http.ResponseWriter, r *http.Request) {
+func TransfersHandler() func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path != "/transfers" {
 			http.NotFound(w, r)
@@ -107,13 +110,14 @@ func TransfersHandler(us users.Service) func(w http.ResponseWriter, r *http.Requ
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
-			user, err := auth.GetCurrentUser(r, us)
-			if err != nil || user.ID == 0 {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
 				return
 			}
 			item.CreatedBy = user.ID
-			item, err = fin.CreateTransfer(item)
+			item, err := fin.CreateTransfer(item)
 			if err != nil {
 				log.Printf("Can't create transfer. Error: %s", err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),

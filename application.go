@@ -12,7 +12,9 @@ import (
 	"github.com/hromov/jevelina/domain/misc"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest"
+	"github.com/hromov/jevelina/http/rest/auth"
 	"github.com/hromov/jevelina/storage/mysql"
+	tokenvalidator "github.com/hromov/jevelina/tokenValidator"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
 )
@@ -44,8 +46,10 @@ func main() {
 	us := users.NewService(storage)
 	ts := tasks.NewService(storage)
 	ms := misc.Service(storage)
+	tv := tokenvalidator.NewService()
+	as := auth.NewService(us, tv)
 	ordersService := orders.NewService(cs, ls, us, ts)
-	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts)
+	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

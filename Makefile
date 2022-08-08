@@ -8,7 +8,11 @@ lint-go:
 
 .PHONY: test
 test: 
-	go test ./...
+	go test ./... -coverprofile=cover.out
+
+.PHONY: cover
+cover: 
+	go tool cover -html=cover.out
 
 .PHONY: build
 build:

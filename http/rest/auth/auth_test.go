@@ -1,25 +1,146 @@
-package auth
+package auth_test
 
-// func TestUserCheck(t *testing.T) {
-// 	req, err := http.NewRequest("GET", "/", nil)
-// 	if err != nil {
-// 		t.Fatal(err)
-// 	}
+import (
+	"errors"
+	"net/http"
+	"net/http/httptest"
+	"testing"
 
-// 	rr := httptest.NewRecorder()
-// 	handler := UserCheck(nil)
+	"github.com/gorilla/mux"
+	"github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/http/rest/auth"
+	"github.com/hromov/jevelina/mocks"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+)
 
-// 	handler.ServeHTTP(rr, req)
+func dummyHandler(w http.ResponseWriter, r *http.Request) {}
 
-// 	if status := rr.Code; status != http.StatusForbidden {
-// 		t.Errorf("handler returned wrong status code: got %v want %v",
-// 			status, http.StatusForbidden)
-// 	}
+func TestUserCheck(t *testing.T) {
+	us := &mocks.UsersService{}
+	user := users.User{ID: 1, Role: "User", Email: "some@mail.com"}
+	us.On("GetByEmail", mock.Anything, mock.Anything).Return(user, nil)
+	tv := &mocks.TokenService{}
+	tv.On("GetMailByToken", mock.Anything).Return("some@mail.com", nil)
+	as := auth.NewService(us, tv)
+	router := mux.NewRouter()
+	router.HandleFunc("/", dummyHandler).Methods("GET")
+	router.Use(as.UserCheck)
+	require.NotNil(t, router)
 
-// 	expected := "User access required\n"
-// 	if rr.Body.String() != expected {
-// 		t.Errorf("handler returned unexpected body: got %q want %q",
-// 			rr.Body.String(), expected)
-// 	}
+	req, err := http.NewRequest(
+		"GET",
+		"/",
+		nil,
+	)
+	require.NoError(t, err)
 
-// }
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+}
+
+func TestNotAUserCheck(t *testing.T) {
+	us := &mocks.UsersService{}
+	us.On("GetByEmail", mock.Anything, mock.Anything).Return(users.User{}, errors.New("Not a user"))
+	tv := &mocks.TokenService{}
+	tv.On("GetMailByToken", mock.Anything).Return("some@mail.com", nil)
+	as := auth.NewService(us, tv)
+	router := mux.NewRouter()
+	router.HandleFunc("/", dummyHandler).Methods("GET")
+	router.Use(as.UserCheck)
+	require.NotNil(t, router)
+
+	req, err := http.NewRequest(
+		"GET",
+		"/",
+		nil,
+	)
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestNotTokenUserCheck(t *testing.T) {
+	us := &mocks.UsersService{}
+	tv := &mocks.TokenService{}
+	tv.On("GetMailByToken", mock.Anything).Return("", errors.New("some wrong token"))
+	as := auth.NewService(us, tv)
+	router := mux.NewRouter()
+	router.HandleFunc("/", dummyHandler).Methods("GET")
+	router.Use(as.UserCheck)
+	require.NotNil(t, router)
+
+	req, err := http.NewRequest(
+		"GET",
+		"/",
+		nil,
+	)
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestNotAdminCheck(t *testing.T) {
+	us := &mocks.UsersService{}
+	user := users.User{ID: 1, Role: "User", Email: "some@mail.com"}
+	us.On("GetByEmail", mock.Anything, mock.Anything).Return(user, nil)
+	tv := &mocks.TokenService{}
+	tv.On("GetMailByToken", mock.Anything).Return("some@mail.com", nil)
+	as := auth.NewService(us, tv)
+	router := mux.NewRouter()
+	router.HandleFunc("/", dummyHandler).Methods("GET")
+	router.Use(as.UserCheck)
+	router.Use(as.AdminCheck)
+	require.NotNil(t, router)
+
+	req, err := http.NewRequest(
+		"GET",
+		"/",
+		nil,
+	)
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusForbidden, rr.Code)
+}
+
+func TestAdminCheck(t *testing.T) {
+	us := &mocks.UsersService{}
+	user := users.User{ID: 1, Role: "Admin", Email: "some@mail.com"}
+	us.On("GetByEmail", mock.Anything, mock.Anything).Return(user, nil)
+	tv := &mocks.TokenService{}
+	tv.On("GetMailByToken", mock.Anything).Return("some@mail.com", nil)
+	as := auth.NewService(us, tv)
+	router := mux.NewRouter()
+	router.HandleFunc("/", dummyHandler).Methods("GET")
+	router.Use(as.UserCheck)
+	router.Use(as.AdminCheck)
+	require.NotNil(t, router)
+
+	req, err := http.NewRequest(
+		"GET",
+		"/",
+		nil,
+	)
+	require.NoError(t, err)
+
+	rr := httptest.NewRecorder()
+
+	router.ServeHTTP(rr, req)
+
+	require.Equal(t, http.StatusOK, rr.Code)
+}

@@ -163,7 +163,7 @@ func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Contacts(cs contacts.Service, us users.Service) func(w http.ResponseWriter, r *http.Request) {
+func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			contact := contactRequest{}
@@ -172,10 +172,11 @@ func Contacts(cs contacts.Service, us users.Service) func(w http.ResponseWriter,
 				return
 			}
 
-			//TODO: move to context
-			user, err := auth.GetCurrentUser(r, us)
-			if err != nil {
-				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
+				return
 			}
 			contact.CreatedID = user.ID
 
