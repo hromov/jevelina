@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/hromov/jevelina/domain/files"
+	"github.com/hromov/jevelina/domain/misc"
 	"gorm.io/gorm"
 )
 
@@ -98,8 +98,8 @@ type File struct {
 	URL       string `gorm:"size:128"`
 }
 
-func (f *File) ToDomain() files.File {
-	return files.File{
+func (f *File) ToDomain() misc.File {
+	return misc.File{
 		ID:        f.ID,
 		ParentID:  f.ParentID,
 		CreatedAt: f.CreatedAt,
@@ -108,8 +108,8 @@ func (f *File) ToDomain() files.File {
 	}
 }
 
-func filesToDomain(items []File) []files.File {
-	converted := make([]files.File, len(items))
+func filesToDomain(items []File) []misc.File {
+	converted := make([]misc.File, len(items))
 	for i, f := range items {
 		converted[i] = f.ToDomain()
 	}
