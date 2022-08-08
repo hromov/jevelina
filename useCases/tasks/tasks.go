@@ -3,7 +3,7 @@ package tasks
 import (
 	"time"
 
-	"github.com/hromov/jevelina/domain/misc"
+	"github.com/hromov/jevelina/domain/misc/files"
 	"github.com/hromov/jevelina/domain/users"
 )
 
@@ -16,7 +16,7 @@ type Task struct {
 	DeadLine  time.Time
 	Completed bool
 
-	Files       []misc.File
+	Files       []files.File
 	Description string
 	Results     string
 
