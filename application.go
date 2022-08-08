@@ -17,9 +17,9 @@ import (
 	"github.com/hromov/jevelina/http/rest/auth"
 	"github.com/hromov/jevelina/storage/gcloud"
 	"github.com/hromov/jevelina/storage/mysql"
-	tokenvalidator "github.com/hromov/jevelina/tokenValidator"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
+	tokenvalidator "github.com/hromov/jevelina/utils/tokenValidator"
 )
 
 // const dns = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
