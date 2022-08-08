@@ -21,7 +21,7 @@ type googleAuthResponse struct {
 	EmailVerified string `json:"email_verified"`
 }
 
-//go:generate mockery --name Service --filename TokenService.go --structname TokenService --output ../mocks
+//go:generate mockery --name Service --filename TokenService.go --structname TokenService --output ../../mocks
 type Service interface {
 	GetMailByToken(*http.Request) (string, error)
 }
