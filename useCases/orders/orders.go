@@ -6,6 +6,7 @@ import (
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/domain/misc"
+	"github.com/hromov/jevelina/useCases/tasks"
 )
 
 type Order struct {
@@ -82,8 +83,8 @@ func (o *Order) ToContactRequest(userID uint64) contacts.ContactRequest {
 	return cr
 }
 
-func (o *Order) ToTaskData(leadID, userID uint64) leads.TaskData {
-	task := leads.TaskData{
+func (o *Order) ToTaskData(leadID, userID uint64) tasks.TaskData {
+	task := tasks.TaskData{
 		ParentID:      leadID,
 		ResponsibleID: userID,
 		CreatedID:     userID,

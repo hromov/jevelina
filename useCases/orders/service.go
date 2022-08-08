@@ -9,6 +9,7 @@ import (
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/domain/users"
+	"github.com/hromov/jevelina/useCases/tasks"
 )
 
 //go:generate mockery --name Service --filename OrdersService.go --structname OrdersService --output ../../mocks
@@ -21,10 +22,11 @@ type service struct {
 	cs contacts.Service
 	ls leads.Service
 	us users.Service
+	ts tasks.Service
 }
 
-func NewService(cs contacts.Service, ls leads.Service, us users.Service) *service {
-	return &service{cs, ls, us}
+func NewService(cs contacts.Service, ls leads.Service, us users.Service, ts tasks.Service) *service {
+	return &service{cs, ls, us, ts}
 }
 
 func (s *service) Create(ctx context.Context, order Order) error {
@@ -48,7 +50,7 @@ func (s *service) CreateForUser(ctx context.Context, order Order, user users.Use
 	}
 
 	task := order.ToTaskData(lead.ID, user.ID)
-	err = s.ls.CreateTask(ctx, task)
+	_, err = s.ts.Create(ctx, task)
 	if err != nil {
 		return err
 	}

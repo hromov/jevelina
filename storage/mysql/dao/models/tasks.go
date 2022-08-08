@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/hromov/jevelina/domain/leads"
+	"github.com/hromov/jevelina/useCases/tasks"
 	"gorm.io/gorm"
 )
 
@@ -47,8 +47,29 @@ type TaskType struct {
 	Name      string         `gorm:"size:32;unique"`
 }
 
-func TaskFromTaskData(t leads.TaskData) Task {
+func (t *Task) ToDomain() tasks.Task {
+	return tasks.Task{
+		ID:        t.ID,
+		ParentID:  t.ParentID,
+		CreatedAt: t.CreatedAt,
+		UpdatedAt: t.UpdatedAt,
+		DeletedAt: t.DeletedAt.Time,
+		DeadLine:  *t.DeadLine,
+		Completed: t.Completed,
+
+		Files:       filesToDomain(t.Files),
+		Description: t.Description,
+		Results:     t.Results,
+
+		Responsible: t.Responsible.ToDomain(),
+		Created:     t.Created.ToDomain(),
+		Updated:     t.Updated.ToDomain(),
+	}
+}
+
+func TaskFromTaskData(t tasks.TaskData) Task {
 	return Task{
+		ID:            t.ID,
 		ParentID:      t.ParentID,
 		DeadLine:      TimeOrNil(t.DeadLine),
 		Description:   t.Description,

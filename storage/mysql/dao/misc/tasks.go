@@ -1,15 +1,16 @@
 package misc
 
 import (
+	"context"
+
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
-	"gorm.io/gorm"
+	"github.com/hromov/jevelina/useCases/tasks"
 	"gorm.io/gorm/clause"
 )
 
-func (m *Misc) Tasks(filter models.ListFilter) (*models.TasksResponse, error) {
+func (m *Misc) GetTasks(ctx context.Context, filter tasks.Filter) (tasks.TasksResponse, error) {
 	cr := &models.TasksResponse{}
-	//How to make joins work?.Joins("Contacts")
-	q := m.DB.Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
+	q := m.DB.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 	if filter.Query != "" {
 		q = q.Where("name LIKE ?", "%"+filter.Query+"%")
 	}
@@ -30,35 +31,57 @@ func (m *Misc) Tasks(filter models.ListFilter) (*models.TasksResponse, error) {
 	}
 	q.Order("created_at asc")
 	if result := q.Find(&cr.Tasks).Count(&cr.Total); result.Error != nil {
-		return nil, result.Error
+		return tasks.TasksResponse{}, result.Error
 	}
-	return cr, nil
+	taskList := make([]tasks.Task, len(cr.Tasks))
+	for i, t := range cr.Tasks {
+		taskList[i] = t.ToDomain()
+	}
+	return tasks.TasksResponse{Tasks: taskList, Total: cr.Total}, nil
 }
 
-func (m *Misc) Task(ID uint64) (*models.Task, error) {
+func (m *Misc) GetTask(ctx context.Context, id uint64) (tasks.Task, error) {
 	var item models.Task
-	if result := m.DB.Preload(clause.Associations).First(&item, ID); result.Error != nil {
-		return nil, result.Error
+	if result := m.DB.WithContext(ctx).Preload(clause.Associations).First(&item, id); result.Error != nil {
+		return tasks.Task{}, result.Error
 	}
-	return &item, nil
+	return item.ToDomain(), nil
 }
 
-func (m *Misc) TaskTypes() ([]models.TaskType, error) {
-	var items []models.TaskType
-	if result := m.DB.Find(&items); result.Error != nil {
-		return nil, result.Error
-	}
-	return items, nil
+func (m *Misc) DeleteTaskByParent(ctx context.Context, parentID uint64) error {
+	return m.DB.WithContext(ctx).Delete(&models.Task{}, "parent_id = ?", parentID).Error
 }
 
-func (m *Misc) TaskType(ID uint8) (*models.TaskType, error) {
-	var item models.TaskType
-	if result := m.DB.First(&item, ID); result.Error != nil {
-		return nil, result.Error
-	}
-	return &item, nil
+func (m *Misc) DeleteTask(ctx context.Context, id uint64) error {
+	return m.DB.WithContext(ctx).Delete(&models.Task{ID: id}).Error
 }
 
-func DeleteTaskByParent(db *gorm.DB, parentID uint64) error {
-	return db.Delete(&models.Task{}, "parent_id = ?", parentID).Error
+func (m *Misc) CreateTask(ctx context.Context, task tasks.TaskData) (tasks.Task, error) {
+	dbTask := models.TaskFromTaskData(task)
+	if err := m.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbTask).Error; err != nil {
+		return tasks.Task{}, err
+	}
+	return dbTask.ToDomain(), nil
 }
+
+func (m *Misc) UpdateTask(ctx context.Context, task tasks.TaskData) error {
+	dbTask := models.TaskFromTaskData(task)
+	return m.DB.WithContext(ctx).Model(&models.Task{}).Where("id", task.ID).Updates(&dbTask).Error
+}
+
+// TODO: don't use task types rn
+// func (m *Misc) TaskTypes() ([]models.TaskType, error) {
+// 	var items []models.TaskType
+// 	if result := m.DB.Find(&items); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return items, nil
+// }
+
+// func (m *Misc) TaskType(ID uint8) (*models.TaskType, error) {
+// 	var item models.TaskType
+// 	if result := m.DB.First(&item, ID); result.Error != nil {
+// 		return nil, result.Error
+// 	}
+// 	return &item, nil
+// }

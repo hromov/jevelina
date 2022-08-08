@@ -3,10 +3,8 @@ package leads
 import (
 	"context"
 	"fmt"
-	"log"
 
 	"github.com/hromov/jevelina/domain/leads"
-	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -29,6 +27,7 @@ func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsR
 		if len(filter.Steps) > 0 {
 			search := ""
 			for i, step := range filter.Steps {
+				//TODO: it has to be always number or find a solution to avoid fmt.Sprintf()
 				search += fmt.Sprintf("step_id = %d", step)
 				if i < (len(filter.Steps) - 1) {
 					search += " OR "
@@ -54,12 +53,14 @@ func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsR
 		}
 		dateSearh := ""
 		if !filter.MinDate.IsZero() {
+			//TODO: it has to be always Time or find a solution to avoid fmt.Sprintf()
 			dateSearh += fmt.Sprintf("closed_at >= '%s'", filter.MinDate)
 		}
 		if !filter.MaxDate.IsZero() {
 			if dateSearh != "" {
 				dateSearh += " AND "
 			}
+			//TODO: it has to be always Time or find a solution to avoid fmt.Sprintf()
 			dateSearh += fmt.Sprintf("closed_at < '%s'", filter.MaxDate)
 		}
 		//then we have to return datet or null
@@ -104,9 +105,10 @@ func (l *Leads) DeleteLead(ctx context.Context, id uint64) error {
 	if err := l.DB.WithContext(ctx).Delete(&models.Lead{ID: id}).Error; err != nil {
 		return err
 	}
-	if err := misc.DeleteTaskByParent(l.DB, id); err != nil {
-		log.Printf("Error while deliting tasks for lead: %s", err.Error())
-	}
+	// TODO: do with hooks ?
+	// if err := misc.DeleteTaskByParent(l.DB, id); err != nil {
+	// 	log.Printf("Error while deliting tasks for lead: %s", err.Error())
+	// }
 	return nil
 }
 
@@ -124,13 +126,4 @@ func (l *Leads) CreateLead(ctx context.Context, lead leads.LeadData) (leads.Lead
 func (l *Leads) UpdateLead(ctx context.Context, lead leads.LeadData) error {
 	dbLead := models.LeadFromDomain(lead)
 	return l.DB.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
-}
-
-// TODO: move or return Task (make full crud)
-func (l *Leads) CreateTask(ctx context.Context, t leads.TaskData) error {
-	dbTask := models.TaskFromTaskData(t)
-	if err := l.DB.WithContext(ctx).Omit(clause.Associations).Create(&dbTask).Error; err != nil {
-		return err
-	}
-	return nil
 }

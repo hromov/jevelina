@@ -14,6 +14,7 @@ import (
 	"github.com/hromov/jevelina/http/rest"
 	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/jevelina/useCases/orders"
+	"github.com/hromov/jevelina/useCases/tasks"
 )
 
 // const dsn = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
@@ -36,9 +37,10 @@ func main() {
 	us := users.NewService(mysql.Misc())
 	cs := contacts.NewService(mysql.Contacts())
 	ls := leads.NewService(mysql.Leads())
-	ordersService := orders.NewService(cs, ls, us)
+	ts := tasks.NewService(mysql.Misc())
 	ms := misc.Service(mysql.Misc())
-	router := rest.InitRouter(us, cs, ls, ordersService, ms)
+	ordersService := orders.NewService(cs, ls, us, ts)
+	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

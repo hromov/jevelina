@@ -4,11 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 	"unicode"
 
 	"github.com/hromov/jevelina/domain/contacts"
-	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -88,9 +86,10 @@ func (c *Contacts) DeleteContact(ctx context.Context, id uint64) error {
 	if err := c.DB.Delete(&models.Contact{ID: id}).Error; err != nil {
 		return err
 	}
-	if err := misc.DeleteTaskByParent(c.DB, id); err != nil {
-		log.Printf("Error while deliting tasks for contact: %s", err.Error())
-	}
+	// TODO: do with hooks ?
+	// if err := misc.DeleteTaskByParent(c.DB, id); err != nil {
+	// 	log.Printf("Error while deliting tasks for contact: %s", err.Error())
+	// }
 	return nil
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/hromov/jevelina/domain/contacts"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/useCases/tasks"
 )
 
 const defaultLimit = 50
@@ -90,6 +91,45 @@ func FilterFromQuery(u url.Values) models.ListFilter {
 	if stepID := u.Get("step"); stepID != "" {
 		step64, _ := strconv.ParseUint(stepID, 10, 64)
 		filter.StepID = uint8(step64)
+	}
+	return filter
+}
+
+func TasksFilter(u url.Values) tasks.Filter {
+	filter := tasks.Filter{}
+	if IDs := u.Get("ids"); IDs != "" {
+		filter.IDs = make([]uint64, 0)
+		slice := strings.Split(IDs, ",")
+		for _, IDstring := range slice {
+			if IDnumber, err := strconv.ParseUint(IDstring, 10, 64); err == nil {
+				filter.IDs = append(filter.IDs, IDnumber)
+			}
+
+		}
+	}
+	if query := u.Get("query"); query != "" {
+		filter.Query = query
+	}
+	if limit := u.Get("limit"); limit != "" {
+		filter.Limit, _ = strconv.Atoi(limit)
+	} else {
+		filter.Limit = defaultLimit
+	}
+	if offset := u.Get("offset"); offset != "" {
+		filter.Offset, _ = strconv.Atoi(offset)
+	}
+	if parentID := u.Get("parent"); parentID != "" {
+		filter.ParentID, _ = strconv.ParseUint(parentID, 10, 64)
+	}
+	if respID := u.Get("responsible"); respID != "" {
+		filter.ResponsibleID, _ = strconv.ParseUint(respID, 10, 64)
+	}
+	const timeForm = "Jan-02-2006"
+	if minDate := u.Get("min_date"); minDate != "" {
+		filter.MinDate, _ = time.Parse(timeForm, minDate)
+	}
+	if maxDate := u.Get("max_date"); maxDate != "" {
+		filter.MaxDate, _ = time.Parse(timeForm, maxDate)
 	}
 	return filter
 }

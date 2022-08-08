@@ -37,8 +37,9 @@ func TestGetRandomUser(t *testing.T) {
 	cs := &mocks.ContactsService{}
 	ls := &mocks.LeadsService{}
 	us := &mocks.UsersService{}
+	ts := &mocks.TasksService{}
 	us.On("List", mock.Anything).Return(users, nil)
-	s := orders.NewService(cs, ls, us)
+	s := orders.NewService(cs, ls, us, ts)
 
 	resMap := make(map[string]int)
 	for i := 0; i < 200; i++ {

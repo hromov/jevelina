@@ -12,23 +12,27 @@ import (
 	"github.com/hromov/jevelina/http/rest/handlers/files_api"
 	"github.com/hromov/jevelina/http/rest/handlers/fin_api"
 	"github.com/hromov/jevelina/useCases/orders"
+	"github.com/hromov/jevelina/useCases/tasks"
 )
 
-func InitRouter(us users.Service, cs contacts.Service, ls leads.Service, os orders.Service, ms misc.Service) *mux.Router {
+func InitRouter(
+	us users.Service, cs contacts.Service, ls leads.Service,
+	os orders.Service, ms misc.Service, ts tasks.Service,
+) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/usercheck", auth.UserCheckHandler).Methods("GET")
 	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
 	// r.Use(auth.UserCheck)
-	r = UserRoutes(r, us, cs, ls, ms)
+	r = UserRoutes(r, us, cs, ls, ms, ts)
 	// TODO: uncoment for prod
 	// r.Use(auth.AdminCheck)
-	r = AdminRoutes(r, us, ms, ls)
+	r = AdminRoutes(r, us, ms, ls, ts)
 
 	return r
 }
 
-func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Service) *mux.Router {
+func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Service, ts tasks.Service) *mux.Router {
 	r.HandleFunc("/users", api.CreateUser(us)).Methods("POST")
 	r.HandleFunc("/users/{id}", api.UpdateUser(us)).Methods("PUT")
 	r.HandleFunc("/users/{id}", api.DeleteUser(us)).Methods("DELETE")
@@ -45,9 +49,9 @@ func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Serv
 	r.HandleFunc("/manufacturers/{id}", api.Manufacturer(ms)).Methods("PUT", "DELETE")
 	r.HandleFunc("/tags", api.TagsHandler).Methods("POST")
 	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("PUT", "DELETE")
-	r.HandleFunc("/tasks/{id}", api.TaskHandler).Methods("DELETE")
-	r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("POST")
-	r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("PUT", "DELETE")
+	r.HandleFunc("/tasks/{id}", api.Task(ts)).Methods("DELETE")
+	// r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("POST")
+	// r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("PUT", "DELETE")
 	r.HandleFunc("/events/transfers", events_api.ListHandler).Methods("GET")
 	r.HandleFunc("/files/{id}", files_api.FileHandler).Methods("DELETE")
 	// Finance part
@@ -60,7 +64,7 @@ func AdminRoutes(r *mux.Router, us users.Service, ms misc.Service, ls leads.Serv
 	return r
 }
 
-func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.Service, ms misc.Service) *mux.Router {
+func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.Service, ms misc.Service, ts tasks.Service) *mux.Router {
 	r.HandleFunc("/contacts", api.Contacts(cs)).Methods("GET", "POST")
 	r.HandleFunc("/contacts/{id}", api.Contact(cs)).Methods("GET", "PUT", "DELETE")
 	r.HandleFunc("/leads", api.Leads(ls)).Methods("GET", "POST")
@@ -79,10 +83,10 @@ func UserRoutes(r *mux.Router, us users.Service, cs contacts.Service, ls leads.S
 	r.HandleFunc("/manufacturers/{id}", api.Manufacturer(ms)).Methods("GET")
 	r.HandleFunc("/tags", api.TagsHandler).Methods("GET")
 	r.HandleFunc("/tags/{id}", api.TagHandler).Methods("GET")
-	r.HandleFunc("/tasks", api.TasksHandler).Methods("GET", "POST")
-	r.HandleFunc("/tasks/{id}", api.TaskHandler).Methods("GET", "PUT")
-	r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("GET")
-	r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("GET")
+	r.HandleFunc("/tasks", api.Tasks(ts)).Methods("GET", "POST")
+	r.HandleFunc("/tasks/{id}", api.Task(ts)).Methods("GET", "PUT")
+	// r.HandleFunc("/tasktypes", api.TaskTypesHandler).Methods("GET")
+	// r.HandleFunc("/tasktypes/{id}", api.TaskTypeHandler).Methods("GET")
 	r.HandleFunc("/files", files_api.FilesHandler).Methods("POST", "GET")
 	r.HandleFunc("/files/{id}", files_api.FileHandler).Methods("GET")
 

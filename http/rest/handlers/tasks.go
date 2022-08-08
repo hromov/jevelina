@@ -8,152 +8,115 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/http/rest/auth"
-	"github.com/hromov/jevelina/storage/mysql"
-	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/useCases/tasks"
 	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
-func TaskHandler(w http.ResponseWriter, r *http.Request) {
-	vars := mux.Vars(r)
-	ID, err := strconv.ParseUint(vars["id"], 10, 32)
-	if err != nil {
-		http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	c := mysql.Misc()
-	var task *models.Task
-
-	switch r.Method {
-	case "GET":
-		task, err = c.Task(ID)
+func Task(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id, err := getID(r)
 		if err != nil {
-			log.Println("Can't get task error: " + err.Error())
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				http.NotFound(w, r)
-			} else {
+			http.Error(w, "ID conversion error: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		switch r.Method {
+		case "GET":
+			task, err := ts.Get(r.Context(), id)
+			if err != nil {
+				log.Println("Can't get task error: " + err.Error())
+				if errors.Is(err, gorm.ErrRecordNotFound) {
+					http.NotFound(w, r)
+				} else {
+					http.Error(w, http.StatusText(http.StatusInternalServerError),
+						http.StatusInternalServerError)
+				}
+				return
+			}
+			_ = json.NewEncoder(w).Encode(task)
+			return
+		case "PUT":
+			task := tasks.TaskData{}
+			if err = json.NewDecoder(r.Body).Decode(&task); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			if uint64(task.ID) != id {
+				http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", id, task.ID), http.StatusBadRequest)
+				return
+			}
+			if task.ParentID == 0 {
+				http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
+				return
+			}
+
+			// TODO: move all this update fileds to events
+			// user, err := auth.GetCurrentUser(r)
+			// if err != nil {
+			// 	http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			// }
+			// task.UpdatedID = &user.ID
+
+			if err := ts.Update(r.Context(), task); err != nil {
+				log.Printf("Can't update task with ID = %d. Error: %s", id, err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			return
+		case "DELETE":
+
+			if err := ts.Delete(r.Context(), id); err != nil {
+				log.Printf("Can't delete task with ID = %d. Error: %s", id, err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
 			return
 		}
-		b, err := json.Marshal(task)
-		if err != nil {
-			log.Println("Can't json.Marshal(task) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-		return
-	case "PUT":
-		if err = json.NewDecoder(r.Body).Decode(&task); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if uint64(task.ID) != ID {
-			http.Error(w, fmt.Sprintf("url ID = %d is not the one from the request: %d", ID, task.ID), http.StatusBadRequest)
-			return
-		}
-		if task.ParentID == 0 {
-			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
-			return
-		}
-
-		user, err := auth.GetCurrentUser(r)
-		if err != nil {
-			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
-		}
-		task.UpdatedID = &user.ID
-
-		if err = c.DB.Omit(clause.Associations).Save(task).Error; err != nil {
-			log.Printf("Can't update task with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		return
-	case "DELETE":
-
-		if err = c.DB.Delete(&models.Task{ID: ID}).Error; err != nil {
-			log.Printf("Can't delete task with ID = %d. Error: %s", ID, err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-		return
 	}
-
 }
 
-func TasksHandler(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/tasks" {
-		http.NotFound(w, r)
-		return
-	}
+func Tasks(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	if r.Method == "POST" {
-		task := new(models.Task)
-		if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+		if r.Method == "POST" {
+			task := tasks.TaskData{}
+			if err := json.NewDecoder(r.Body).Decode(&task); err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			if task.ParentID == 0 {
+				http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
+				return
+			}
+
+			// TODO: move create to events too
+			user, err := auth.GetCurrentUser(r)
+			if err != nil {
+				http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
+			}
+			task.CreatedID = user.ID
+
+			createdTask, err := ts.Create(r.Context(), task)
+			if err != nil {
+				log.Printf("Can't create task. Error: %s", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+			}
+			_ = json.NewEncoder(w).Encode(createdTask)
 			return
 		}
-		if task.ParentID == 0 {
-			http.Error(w, "task shoud have ParentID", http.StatusBadRequest)
-			return
-		}
 
-		user, err := auth.GetCurrentUser(r)
+		filter := TasksFilter(r.URL.Query())
+		tasksResponse, err := ts.List(r.Context(), filter)
 		if err != nil {
-			http.Error(w, http.StatusText(http.StatusForbidden), http.StatusForbidden)
-		}
-		task.CreatedID = &user.ID
-
-		c := mysql.GetDB()
-		if err := c.DB.Omit(clause.Associations).Create(task).Error; err != nil {
-			log.Printf("Can't create task. Error: %s", err.Error())
+			log.Println("tasks Response error: ", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-
-		fullTask, err := mysql.Misc().Task(task.ID)
-		if err != nil {
-			log.Printf("Task should be created but we wasn't able to get it back. Error: %s", err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-		}
-
-		//it actually was created ......
-		b, err := json.Marshal(fullTask)
-		if err != nil {
-			log.Println("Can't json.Marshal(task) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
-		}
-		fmt.Fprint(w, string(b))
-		return
+		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
+		w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
+		_ = json.NewEncoder(w).Encode(tasksResponse.Tasks)
 	}
-
-	c := mysql.Misc()
-
-	tasksResponse, err := c.Tasks(FilterFromQuery(r.URL.Query()))
-	if err != nil {
-		log.Println("tasks Response error: ", err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-	}
-	// log.Println("banks in main: ", banks)
-	b, err := json.Marshal(tasksResponse.Tasks)
-	if err != nil {
-		log.Println("Can't json.Marshal(tasks) error: " + err.Error())
-		http.Error(w, http.StatusText(http.StatusInternalServerError),
-			http.StatusInternalServerError)
-		return
-	}
-	w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
-	w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
-	fmt.Fprint(w, string(b))
 }
