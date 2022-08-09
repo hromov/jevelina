@@ -38,6 +38,6 @@ func EventsHandler(es events.Service) func(w http.ResponseWriter, r *http.Reques
 		total := strconv.Itoa(int(eResponse.Total))
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", total)
-		json.NewEncoder(w).Encode(eResponse.Events)
+		_ = json.NewEncoder(w).Encode(eResponse.Events)
 	}
 }
