@@ -9,6 +9,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/domain/misc"
 	"github.com/hromov/jevelina/domain/misc/files"
@@ -48,13 +49,14 @@ func main() {
 	ms := misc.Service(storage)
 	tv := tokenvalidator.NewService()
 	as := auth.NewService(us, tv)
+	fin := finances.NewService(storage)
 	gc, err := gcloud.NewService(context.Background(), cfg.BucketName)
 	if err != nil {
 		log.Println("Can't create google cloud client error: ", err.Error())
 	}
 	fs := files.NewService(storage, gc)
 	ordersService := orders.NewService(cs, ls, us, ts)
-	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as, fs)
+	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as, fs, fin)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

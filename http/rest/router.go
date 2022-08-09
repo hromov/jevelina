@@ -3,6 +3,7 @@ package rest
 import (
 	"github.com/gorilla/mux"
 	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/domain/misc"
 	"github.com/hromov/jevelina/domain/misc/files"
@@ -18,17 +19,17 @@ import (
 func InitRouter(
 	us users.Service, cs contacts.Service, ls leads.Service,
 	os orders.Service, ms misc.Service, ts tasks.Service,
-	as auth.Service, fs files.Service,
+	as auth.Service, fs files.Service, fin finances.Service,
 ) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/usercheck", as.UserCheckHandler()).Methods("GET")
 	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
 	// r.Use(as.UserCheck)
-	r = UserRoutes(r, us, cs, ls, ms, ts, fs)
+	r = UserRoutes(r, us, cs, ls, ms, ts, fs, fin)
 	// TODO: uncoment for prod
 	// r.Use(as.AdminCheck)
-	r = AdminRoutes(r, us, ms, ls, ts, fs)
+	r = AdminRoutes(r, us, ms, ls, ts, fs, fin)
 
 	return r
 }
@@ -36,6 +37,7 @@ func InitRouter(
 func AdminRoutes(
 	r *mux.Router, us users.Service, ms misc.Service,
 	ls leads.Service, ts tasks.Service, fs files.Service,
+	fin finances.Service,
 ) *mux.Router {
 	r.HandleFunc("/users", api.CreateUser(us)).Methods("POST")
 	r.HandleFunc("/users/{id}", api.UpdateUser(us)).Methods("PUT")
@@ -59,10 +61,11 @@ func AdminRoutes(
 	r.HandleFunc("/events/transfers", events_api.ListHandler).Methods("GET")
 	r.HandleFunc("/files/{id}", api.File(fs)).Methods("DELETE")
 	// Finance part
-	r.HandleFunc("/wallets", fin_api.WalletsHandler).Methods("POST")
-	r.HandleFunc("/wallets/{id}", fin_api.WalletHandler).Methods("PUT", "DELETE")
-	r.HandleFunc("/wallets/{id}/close", fin_api.CloseWalletHandler).Methods("GET")
-	r.HandleFunc("/wallets/{id}/open", fin_api.OpenWalletHandler).Methods("GET")
+	r.HandleFunc("/wallets", api.Wallets(fin)).Methods("POST")
+	r.HandleFunc("/wallets/{id}", api.Wallet(fin)).Methods("PUT", "DELETE")
+	// TODO: changed to put - force front to use new route
+	r.HandleFunc("/wallets/{id}/state", api.ChangeWalletState(fin)).Methods("GET")
+	// r.HandleFunc("/wallets/{id}/open", fin_api.OpenWalletHandler).Methods("GET")
 	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler()).Methods("DELETE")
 	r.HandleFunc("/transfers/{id}/complete", fin_api.CompleteTransferHandler()).Methods("GET")
 	return r
@@ -71,7 +74,7 @@ func AdminRoutes(
 func UserRoutes(
 	r *mux.Router, us users.Service, cs contacts.Service,
 	ls leads.Service, ms misc.Service, ts tasks.Service,
-	fs files.Service,
+	fs files.Service, fin finances.Service,
 ) *mux.Router {
 	r.HandleFunc("/contacts", api.Contacts(cs)).Methods("GET", "POST")
 	r.HandleFunc("/contacts/{id}", api.Contact(cs)).Methods("GET", "PUT", "DELETE")
@@ -98,7 +101,7 @@ func UserRoutes(
 	r.HandleFunc("/files", api.Files(fs)).Methods("POST", "GET")
 	r.HandleFunc("/files/{id}", api.File(fs)).Methods("GET")
 
-	r.HandleFunc("/wallets", fin_api.WalletsHandler).Methods("GET")
+	r.HandleFunc("/wallets", api.Wallets(fin)).Methods("GET")
 	r.HandleFunc("/transfers", fin_api.TransfersHandler()).Methods("GET", "POST")
 	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler()).Methods("PUT")
 	r.HandleFunc("/categories", fin_api.CategoriesHandler).Methods("GET")

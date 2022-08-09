@@ -5,6 +5,7 @@ import (
 
 	"github.com/hromov/jevelina/storage/mysql/dao/contacts"
 	"github.com/hromov/jevelina/storage/mysql/dao/files"
+	"github.com/hromov/jevelina/storage/mysql/dao/finance"
 	"github.com/hromov/jevelina/storage/mysql/dao/leads"
 	"github.com/hromov/jevelina/storage/mysql/dao/misc"
 	"github.com/hromov/jevelina/storage/mysql/dao/users"
@@ -18,6 +19,7 @@ type Storage struct {
 	*leads.Leads
 	*contacts.Contacts
 	*files.Files
+	*finance.Finance
 }
 
 func NewStorage(dns string) (*Storage, error) {
@@ -33,5 +35,6 @@ func NewStorage(dns string) (*Storage, error) {
 		leads.NewLeads(db),
 		contacts.NewContacts(db),
 		files.NewFiles(db),
+		finance.NewFinance(db),
 	}, nil
 }

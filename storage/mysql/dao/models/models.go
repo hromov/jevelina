@@ -49,16 +49,6 @@ type Tag struct {
 	Name      string         `gorm:"size:32;unique"`
 }
 
-type Wallet struct {
-	ID        uint16 `gorm:"primaryKey"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	Name      string         `gorm:"size:32"`
-	Balance   int64
-	Closed    bool
-}
-
 type Transfer struct {
 	ID uint64 `gorm:"primaryKey"`
 	//Usualy LeadID
