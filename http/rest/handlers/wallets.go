@@ -124,7 +124,7 @@ func Wallets(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
 					http.StatusInternalServerError)
 			}
 
-			json.NewEncoder(w).Encode(wallet)
+			_ = json.NewEncoder(w).Encode(wallet)
 			return
 		}
 
@@ -134,6 +134,6 @@ func Wallets(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		json.NewEncoder(w).Encode(wallets)
+		_ = json.NewEncoder(w).Encode(wallets)
 	}
 }

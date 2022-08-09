@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/misc/files"
 	"gorm.io/gorm"
 )
@@ -28,6 +29,23 @@ type ListFilter struct {
 	Wallet        uint16
 	Completed     bool
 }
+
+func ListFilterFromFin(f finances.Filter) ListFilter {
+	return ListFilter{
+		IDs:       f.IDs,
+		Limit:     f.Limit,
+		Offset:    f.Offset,
+		Query:     f.Query,
+		ParentID:  f.ParentID,
+		MinDate:   f.MinDate,
+		MaxDate:   f.MaxDate,
+		From:      f.From,
+		To:        f.To,
+		Wallet:    f.Wallet,
+		Completed: f.Completed,
+	}
+}
+
 type Analytics struct {
 	CID string `gorm:"size:64"`
 	UID string `gorm:"size:64"`
@@ -47,36 +65,6 @@ type Tag struct {
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"size:32;unique"`
-}
-
-type Transfer struct {
-	ID uint64 `gorm:"primaryKey"`
-	//Usualy LeadID
-	ParentID  *uint64 `gorm:"index"`
-	CreatedAt time.Time
-	//UserID
-	CreatedBy   uint64
-	UpdatedAt   time.Time
-	DeletedAt   gorm.DeletedAt `gorm:"index"`
-	DeletedBy   uint64
-	Completed   bool
-	CompletedAt *time.Time
-	Description string
-	//UserID
-	CompletedBy uint64
-	//Wallet
-	From *uint16 `gorm:"index"`
-	//Wallet
-	To *uint16 `gorm:"index"`
-	// Can be changed to id later, will try like this for now
-	Category string
-	Amount   int64
-	Files    []File `gorm:"foreignKey:ParentID"`
-}
-
-type TransfersResponse struct {
-	Transfers []Transfer
-	Total     int64
 }
 
 type File struct {

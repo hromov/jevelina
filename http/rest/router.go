@@ -11,7 +11,6 @@ import (
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
 	"github.com/hromov/jevelina/http/rest/handlers/events_api"
-	"github.com/hromov/jevelina/http/rest/handlers/fin_api"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
 )
@@ -65,9 +64,9 @@ func AdminRoutes(
 	r.HandleFunc("/wallets/{id}", api.Wallet(fin)).Methods("PUT", "DELETE")
 	// TODO: changed to put - force front to use new route
 	r.HandleFunc("/wallets/{id}/state", api.ChangeWalletState(fin)).Methods("GET")
-	// r.HandleFunc("/wallets/{id}/open", fin_api.OpenWalletHandler).Methods("GET")
-	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler()).Methods("DELETE")
-	r.HandleFunc("/transfers/{id}/complete", fin_api.CompleteTransferHandler()).Methods("GET")
+	// r.HandleFunc("/wallets/{id}/open", api.OpenWalletHandler).Methods("GET")
+	r.HandleFunc("/transfers/{id}", api.TransferHandler(fin)).Methods("DELETE")
+	r.HandleFunc("/transfers/{id}/complete", api.CompleteTransferHandler(fin)).Methods("GET")
 	return r
 }
 
@@ -102,9 +101,9 @@ func UserRoutes(
 	r.HandleFunc("/files/{id}", api.File(fs)).Methods("GET")
 
 	r.HandleFunc("/wallets", api.Wallets(fin)).Methods("GET")
-	r.HandleFunc("/transfers", fin_api.TransfersHandler()).Methods("GET", "POST")
-	r.HandleFunc("/transfers/{id}", fin_api.TransferHandler()).Methods("PUT")
-	r.HandleFunc("/categories", fin_api.CategoriesHandler).Methods("GET")
-	r.HandleFunc("/analytics/categories", fin_api.CategoriesSumHandler).Methods("GET")
+	r.HandleFunc("/transfers", api.TransfersHandler(fin)).Methods("GET", "POST")
+	r.HandleFunc("/transfers/{id}", api.TransferHandler(fin)).Methods("PUT")
+	r.HandleFunc("/categories", api.CategoriesHandler(fin)).Methods("GET")
+	r.HandleFunc("/analytics/categories", api.CategoriesSumHandler(fin)).Methods("GET")
 	return r
 }

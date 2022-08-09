@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/hromov/jevelina/domain/contacts"
+	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"github.com/hromov/jevelina/useCases/tasks"
@@ -211,6 +212,58 @@ func LeadsFilter(u url.Values) leads.Filter {
 	if stepID := u.Get("step"); stepID != "" {
 		step64, _ := strconv.ParseUint(stepID, 10, 64)
 		filter.StepID = uint8(step64)
+	}
+	return filter
+}
+
+func FinFilter(u url.Values) finances.Filter {
+	filter := finances.Filter{}
+	if IDs := u.Get("ids"); IDs != "" {
+		filter.IDs = make([]uint64, 0)
+		slice := strings.Split(IDs, ",")
+		for _, IDstring := range slice {
+			if IDnumber, err := strconv.ParseUint(IDstring, 10, 64); err == nil {
+				filter.IDs = append(filter.IDs, IDnumber)
+			}
+
+		}
+	}
+
+	if query := u.Get("query"); query != "" {
+		filter.Query = query
+	}
+	if limit := u.Get("limit"); limit != "" {
+		filter.Limit, _ = strconv.Atoi(limit)
+	} else {
+		filter.Limit = defaultLimit
+	}
+	if offset := u.Get("offset"); offset != "" {
+		filter.Offset, _ = strconv.Atoi(offset)
+	}
+	if parentID := u.Get("parent"); parentID != "" {
+		filter.ParentID, _ = strconv.ParseUint(parentID, 10, 64)
+	}
+	if from := u.Get("from"); from != "" {
+		from64, _ := strconv.ParseUint(from, 10, 64)
+		filter.From = uint16(from64)
+	}
+	if completed := u.Get("completed"); completed != "" {
+		filter.Completed, _ = strconv.ParseBool(completed)
+	}
+	if wallet := u.Get("wallet"); wallet != "" {
+		wallet64, _ := strconv.ParseUint(wallet, 10, 64)
+		filter.Wallet = uint16(wallet64)
+	}
+	if to := u.Get("to"); to != "" {
+		to64, _ := strconv.ParseUint(to, 10, 64)
+		filter.To = uint16(to64)
+	}
+	const timeForm = "Jan-02-2006"
+	if minDate := u.Get("min_date"); minDate != "" {
+		filter.MinDate, _ = time.Parse(timeForm, minDate)
+	}
+	if maxDate := u.Get("max_date"); maxDate != "" {
+		filter.MaxDate, _ = time.Parse(timeForm, maxDate)
 	}
 	return filter
 }
