@@ -1,51 +1,38 @@
 package finance
 
 import (
+	"context"
 	"errors"
 	"fmt"
-	"log"
 	"time"
 
+	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 )
 
-func (f *Finance) CreateTransfer(t *models.Transfer) (*models.Transfer, error) {
-	t.Completed = false
-	if t.From == t.To {
-		return nil, errors.New("Can't transfer to the same wallet")
+func (f *Finance) CreateTransfer(ctx context.Context, t finances.Transfer) (finances.Transfer, error) {
+	transfer := models.TransferFromDomain(t)
+	if err := f.db.WithContext(ctx).Create(&transfer).Error; err != nil {
+		return finances.Transfer{}, err
 	}
-	if err := f.DB.Omit(clause.Associations).Create(t).Error; err != nil {
-		return nil, err
-	}
-	return t, nil
+	return transfer.ToDomain(), nil
 }
 
-func (f *Finance) UpdateTransfer(userID uint64, t *models.Transfer) error {
-	var oldTransfer *models.Transfer
-	if t.From == t.To {
-		return errors.New("Can't transfer to the same wallet")
-	}
-	f.DB.Unscoped().First(&oldTransfer, t.ID)
-	if oldTransfer == nil {
-		return fmt.Errorf("Can't find transfer with ID = %d", t.ID)
-	}
-	if oldTransfer.Completed || !oldTransfer.DeletedAt.Time.IsZero() {
-		f.categoryChangeCheck(userID, *oldTransfer, *t)
-		return f.DB.Unscoped().Model(oldTransfer).Updates(models.Transfer{Category: t.Category, Description: t.Description}).Error
-	}
-	return f.DB.Omit(clause.Associations).Save(t).Error
+func (f *Finance) UpdateTransfer(ctx context.Context, t finances.Transfer) error {
+	transfer := models.TransferFromDomain(t)
+	return f.db.WithContext(ctx).Omit(clause.Associations).Model(&models.Transfer{}).Where("id", t.ID).Updates(&transfer).Error
 }
 
-func (f *Finance) CompleteTransfer(ID uint64, userID uint64) error {
+func (f *Finance) CompleteTransfer(ctx context.Context, id uint64, userID uint64) error {
 
-	return f.DB.Transaction(func(tx *gorm.DB) error {
+	return f.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
 		var t *models.Transfer
-		tx.First(&t, ID)
+		tx.First(&t, id)
 		if t == nil {
-			return fmt.Errorf("Can't find transfer with ID = %d", ID)
+			return fmt.Errorf("Can't find transfer with ID = %d", id)
 		}
 
 		if !t.DeletedAt.Time.IsZero() {
@@ -82,13 +69,13 @@ func (f *Finance) CompleteTransfer(ID uint64, userID uint64) error {
 	})
 }
 
-func (f *Finance) DeleteTransfer(ID uint64, userID uint64) error {
-	return f.DB.Transaction(func(tx *gorm.DB) error {
+func (f *Finance) DeleteTransfer(ctx context.Context, id uint64, userID uint64) error {
+	return f.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
 
 		var t *models.Transfer
-		tx.First(&t, ID)
+		tx.First(&t, id)
 		if t == nil {
-			return fmt.Errorf("Can't find transfer with ID = %d", ID)
+			return fmt.Errorf("Can't find transfer with ID = %d", id)
 		}
 		if t.Completed {
 			if t.From != nil {
@@ -117,13 +104,15 @@ func (f *Finance) DeleteTransfer(ID uint64, userID uint64) error {
 				return err
 			}
 		}
-		return tx.Delete(&models.Transfer{ID: ID}).Error
+		return tx.Delete(&models.Transfer{ID: id}).Error
 	})
 }
 
-func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse, error) {
-	cr := &models.TransfersResponse{}
-	q := f.DB.Preload("Files").Limit(filter.Limit).Offset(filter.Offset)
+func (f *Finance) Transfers(ctx context.Context, ff finances.Filter) (finances.TransfersResponse, error) {
+	tr := finances.TransfersResponse{}
+	dbTransfers := []models.Transfer{}
+	filter := models.ListFilterFromFin(ff)
+	q := f.db.WithContext(ctx).Preload("Files").Limit(filter.Limit).Offset(filter.Offset)
 	// if IDs providen - return here and it has to be used as parent's ID, because we don't know transfers IDs other way
 	if len(filter.IDs) > 0 {
 		search := ""
@@ -133,77 +122,65 @@ func (f *Finance) Transfers(filter models.ListFilter) (*models.TransfersResponse
 				search += " OR "
 			}
 		}
-		if err := q.Where(search).Find(&cr.Transfers).Count(&cr.Total).Error; err != nil {
-			return nil, err
+		if err := q.Where(search).Find(&dbTransfers).Count(&tr.Total).Error; err != nil {
+			return finances.TransfersResponse{}, err
 		}
-		return cr, nil
+	} else {
+		//Category is text field for now, so let's use query. TODO: if changed to ID...
+		if filter.Query != "" {
+			q = q.Where("category LIKE ?", "%"+filter.Query+"%")
+		}
+		if filter.ParentID != 0 {
+			q = q.Where("parent_id = ?", filter.ParentID)
+		}
+		if filter.From != 0 {
+			q = q.Where("from = ?", filter.From)
+		}
+		if filter.To != 0 {
+			q = q.Where("to = ?", filter.To)
+		}
+		if filter.Wallet != 0 {
+			q = q.Where(f.db.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
+		}
+		q = q.Where(filter.DateCondition())
+		//TODO: check if it gives all uncompleted at first place
+		q.Order("completed asc").Order("completed_at desc").Order("created_at desc")
+		if result := q.Find(&dbTransfers).Count(&tr.Total); result.Error != nil {
+			return finances.TransfersResponse{}, result.Error
+		}
 	}
-
-	//Category is text field for now, so let's use query. TODO: if changed to ID...
-	if filter.Query != "" {
-		q = q.Where("category LIKE ?", "%"+filter.Query+"%")
+	tr.Transfers = make([]finances.Transfer, len(dbTransfers))
+	for i, t := range dbTransfers {
+		tr.Transfers[i] = t.ToDomain()
 	}
-	if filter.ParentID != 0 {
-		q = q.Where("parent_id = ?", filter.ParentID)
-	}
-	if filter.From != 0 {
-		q = q.Where("from = ?", filter.From)
-	}
-	if filter.To != 0 {
-		q = q.Where("to = ?", filter.To)
-	}
-	if filter.Wallet != 0 {
-		q = q.Where(f.DB.Where("`from` = ?", filter.Wallet).Or("`to` = ?", filter.Wallet))
-	}
-	q = q.Where(filter.DateCondition())
-	//TODO: check if it gives all uncompleted at first place
-	q.Order("completed asc").Order("completed_at desc").Order("created_at desc")
-	if result := q.Find(&cr.Transfers).Count(&cr.Total); result.Error != nil {
-		return nil, result.Error
-	}
-	return cr, nil
+	return tr, nil
 }
 
-func (f *Finance) Categories() ([]string, error) {
-	categories := make([]string, 0)
-	err := f.DB.Debug().Raw("SELECT DISTINCT(category) FROM transfers WHERE deleted_at IS NULL ORDER BY category asc").Scan(&categories).Error
+func (f *Finance) TransferCategories(ctx context.Context) ([]string, error) {
+	categories := []string{}
+	err := f.db.WithContext(ctx).Raw("SELECT DISTINCT(category) FROM transfers WHERE deleted_at IS NULL ORDER BY category asc").Scan(&categories).Error
 	return categories, err
 }
 
-type CatTotal struct {
-	Category string
-	Total    int
-}
-
-type CategorisedCashflow struct {
-	Incomes  []CatTotal
-	Expenses []CatTotal
-}
-
-func (f *Finance) SumByCategory(filter models.ListFilter) (*CategorisedCashflow, error) {
-	incomes := make([]CatTotal, 0)
-	expenses := make([]CatTotal, 0)
-	q := f.DB.Model(&models.Transfer{}).Where(filter.DateCondition())
+func (f *Finance) SumByCategory(ctx context.Context, ff finances.Filter) (finances.CategorisedCashflow, error) {
+	filter := models.ListFilterFromFin(ff)
+	incomes := []finances.CatTotal{}
+	expenses := []finances.CatTotal{}
+	q := f.db.WithContext(ctx).Model(&models.Transfer{}).Where(filter.DateCondition())
 	if err := q.Select("category, sum(amount) as total").Where("`from` IS NULL").Group("category").Find(&incomes).Error; err != nil {
-		return nil, fmt.Errorf("Can't get incomes error: %s", err.Error())
+		return finances.CategorisedCashflow{}, fmt.Errorf("Can't get incomes error: %s", err.Error())
 	}
-	q2 := f.DB.Model(&models.Transfer{}).Where(filter.DateCondition())
+	q2 := f.db.WithContext(ctx).Model(&models.Transfer{}).Where(filter.DateCondition())
 	if err := q2.Select("category, sum(amount) as total").Where("`to` IS NULL").Group("category").Find(&expenses).Error; err != nil {
-		return nil, fmt.Errorf("Can't get expenses error: %s", err.Error())
+		return finances.CategorisedCashflow{}, fmt.Errorf("Can't get expenses error: %s", err.Error())
 	}
-	return &CategorisedCashflow{Incomes: incomes, Expenses: expenses}, nil
+	return finances.CategorisedCashflow{Incomes: incomes, Expenses: expenses}, nil
 }
 
-func (f *Finance) categoryChangeCheck(userID uint64, oldTransfer, t models.Transfer) {
-	if oldTransfer.Category != t.Category {
-		if err := f.Events.Save(models.NewEvent{
-			UserID:          userID,
-			ParentID:        oldTransfer.ID,
-			Message:         fmt.Sprintf("%s > %s", oldTransfer.Category, t.Category),
-			EventType:       models.CategoryChange,
-			EventParentType: models.TransferEvent,
-		}); err != nil {
-			log.Println("events save error: ", err)
-		}
+func (f *Finance) GetTransfer(ctx context.Context, id uint64) (finances.Transfer, error) {
+	transfer := models.Transfer{ID: id}
+	if err := f.db.WithContext(ctx).First(&transfer).Error; err != nil {
+		return finances.Transfer{}, nil
 	}
+	return transfer.ToDomain(), nil
 }

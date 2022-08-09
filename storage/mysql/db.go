@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	"github.com/hromov/jevelina/storage/mysql/dao/events"
-	"github.com/hromov/jevelina/storage/mysql/dao/finance"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -36,9 +35,9 @@ func GetDB() *DB {
 // 	return &misc.Misc{DB: currentDB.DB}
 // }
 
-func Finance() *finance.Finance {
-	return &finance.Finance{DB: currentDB.DB, Events: Events()}
-}
+// func Finance() *finance.Finance {
+// 	return &finance.Finance{DB: currentDB.DB, Events: Events()}
+// }
 
 // func Files() *files.FilesService {
 // 	return &files.FilesService{DB: currentDB.DB, BucketName: currentDB.BucketName}
@@ -99,17 +98,17 @@ func (db *DB) Init() error {
 	// 	}
 	// }
 
-	if !currentDB.DB.Migrator().HasTable("wallets") {
-		if err := db.AutoMigrate(&models.Wallet{}); err != nil {
-			return err
-		}
-	}
+	// if !currentDB.DB.Migrator().HasTable("wallets") {
+	// 	if err := db.AutoMigrate(&models.Wallet{}); err != nil {
+	// 		return err
+	// 	}
+	// }
 
-	if !currentDB.DB.Migrator().HasTable("transfers") {
-		if err := db.AutoMigrate(&models.Transfer{}); err != nil {
-			return err
-		}
-	}
+	// if !currentDB.DB.Migrator().HasTable("transfers") {
+	// 	if err := db.AutoMigrate(&models.Transfer{}); err != nil {
+	// 		return err
+	// 	}
+	// }
 	// if !currentDB.DB.Migrator().HasTable("files") {
 	// 	if err := db.AutoMigrate(&models.File{}); err != nil {
 	// 		return err
