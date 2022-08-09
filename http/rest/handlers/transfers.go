@@ -12,6 +12,7 @@ import (
 	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
+	"github.com/hromov/jevelina/utils/events"
 )
 
 func CompleteTransferHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
@@ -41,7 +42,7 @@ func CompleteTransferHandler(f finances.Service) func(w http.ResponseWriter, r *
 	}
 }
 
-func TransferHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
+func TransferHandler(f finances.Service, es events.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 		vars := mux.Vars(r)
 		id, err := strconv.ParseUint(vars["id"], 10, 32)
@@ -63,12 +64,35 @@ func TransferHandler(f finances.Service) func(w http.ResponseWriter, r *http.Req
 				return
 			}
 
-			// userValue := r.Context().Value(auth.KeyUser{})
-			// user, ok := userValue.(users.User)
-			// if !ok {
-			// 	http.Error(w, "Not a user", http.StatusForbidden)
-			// 	return
-			// }
+			oldTransfer, err := f.GetTransfer(r.Context(), id)
+			if err != nil {
+				log.Println("Can't get old transfer error: ", err.Error())
+				http.Error(w, "Can't get old transfer", http.StatusInternalServerError)
+				return
+			}
+
+			userValue := r.Context().Value(auth.KeyUser{})
+			user, ok := userValue.(users.User)
+			if !ok {
+				http.Error(w, "Not a user", http.StatusForbidden)
+				return
+			}
+
+			if needCheck(oldTransfer) && oldTransfer.Category != transfer.Category {
+				event := events.NewEvent{
+					UserID:          user.ID,
+					ParentID:        oldTransfer.ID,
+					Message:         fmt.Sprintf("%s > %s", oldTransfer.Category, transfer.Category),
+					EventType:       events.CategoryChange,
+					EventParentType: events.TransferEvent,
+				}
+
+				if err := es.Save(r.Context(), event); err != nil {
+					log.Println("events save error: ", err)
+					log.Println("Event to save: ", event.Message)
+				}
+
+			}
 
 			//TODO: save event here at least on cat change
 			if err = f.UpdateTransfer(r.Context(), transfer); err != nil {
@@ -162,4 +186,8 @@ func CategoriesSumHandler(f finances.Service) func(w http.ResponseWriter, r *htt
 		}
 		_ = json.NewEncoder(w).Encode(sums)
 	}
+}
+
+func needCheck(t finances.Transfer) bool {
+	return t.Completed || !t.DeletedAt.IsZero()
 }

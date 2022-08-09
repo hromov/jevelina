@@ -1,31 +1,33 @@
 package events
 
 import (
-	"fmt"
-	"time"
+	"context"
+	"log"
 
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
+	"github.com/hromov/jevelina/utils/events"
 	"gorm.io/gorm"
 )
 
-type EventService struct {
-	DB *gorm.DB
+type Events struct {
+	db *gorm.DB
 }
 
-func (es *EventService) Save(newEvent models.NewEvent) error {
-	event := &models.Event{
-		CreatedAt:       time.Now(),
-		UserID:          newEvent.UserID,
-		ParentID:        newEvent.ParentID,
-		EventParentType: newEvent.EventParentType,
-		Description:     fmt.Sprintf("[%s] %s", newEvent.EventType.String(), newEvent.Message),
+func NewEvents(db *gorm.DB) *Events {
+	if err := db.AutoMigrate(&models.Event{}); err != nil {
+		log.Println("Can't auto migrate events error: ", err.Error())
 	}
-	return es.DB.Create(event).Error
+	return &Events{db}
 }
 
-func (es *EventService) List(filter models.EventFilter) (*models.EventsResponse, error) {
-	er := &models.EventsResponse{}
-	q := es.DB
+func (e *Events) SaveEvent(ctx context.Context, newEvent events.Event) error {
+	event := models.Event(newEvent)
+	return e.db.WithContext(ctx).Create(&event).Error
+}
+
+func (e *Events) GetEvents(ctx context.Context, filter events.EventFilter) (events.EventsResponse, error) {
+	er := events.EventsResponse{}
+	q := e.db.WithContext(ctx)
 	if filter.EventParentType != 0 {
 		q = q.Where("event_parent_type = ?", filter.EventParentType)
 	}
@@ -39,9 +41,13 @@ func (es *EventService) List(filter models.EventFilter) (*models.EventsResponse,
 	}
 
 	q.Order("created_at desc").Limit(filter.Limit).Offset(filter.Offset)
-
-	if result := q.Find(&er.Events).Count(&er.Total); result.Error != nil {
-		return nil, result.Error
+	list := []models.Event{}
+	if err := q.Find(&list).Count(&er.Total).Error; err != nil {
+		return events.EventsResponse{}, err
+	}
+	er.Events = make([]events.Event, len(list))
+	for i, event := range list {
+		er.Events[i] = event.ToDomain()
 	}
 	return er, nil
 }

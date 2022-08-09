@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/hromov/jevelina/domain/finances"
-	"github.com/hromov/jevelina/domain/misc/files"
 	"gorm.io/gorm"
 )
 
@@ -58,116 +57,12 @@ type Analytics struct {
 
 	Domain string `gorm:"size:128"`
 }
-
 type Tag struct {
 	ID        uint8 `gorm:"primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 	Name      string         `gorm:"size:32;unique"`
-}
-
-type File struct {
-	ID        uint64 `gorm:"primaryKey"`
-	ParentID  uint64 `gorm:"index"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Name      string `gorm:"size:32"`
-	URL       string `gorm:"size:128"`
-}
-
-func FileFromDomain(f files.FileCreateReq) File {
-	return File{
-		ParentID: f.ParentID,
-		Name:     f.Name,
-		URL:      f.URL,
-	}
-}
-
-func (f *File) ToDomain() files.File {
-	return files.File{
-		ID:        f.ID,
-		ParentID:  f.ParentID,
-		CreatedAt: f.CreatedAt,
-		Name:      f.Name,
-		URL:       f.URL,
-	}
-}
-
-func FilesToDomain(items []File) []files.File {
-	converted := make([]files.File, len(items))
-	for i, f := range items {
-		converted[i] = f.ToDomain()
-	}
-	return converted
-}
-
-type FileAddReq struct {
-	Parent uint64
-	Name   string
-	Type   string
-	Value  string
-}
-
-type EventParentType int16
-
-const (
-	TransferEvent EventParentType = iota + 1
-	LeadEvent
-	ContactEvent
-)
-
-type EventType int16
-
-const (
-	Create EventType = iota + 1
-	Update
-	Delete
-	CategoryChange
-)
-
-func (et EventType) String() string {
-	switch et {
-	case Create:
-		return "Create"
-	case Update:
-		return "Update"
-	case Delete:
-		return "Delete"
-	case CategoryChange:
-		return "Category Change"
-	}
-	return "unknown"
-}
-
-type Event struct {
-	ID              uint64 `gorm:"primaryKey"`
-	CreatedAt       time.Time
-	ParentID        uint64
-	UserID          uint64
-	EventParentType EventParentType
-	Description     string `gorm:"size:512"`
-}
-
-type NewEvent struct {
-	ParentID        uint64
-	UserID          uint64
-	Message         string
-	EventType       EventType
-	EventParentType EventParentType
-}
-
-type EventsResponse struct {
-	Events []Event
-	Total  int64
-}
-
-type EventFilter struct {
-	ParentID        uint64
-	UserID          uint64
-	EventParentType EventParentType
-	Limit           int
-	Offset          int
 }
 
 // TODO: move to cdb

@@ -20,10 +20,9 @@ import (
 	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
+	"github.com/hromov/jevelina/utils/events"
 	tokenvalidator "github.com/hromov/jevelina/utils/tokenValidator"
 )
-
-// const dns = "root:password@tcp(127.0.0.1:3306)/gorm_test?charset=utf8mb4&parseTime=True&loc=Local"
 
 func main() {
 	cfg := config.Get()
@@ -31,10 +30,6 @@ func main() {
 	dns, err := os.ReadFile(cfg.Dsn)
 	if err != nil {
 		log.Fatal(err)
-	}
-	// TODO: remove after all transition finished on storage and services
-	if _, err = mysql.OpenAndInit(string(dns)); err != nil {
-		log.Fatalf("Cant open and init data base error: %s", err.Error())
 	}
 
 	storage, err := mysql.NewStorage(string(dns))
@@ -50,13 +45,14 @@ func main() {
 	tv := tokenvalidator.NewService()
 	as := auth.NewService(us, tv)
 	fin := finances.NewService(storage)
+	es := events.NewService(storage)
 	gc, err := gcloud.NewService(context.Background(), cfg.BucketName)
 	if err != nil {
 		log.Println("Can't create google cloud client error: ", err.Error())
 	}
 	fs := files.NewService(storage, gc)
 	ordersService := orders.NewService(cs, ls, us, ts)
-	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as, fs, fin)
+	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as, fs, fin, es)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})
