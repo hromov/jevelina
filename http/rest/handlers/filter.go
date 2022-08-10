@@ -195,6 +195,9 @@ func LeadsFilter(u url.Values) leads.Filter {
 	if completed := u.Get("completed"); completed != "" {
 		filter.Completed, _ = strconv.ParseBool(completed)
 	}
+	if byDate := u.Get("by_date"); byDate != "" {
+		filter.ByCreationDate, _ = strconv.ParseBool(byDate)
+	}
 	if respID := u.Get("responsible"); respID != "" {
 		filter.ResponsibleID, _ = strconv.ParseUint(respID, 10, 64)
 	}

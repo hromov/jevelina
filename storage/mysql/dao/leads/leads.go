@@ -138,3 +138,60 @@ func (l *Leads) UpdateLead(ctx context.Context, lead leads.LeadData) error {
 	dbLead := models.LeadFromDomain(lead)
 	return l.db.WithContext(ctx).Omit(clause.Associations).Where("id", lead.ID).Updates(&dbLead).Error
 }
+
+func (l *Leads) GetLeadsByDates(ctx context.Context, filter leads.Filter) (leads.LeadsResponse, error) {
+	if filter.ByCreationDate {
+		return l.GetLeadsByDates(ctx, filter)
+	}
+
+	cr := &models.LeadsResponse{}
+	q := l.db.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
+
+	if len(filter.Steps) > 0 {
+		search := ""
+		for i, step := range filter.Steps {
+			//TODO: it has to be always number or find a solution to avoid fmt.Sprintf()
+			search += fmt.Sprintf("step_id = %d", step)
+			if i < (len(filter.Steps) - 1) {
+				search += " OR "
+			}
+		}
+		q = q.Where(search)
+	}
+
+	if filter.ResponsibleID != 0 {
+		q = q.Where("responsible_id = ?", filter.ResponsibleID)
+	}
+	if filter.Active {
+		q = q.Where("closed_at IS NULL")
+	}
+	if filter.StepID != 0 {
+		q = q.Where("step_id = ?", filter.StepID)
+	}
+	dateSearh := ""
+	if !filter.MinDate.IsZero() {
+		//TODO: it has to be always Time or find a solution to avoid fmt.Sprintf()
+		dateSearh += fmt.Sprintf("created_at >= '%s'", filter.MinDate)
+	}
+	if !filter.MaxDate.IsZero() {
+		if dateSearh != "" {
+			dateSearh += " AND "
+		}
+		//TODO: it has to be always Time or find a solution to avoid fmt.Sprintf()
+		dateSearh += fmt.Sprintf("created_at < '%s'", filter.MaxDate)
+	}
+	q = q.Where(dateSearh).Order("created_at desc")
+
+	if err := q.Find(&cr.Leads).Count(&cr.Total).Error; err != nil {
+		return leads.LeadsResponse{}, err
+	}
+
+	resp := leads.LeadsResponse{
+		Leads: make([]leads.Lead, len(cr.Leads)),
+		Total: cr.Total,
+	}
+	for i, l := range cr.Leads {
+		resp.Leads[i] = l.ToDomain()
+	}
+	return resp, nil
+}
