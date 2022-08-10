@@ -9,14 +9,11 @@ import (
 )
 
 type Filter struct {
-	IDs    []uint64
-	Limit  int
-	Offset int
-	// LeadID        uint64
-	ContactID uint64
-	// TagID         uint8
-	Query string
-	// ParentID      uint64
+	IDs            []uint64
+	Limit          int
+	Offset         int
+	ContactID      uint64
+	Query          string
 	Active         bool
 	ByCreationDate bool
 	StepID         uint8
@@ -24,10 +21,7 @@ type Filter struct {
 	ResponsibleID  uint64
 	MinDate        time.Time
 	MaxDate        time.Time
-	// From          uint16
-	// To            uint16
-	// Wallet        uint16
-	Completed bool
+	Completed      bool
 }
 
 type Lead struct {
