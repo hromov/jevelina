@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/url"
 	"strconv"
 	"strings"
@@ -195,9 +196,11 @@ func LeadsFilter(u url.Values) leads.Filter {
 	if completed := u.Get("completed"); completed != "" {
 		filter.Completed, _ = strconv.ParseBool(completed)
 	}
+	log.Println(u.Get("by_date"))
 	if byDate := u.Get("by_date"); byDate != "" {
 		filter.ByCreationDate, _ = strconv.ParseBool(byDate)
 	}
+	log.Println(filter.ByCreationDate)
 	if respID := u.Get("responsible"); respID != "" {
 		filter.ResponsibleID, _ = strconv.ParseUint(respID, 10, 64)
 	}

@@ -26,6 +26,9 @@ func NewLeads(db *gorm.DB) *Leads {
 }
 
 func (l *Leads) GetLeads(ctx context.Context, filter leads.Filter) (leads.LeadsResponse, error) {
+	if filter.ByCreationDate {
+		return l.GetLeadsByDates(ctx, filter)
+	}
 	cr := &models.LeadsResponse{}
 	q := l.db.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 
@@ -140,10 +143,6 @@ func (l *Leads) UpdateLead(ctx context.Context, lead leads.LeadData) error {
 }
 
 func (l *Leads) GetLeadsByDates(ctx context.Context, filter leads.Filter) (leads.LeadsResponse, error) {
-	if filter.ByCreationDate {
-		return l.GetLeadsByDates(ctx, filter)
-	}
-
 	cr := &models.LeadsResponse{}
 	q := l.db.WithContext(ctx).Preload(clause.Associations).Limit(filter.Limit).Offset(filter.Offset)
 
