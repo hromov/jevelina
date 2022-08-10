@@ -104,6 +104,6 @@ type LeadData struct {
 	ProductID      uint32
 	ManufacturerID uint16
 	SourceID       uint8
-	Step           Step
-	Analytics      misc.Analytics
+	//TODO: move it
+	Analytics misc.Analytics
 }

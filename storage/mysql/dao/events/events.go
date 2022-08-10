@@ -4,8 +4,8 @@ import (
 	"context"
 	"log"
 
+	"github.com/hromov/jevelina/services/events"
 	"github.com/hromov/jevelina/storage/mysql/dao/models"
-	"github.com/hromov/jevelina/utils/events"
 	"gorm.io/gorm"
 )
 

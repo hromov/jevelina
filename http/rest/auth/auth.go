@@ -8,7 +8,7 @@ import (
 	"net/http"
 
 	"github.com/hromov/jevelina/domain/users"
-	tokenvalidator "github.com/hromov/jevelina/utils/tokenValidator"
+	tokenvalidator "github.com/hromov/jevelina/services/tokenValidator"
 )
 
 type KeyUser struct{}

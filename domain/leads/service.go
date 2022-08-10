@@ -49,10 +49,14 @@ func (s *service) List(ctx context.Context, f Filter) (LeadsResponse, error) {
 }
 
 func (s *service) Update(ctx context.Context, lead LeadData) error {
-	if !lead.Step.Active && lead.ClosedAt.IsZero() {
+	step, err := s.GetStep(ctx, lead.StepID)
+	if err != nil {
+		return err
+	}
+	if !step.Active && lead.ClosedAt.IsZero() {
 		lead.ClosedAt = time.Now()
 	}
-	if lead.Step.Active && !lead.ClosedAt.IsZero() {
+	if step.Active && !lead.ClosedAt.IsZero() {
 		lead.ClosedAt = time.Time{}
 	}
 	return s.r.UpdateLead(ctx, lead)

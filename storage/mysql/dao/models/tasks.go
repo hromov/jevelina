@@ -54,7 +54,7 @@ func (t *Task) ToDomain() tasks.Task {
 		CreatedAt: t.CreatedAt,
 		UpdatedAt: t.UpdatedAt,
 		DeletedAt: t.DeletedAt.Time,
-		DeadLine:  *t.DeadLine,
+		DeadLine:  Time(t.DeadLine),
 		Completed: t.Completed,
 
 		Files:       FilesToDomain(t.Files),
@@ -75,5 +75,7 @@ func TaskFromTaskData(t tasks.TaskData) Task {
 		Description:   t.Description,
 		ResponsibleID: OrNil(t.ResponsibleID),
 		CreatedID:     OrNil(t.CreatedID),
+		Results:       t.Results,
+		Completed:     t.Completed,
 	}
 }

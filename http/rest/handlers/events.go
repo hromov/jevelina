@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/hromov/jevelina/utils/events"
+	"github.com/hromov/jevelina/services/events"
 )
 
 func EventsHandler(es events.Service) func(w http.ResponseWriter, r *http.Request) {
