@@ -23,7 +23,7 @@ type Service interface {
 	Get(context.Context, uint64) (Lead, error)
 	List(context.Context, Filter) (LeadsResponse, error)
 	Create(context.Context, LeadData) (Lead, error)
-	Update(context.Context, LeadData) (Lead, error)
+	Update(context.Context, LeadData) error
 	Delete(context.Context, uint64) error
 	GetStep(context.Context, uint8) (Step, error)
 	GetSteps(context.Context) ([]Step, error)
@@ -48,10 +48,10 @@ func (s *service) List(ctx context.Context, f Filter) (LeadsResponse, error) {
 	return s.r.GetLeads(ctx, f)
 }
 
-func (s *service) Update(ctx context.Context, lead LeadData) (Lead, error) {
+func (s *service) Update(ctx context.Context, lead LeadData) error {
 	step, err := s.GetStep(ctx, lead.StepID)
 	if err != nil {
-		return Lead{}, err
+		return err
 	}
 	if !step.Active && lead.ClosedAt.IsZero() {
 		lead.ClosedAt = time.Now()
@@ -59,10 +59,7 @@ func (s *service) Update(ctx context.Context, lead LeadData) (Lead, error) {
 	if step.Active && !lead.ClosedAt.IsZero() {
 		lead.ClosedAt = time.Time{}
 	}
-	if err := s.r.UpdateLead(ctx, lead); err != nil {
-		return Lead{}, err
-	}
-	return s.Get(ctx, lead.ID)
+	return s.r.UpdateLead(ctx, lead)
 }
 
 func (s *service) Delete(ctx context.Context, id uint64) error {

@@ -48,4 +48,6 @@ type TaskData struct {
 	Description   string
 	ResponsibleID uint64
 	CreatedID     uint64
+	Results       string
+	Completed     bool
 }

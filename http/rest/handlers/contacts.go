@@ -151,6 +151,14 @@ func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
+			updated, err := cs.Get(r.Context(), id)
+			if err != nil {
+				log.Println("Can't get saved contact error: ", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			json.NewEncoder(w).Encode(contactFromDomain(updated))
 			return
 		case "DELETE":
 			if err := cs.Delete(r.Context(), id); err != nil {

@@ -45,7 +45,7 @@ func (m *Misc) GetTask(ctx context.Context, id uint64) (tasks.Task, error) {
 	if result := m.db.WithContext(ctx).Preload(clause.Associations).First(&item, id); result.Error != nil {
 		return tasks.Task{}, result.Error
 	}
-	return item.ToDomain(), nil
+	return m.GetTask(ctx, id)
 }
 
 func (m *Misc) DeleteTaskByParent(ctx context.Context, parentID uint64) error {

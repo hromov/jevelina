@@ -97,9 +97,16 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			updated, err := ls.Update(r.Context(), lead)
+			err := ls.Update(r.Context(), lead)
 			if err != nil {
 				log.Println("Can't save lead error: ", err.Error())
+				http.Error(w, http.StatusText(http.StatusInternalServerError),
+					http.StatusInternalServerError)
+				return
+			}
+			updated, err := ls.Get(r.Context(), id)
+			if err != nil {
+				log.Println("Can't get saved lead error: ", err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 				return
