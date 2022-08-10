@@ -25,10 +25,10 @@ func InitRouter(
 	r.HandleFunc("/usercheck", as.UserCheckHandler()).Methods("GET")
 	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
-	// r.Use(as.UserCheck)
+	r.Use(as.UserCheck)
 	r = UserRoutes(r, us, cs, ls, ms, ts, fs, fin, es)
 	// TODO: uncoment for prod
-	// r.Use(as.AdminCheck)
+	r.Use(as.AdminCheck)
 	r = AdminRoutes(r, us, ms, ls, ts, fs, fin, es)
 
 	return r

@@ -97,13 +97,14 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			if err := ls.Update(r.Context(), lead); err != nil {
+			updated, err := ls.Update(r.Context(), lead)
+			if err != nil {
 				log.Println("Can't save lead error: ", err.Error())
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 				return
 			}
-			w.WriteHeader(http.StatusNoContent)
+			json.NewEncoder(w).Encode(leadFromDomain(updated))
 			return
 		case "DELETE":
 			if err := ls.Delete(r.Context(), id); err != nil {
