@@ -198,8 +198,13 @@ func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) 
 			encode(w, contactFromDomain(createdContact))
 			return
 		}
-
-		contactsResponse, err := cs.List(r.Context(), ContactsFilter(r.URL.Query()))
+		filter, err := parseFilter(r.URL.Query())
+		if err != nil {
+			log.Println("Can't convert filter: ", err.Error())
+			http.Error(w, "Filter error", http.StatusBadRequest)
+			return
+		}
+		contactsResponse, err := cs.List(r.Context(), filter.toContacts())
 		if err != nil {
 			log.Println("Can't get contacts error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

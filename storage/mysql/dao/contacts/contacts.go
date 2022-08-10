@@ -48,15 +48,8 @@ func (c *Contacts) List(ctx context.Context, filter contacts.Filter) (contacts.C
 		}
 		q = q.Where(searchType, sql.Named("query", "%"+filter.Query+"%"))
 	}
-	if filter.TagID != 0 {
-		IDs := []uint{}
-		c.db.Raw("select contact_id from contacts_tags WHERE tag_id = ?", filter.TagID).Scan(&IDs)
-		q.Find(&cr.Contacts, IDs)
-	} else {
-		q.Find(&cr.Contacts)
-	}
 
-	if err := q.Count(&cr.Total).Error; err != nil {
+	if err := q.Find(&cr.Contacts).Count(&cr.Total).Error; err != nil {
 		return contacts.ContactsResponse{}, err
 	}
 	resp := contacts.ContactsResponse{

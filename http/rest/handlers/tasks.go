@@ -150,8 +150,13 @@ func Tasks(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		filter := TasksFilter(r.URL.Query())
-		tasksResponse, err := ts.List(r.Context(), filter)
+		filter, err := parseFilter(r.URL.Query())
+		if err != nil {
+			log.Println("Can't convert filter: ", err.Error())
+			http.Error(w, "Filter error", http.StatusBadRequest)
+			return
+		}
+		tasksResponse, err := ts.List(r.Context(), filter.toTasks())
 		if err != nil {
 			log.Println("tasks Response error: ", err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
