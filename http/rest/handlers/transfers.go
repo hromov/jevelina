@@ -187,7 +187,14 @@ func TransfersHandler(f finances.Service) func(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		tResponse, err := f.Transfers(r.Context(), FinFilter(r.URL.Query()))
+		filter, err := parseFilter(r.URL.Query())
+		if err != nil {
+			log.Println("Can't convert filter: ", err.Error())
+			http.Error(w, "Filter error", http.StatusBadRequest)
+			return
+		}
+
+		tResponse, err := f.Transfers(r.Context(), filter.toFinances())
 		if err != nil {
 			log.Println("Can't get transfer error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
@@ -217,8 +224,13 @@ func CategoriesHandler(f finances.Service) func(w http.ResponseWriter, r *http.R
 
 func CategoriesSumHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-
-		sums, err := f.SumByCategory(r.Context(), FinFilter(r.URL.Query()))
+		filter, err := parseFilter(r.URL.Query())
+		if err != nil {
+			log.Println("Can't convert filter: ", err.Error())
+			http.Error(w, "Filter error", http.StatusBadRequest)
+			return
+		}
+		sums, err := f.SumByCategory(r.Context(), filter.toFinances())
 		if err != nil {
 			http.Error(w, "Can't get sum by category error: %s"+err.Error(), http.StatusInternalServerError)
 			return

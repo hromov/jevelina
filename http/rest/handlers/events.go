@@ -13,14 +13,13 @@ import (
 func EventsHandler(es events.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		//TODO: write normal filter or use listFilter
-		listFilter := FilterFromQuery(r.URL.Query())
-		eventFilter := events.EventFilter{
-			UserID:   listFilter.ResponsibleID,
-			ParentID: listFilter.ParentID,
-			Limit:    listFilter.Limit,
-			Offset:   listFilter.Offset,
+		filter, err := parseFilter(r.URL.Query())
+		if err != nil {
+			log.Println("Can't convert filter: ", err.Error())
+			http.Error(w, "Filter error", http.StatusBadRequest)
+			return
 		}
+		eventFilter := filter.toEvents()
 		switch {
 		case strings.HasSuffix(r.URL.Path, "transfers"):
 			eventFilter.EventParentType = events.TransferEvent

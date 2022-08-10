@@ -56,7 +56,6 @@ type ContactRequest struct {
 type Filter struct {
 	Limit  int
 	Offset int
-	TagID  uint8
 	Query  string
 }
 

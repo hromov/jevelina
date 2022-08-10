@@ -155,7 +155,13 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		leadsResponse, err := ls.List(r.Context(), LeadsFilter(r.URL.Query()))
+		filter, err := parseFilter(r.URL.Query())
+		if err != nil {
+			log.Println("Can't convert filter: ", err.Error())
+			http.Error(w, "Filter error", http.StatusBadRequest)
+			return
+		}
+		leadsResponse, err := ls.List(r.Context(), filter.toLeads())
 		if err != nil {
 			log.Println("Can't get leads error: " + err.Error())
 			http.Error(w, http.StatusText(http.StatusInternalServerError),

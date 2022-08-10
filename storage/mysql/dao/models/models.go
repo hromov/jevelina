@@ -65,7 +65,6 @@ type Tag struct {
 	Name      string         `gorm:"size:32;unique"`
 }
 
-// TODO: move to cdb
 func (filter *ListFilter) DateCondition() string {
 	dateSearh := ""
 	if !filter.MinDate.IsZero() {
