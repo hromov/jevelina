@@ -16,12 +16,12 @@ import (
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest"
 	"github.com/hromov/jevelina/http/rest/auth"
+	"github.com/hromov/jevelina/services/events"
+	tokenvalidator "github.com/hromov/jevelina/services/tokenValidator"
 	"github.com/hromov/jevelina/storage/gcloud"
 	"github.com/hromov/jevelina/storage/mysql"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
-	"github.com/hromov/jevelina/utils/events"
-	tokenvalidator "github.com/hromov/jevelina/utils/tokenValidator"
 )
 
 func main() {

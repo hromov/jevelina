@@ -10,9 +10,9 @@ import (
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
+	"github.com/hromov/jevelina/services/events"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
-	"github.com/hromov/jevelina/utils/events"
 )
 
 func InitRouter(

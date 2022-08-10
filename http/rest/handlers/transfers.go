@@ -12,7 +12,7 @@ import (
 	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
-	"github.com/hromov/jevelina/utils/events"
+	"github.com/hromov/jevelina/services/events"
 )
 
 func CompleteTransferHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {

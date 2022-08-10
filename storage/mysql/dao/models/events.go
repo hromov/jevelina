@@ -3,7 +3,7 @@ package models
 import (
 	"time"
 
-	"github.com/hromov/jevelina/utils/events"
+	"github.com/hromov/jevelina/services/events"
 )
 
 type Event struct {
