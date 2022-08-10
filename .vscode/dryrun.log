@@ -1,5 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory '/home/serhii/go/src/github.com/hromov/jevelina'
-golangci-lint run -v
-make: Leaving directory '/home/serhii/go/src/github.com/hromov/jevelina'
- 
