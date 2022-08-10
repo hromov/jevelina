@@ -41,7 +41,7 @@ func taskFromDomain(t tasks.Task) task {
 		CreatedAt: t.CreatedAt,
 		UpdatedAt: t.UpdatedAt,
 		DeletedAt: timeOrNull(t.DeletedAt),
-		DeadLine:  timeOrNull(t.DeletedAt),
+		DeadLine:  timeOrNull(t.DeadLine),
 		Completed: t.Completed,
 
 		Files:       t.Files,
@@ -75,7 +75,7 @@ func Task(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			_ = json.NewEncoder(w).Encode(task)
+			_ = json.NewEncoder(w).Encode(taskFromDomain(task))
 			return
 		case "PUT":
 			task := tasks.TaskData{}
@@ -157,8 +157,12 @@ func Tasks(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
+		list := make([]task, len(tasksResponse.Tasks))
+		for i, t := range tasksResponse.Tasks {
+			list[i] = taskFromDomain(t)
+		}
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
-		_ = json.NewEncoder(w).Encode(tasksResponse.Tasks)
+		_ = json.NewEncoder(w).Encode(list)
 	}
 }

@@ -111,7 +111,7 @@ func (c *Contacts) CreateContact(ctx context.Context, newContact contacts.Contac
 
 func (c *Contacts) UpdateContact(ctx context.Context, contact contacts.ContactRequest) error {
 	dbContact := models.ContactFromDomain(contact)
-	if err := c.db.Debug().WithContext(ctx).Omit(clause.Associations).Model(&models.Contact{}).Where("id", contact.ID).Updates(&dbContact).Error; err != nil {
+	if err := c.db.WithContext(ctx).Omit(clause.Associations).Model(&models.Contact{}).Where("id", contact.ID).Updates(&dbContact).Error; err != nil {
 		return err
 	}
 	return nil
