@@ -6,14 +6,56 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gorilla/mux"
 
 	"github.com/hromov/jevelina/domain/finances"
+	"github.com/hromov/jevelina/domain/misc/files"
 	"github.com/hromov/jevelina/domain/users"
 	"github.com/hromov/jevelina/http/rest/auth"
 	"github.com/hromov/jevelina/services/events"
 )
+
+type transfer struct {
+	ID          uint64
+	ParentID    uint64
+	CreatedAt   time.Time
+	CreatedBy   uint64
+	UpdatedAt   time.Time
+	DeletedAt   *time.Time
+	DeletedBy   uint64
+	Completed   bool
+	CompletedAt *time.Time
+	Description string
+	CompletedBy uint64
+	From        uint16
+	To          uint16
+	Category    string
+	Amount      int64
+	Files       []files.File
+}
+
+func transferFromDomain(t finances.Transfer) transfer {
+	return transfer{
+		ID:          t.ID,
+		ParentID:    t.ParentID,
+		CreatedAt:   t.CreatedAt,
+		CreatedBy:   t.CreatedBy,
+		UpdatedAt:   t.UpdatedAt,
+		DeletedAt:   timeOrNull(t.DeletedAt),
+		DeletedBy:   t.DeletedBy,
+		Completed:   t.Completed,
+		CompletedAt: timeOrNull(t.CompletedAt),
+		Description: t.Description,
+		CompletedBy: t.CompletedBy,
+		From:        t.From,
+		To:          t.To,
+		Category:    t.Category,
+		Amount:      t.Amount,
+		Files:       t.Files,
+	}
+}
 
 func CompleteTransferHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -141,7 +183,7 @@ func TransfersHandler(f finances.Service) func(w http.ResponseWriter, r *http.Re
 					http.StatusInternalServerError)
 			}
 
-			_ = json.NewEncoder(w).Encode(transfer)
+			_ = json.NewEncoder(w).Encode(transferFromDomain(transfer))
 			return
 		}
 
@@ -152,17 +194,14 @@ func TransfersHandler(f finances.Service) func(w http.ResponseWriter, r *http.Re
 				http.StatusInternalServerError)
 		}
 
-		b, err := json.Marshal(tResponse.Transfers)
-		if err != nil {
-			log.Println("Can't json.Marshal(transfers) error: " + err.Error())
-			http.Error(w, http.StatusText(http.StatusInternalServerError),
-				http.StatusInternalServerError)
-			return
+		list := make([]transfer, len(tResponse.Transfers))
+		for i, t := range tResponse.Transfers {
+			list[i] = transferFromDomain(t)
 		}
 		total := strconv.Itoa(int(tResponse.Total))
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", total)
-		fmt.Fprint(w, string(b))
+		_ = json.NewEncoder(w).Encode(list)
 	}
 }
 func CategoriesHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
