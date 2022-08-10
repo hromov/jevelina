@@ -111,7 +111,7 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 					http.StatusInternalServerError)
 				return
 			}
-			json.NewEncoder(w).Encode(leadFromDomain(updated))
+			_ = json.NewEncoder(w).Encode(leadFromDomain(updated))
 			return
 		case "DELETE":
 			if err := ls.Delete(r.Context(), id); err != nil {
