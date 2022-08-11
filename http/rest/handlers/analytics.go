@@ -24,6 +24,6 @@ func LeadsBySource(as analytics.Service) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		json.NewEncoder(w).Encode(sources)
+		_ = json.NewEncoder(w).Encode(sources)
 	}
 }
