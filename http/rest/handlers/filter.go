@@ -10,6 +10,7 @@ import (
 	"github.com/hromov/jevelina/domain/finances"
 	"github.com/hromov/jevelina/domain/leads"
 	"github.com/hromov/jevelina/services/events"
+	"github.com/hromov/jevelina/useCases/analytics"
 	"github.com/hromov/jevelina/useCases/tasks"
 )
 
@@ -87,6 +88,14 @@ func (f *listFilter) toLeads() leads.Filter {
 		MinDate:        f.MinDate,
 		MaxDate:        f.MaxDate,
 		Completed:      f.Completed,
+	}
+}
+
+func (f *listFilter) toAnalytics() analytics.Filter {
+	return analytics.Filter{
+		ResponsibleID: f.ResponsibleID,
+		MinDate:       f.MinDate,
+		MaxDate:       f.MaxDate,
 	}
 }
 
