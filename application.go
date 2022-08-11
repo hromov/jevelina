@@ -20,6 +20,7 @@ import (
 	tokenvalidator "github.com/hromov/jevelina/services/tokenValidator"
 	"github.com/hromov/jevelina/storage/gcloud"
 	"github.com/hromov/jevelina/storage/mysql"
+	"github.com/hromov/jevelina/useCases/analytics"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
 )
@@ -45,6 +46,7 @@ func main() {
 	tv := tokenvalidator.NewService()
 	as := auth.NewService(us, tv)
 	fin := finances.NewService(storage)
+	als := analytics.NewService(ls)
 	es := events.NewService(storage)
 	gc, err := gcloud.NewService(context.Background(), cfg.BucketName)
 	if err != nil {
@@ -52,7 +54,7 @@ func main() {
 	}
 	fs := files.NewService(storage, gc)
 	ordersService := orders.NewService(cs, ls, us, ts)
-	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as, fs, fin, es)
+	router := rest.InitRouter(us, cs, ls, ordersService, ms, ts, as, fs, fin, es, als)
 	credentials := handlers.AllowCredentials()
 	methods := handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"})
 	headersOk := handlers.AllowedHeaders([]string{"Accept", "Accept-Language", "Content-Type", "Content-Language", "Origin", "X-Requested-With", "application/json", "Authorization"})

@@ -11,6 +11,7 @@ import (
 	"github.com/hromov/jevelina/http/rest/auth"
 	api "github.com/hromov/jevelina/http/rest/handlers"
 	"github.com/hromov/jevelina/services/events"
+	"github.com/hromov/jevelina/useCases/analytics"
 	"github.com/hromov/jevelina/useCases/orders"
 	"github.com/hromov/jevelina/useCases/tasks"
 )
@@ -19,17 +20,19 @@ func InitRouter(
 	us users.Service, cs contacts.Service, ls leads.Service,
 	os orders.Service, ms misc.Service, ts tasks.Service,
 	as auth.Service, fs files.Service, fin finances.Service,
-	es events.Service,
+	es events.Service, als analytics.Service,
 ) *mux.Router {
 	r := mux.NewRouter()
 	r.HandleFunc("/usercheck", as.UserCheckHandler()).Methods("GET")
 	r.HandleFunc("/orders", api.Order(us, os)).Methods("POST")
 	// TODO: uncoment for prod
-	r.Use(as.UserCheck)
-	r = UserRoutes(r, us, cs, ls, ms, ts, fs, fin, es)
+	userRoutes := r.NewRoute().Subrouter()
+	userRoutes.Use(as.UserCheck)
+	UserRoutes(userRoutes, us, cs, ls, ms, ts, fs, fin, es)
 	// TODO: uncoment for prod
-	r.Use(as.AdminCheck)
-	r = AdminRoutes(r, us, ms, ls, ts, fs, fin, es)
+	adminRoutes := r.NewRoute().Subrouter()
+	adminRoutes.Use(as.AdminCheck)
+	AdminRoutes(r, us, ms, ls, ts, fs, fin, es, als)
 
 	return r
 }
@@ -37,7 +40,7 @@ func InitRouter(
 func AdminRoutes(
 	r *mux.Router, us users.Service, ms misc.Service,
 	ls leads.Service, ts tasks.Service, fs files.Service,
-	fin finances.Service, es events.Service,
+	fin finances.Service, es events.Service, als analytics.Service,
 ) *mux.Router {
 	r.HandleFunc("/users", api.CreateUser(us)).Methods("POST")
 	r.HandleFunc("/users/{id}", api.UpdateUser(us)).Methods("PUT")
@@ -68,6 +71,7 @@ func AdminRoutes(
 	// r.HandleFunc("/wallets/{id}/open", api.OpenWalletHandler).Methods("GET")
 	r.HandleFunc("/transfers/{id}", api.TransferHandler(fin, es)).Methods("DELETE")
 	r.HandleFunc("/transfers/{id}/complete", api.CompleteTransferHandler(fin)).Methods("GET")
+	r.HandleFunc("/analytics/sources", api.LeadsBySource(als)).Methods("GET")
 	return r
 }
 

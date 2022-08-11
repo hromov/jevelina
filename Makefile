@@ -26,3 +26,12 @@ serve:
 generate:
 	go generate ./...
 
+.PHONY: db-admin-start
+db-admin-start:
+	docker compose up -d > docker-compose-up.out
+	$(info DB is running)
+
+.PHONY: db-admin-stop
+db-admin-stop:
+	docker compose down > docker-compose-down.out
+
