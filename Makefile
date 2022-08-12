@@ -8,7 +8,11 @@ lint-go:
 
 .PHONY: test
 test: 
-	go test ./...
+	go test ./... -coverprofile=cover.out
+
+.PHONY: cover
+cover: 
+	go tool cover -html=cover.out
 
 .PHONY: build
 build:
@@ -21,4 +25,13 @@ serve:
 .PHONY: generate
 generate:
 	go generate ./...
+
+.PHONY: db-admin-start
+db-admin-start:
+	docker compose up -d > docker-compose-up.out
+	$(info DB is running)
+
+.PHONY: db-admin-stop
+db-admin-stop:
+	docker compose down > docker-compose-down.out
 

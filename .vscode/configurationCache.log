@@ -1,1 +1,0 @@
-{"buildTargets":["build","generate","lint","lint-go","serve","test"],"launchTargets":[],"customConfigurationProvider":{"workspaceBrowse":{"browsePath":[],"compilerArgs":[]},"fileIndex":[]}}
