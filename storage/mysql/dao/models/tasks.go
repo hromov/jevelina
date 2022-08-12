@@ -73,8 +73,8 @@ func TaskFromTaskData(t tasks.TaskData) Task {
 		ParentID:      t.ParentID,
 		DeadLine:      TimeOrNil(t.DeadLine),
 		Description:   t.Description,
-		ResponsibleID: OrNil(t.ResponsibleID),
-		CreatedID:     OrNil(t.CreatedID),
+		ResponsibleID: OrNil64(t.ResponsibleID),
+		CreatedID:     OrNil64(t.CreatedID),
 		Results:       t.Results,
 		Completed:     t.Completed,
 	}

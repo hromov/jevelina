@@ -37,7 +37,7 @@ var createRoleTests = []roleCreateTest{
 			Role:      "some name",
 		},
 		respErr: nil,
-		code:    http.StatusAccepted,
+		code:    http.StatusCreated,
 	},
 	{
 		name:    "json failed role creation",
@@ -57,29 +57,32 @@ var createRoleTests = []roleCreateTest{
 
 func TestCreateRole(t *testing.T) {
 	for _, tc := range createRoleTests {
-		req, err := http.NewRequest(
-			"POST",
-			"/roles",
-			bytes.NewBuffer([]byte(
-				[]byte(tc.req),
-			)),
-		)
-		require.NoError(t, err)
+		t.Run(tc.name, func(t *testing.T) {
+			req, err := http.NewRequest(
+				"POST",
+				"/roles",
+				bytes.NewBuffer([]byte(
+					[]byte(tc.req),
+				)),
+			)
+			require.NoError(t, err)
 
-		us := &mocks.UsersService{}
-		us.On("CreateRole", mock.Anything, mock.Anything).Return(tc.resp, tc.respErr)
+			us := &mocks.UsersService{}
+			us.On("CreateRole", mock.Anything, mock.Anything).Return(tc.resp, tc.respErr)
 
-		rr := httptest.NewRecorder()
-		handler := http.HandlerFunc(api.CreateRole(us))
+			rr := httptest.NewRecorder()
+			handler := http.HandlerFunc(api.CreateRole(us))
 
-		handler.ServeHTTP(rr, req)
+			handler.ServeHTTP(rr, req)
 
-		require.Equal(t, tc.code, rr.Code)
+			require.Equal(t, tc.code, rr.Code)
 
-		//we test result body only for success cases
-		if tc.code < 400 {
-			b, _ := json.Marshal(tc.resp)
-			require.Equal(t, string(b), rr.Body.String())
-		}
+			//we test result body only for success cases
+			if tc.code < 400 {
+				b, _ := json.Marshal(tc.resp)
+				require.Equal(t, string(b), rr.Body.String())
+			}
+		})
+
 	}
 }

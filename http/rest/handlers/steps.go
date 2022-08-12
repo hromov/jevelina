@@ -32,7 +32,7 @@ func Step(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			_ = json.NewEncoder(w).Encode(step)
+			encode(w, step)
 			return
 		case "PUT":
 			step := leads.Step{}
@@ -80,7 +80,8 @@ func Steps(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			_ = json.NewEncoder(w).Encode(step)
+			w.WriteHeader(http.StatusCreated)
+			encode(w, step)
 			return
 		}
 
@@ -90,6 +91,6 @@ func Steps(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		_ = json.NewEncoder(w).Encode(steps)
+		encode(w, steps)
 	}
 }

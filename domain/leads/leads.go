@@ -57,34 +57,6 @@ type Step struct {
 	Active bool
 }
 
-type LeadRequest struct {
-	Name        string
-	Price       int
-	Description string
-
-	ClientName  string
-	ClientEmail string
-	ClientPhone string
-
-	Source       string
-	Product      string
-	Manufacturer string
-
-	UserEmail string
-	UserHash  string
-
-	CID string
-	UID string
-	TID string
-
-	UtmID       string
-	UtmSource   string
-	UtmMedium   string
-	UtmCampaign string
-
-	Domain string
-}
-
 type LeadData struct {
 	ID       uint64
 	ClosedAt time.Time

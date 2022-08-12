@@ -183,7 +183,8 @@ func TransfersHandler(f finances.Service) func(w http.ResponseWriter, r *http.Re
 					http.StatusInternalServerError)
 			}
 
-			_ = json.NewEncoder(w).Encode(transferFromDomain(transfer))
+			w.WriteHeader(http.StatusCreated)
+			encode(w, transferFromDomain(transfer))
 			return
 		}
 
@@ -208,7 +209,7 @@ func TransfersHandler(f finances.Service) func(w http.ResponseWriter, r *http.Re
 		total := strconv.Itoa(int(tResponse.Total))
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", total)
-		_ = json.NewEncoder(w).Encode(list)
+		encode(w, list)
 	}
 }
 func CategoriesHandler(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
@@ -218,7 +219,7 @@ func CategoriesHandler(f finances.Service) func(w http.ResponseWriter, r *http.R
 			http.Error(w, "Can't get transfer categories error: %s"+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		_ = json.NewEncoder(w).Encode(categories)
+		encode(w, categories)
 	}
 }
 
@@ -235,7 +236,7 @@ func CategoriesSumHandler(f finances.Service) func(w http.ResponseWriter, r *htt
 			http.Error(w, "Can't get sum by category error: %s"+err.Error(), http.StatusInternalServerError)
 			return
 		}
-		_ = json.NewEncoder(w).Encode(sums)
+		encode(w, sums)
 	}
 }
 
