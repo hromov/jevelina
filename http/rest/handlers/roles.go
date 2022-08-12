@@ -60,7 +60,7 @@ func CreateRole(us users.Service) func(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		log.Println("new role was created: ", string(b))
-		w.WriteHeader(http.StatusAccepted)
+		w.WriteHeader(http.StatusCreated)
 		fmt.Fprint(w, string(b))
 	}
 }

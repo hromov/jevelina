@@ -32,7 +32,7 @@ func Product(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			_ = json.NewEncoder(w).Encode(product)
+			encode(w, product)
 			return
 		case "PUT":
 			product := misc.Product{}
@@ -84,6 +84,8 @@ func Products(ms misc.Service) func(w http.ResponseWriter, r *http.Request) {
 			log.Println("Can't get products error: ", err)
 			http.Error(w, "Can't get products list", http.StatusInternalServerError)
 		}
-		_ = json.NewEncoder(w).Encode(products)
+
+		w.WriteHeader(http.StatusCreated)
+		encode(w, products)
 	}
 }

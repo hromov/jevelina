@@ -75,7 +75,7 @@ func Task(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			_ = json.NewEncoder(w).Encode(taskFromDomain(task))
+			encode(w, taskFromDomain(task))
 			return
 		case "PUT":
 			task := tasks.TaskData{}
@@ -146,7 +146,9 @@ func Tasks(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
-			_ = json.NewEncoder(w).Encode(taskFromDomain(createdTask))
+
+			w.WriteHeader(http.StatusCreated)
+			encode(w, taskFromDomain(createdTask))
 			return
 		}
 
@@ -168,6 +170,6 @@ func Tasks(ts tasks.Service) func(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", strconv.FormatInt(tasksResponse.Total, 10))
-		_ = json.NewEncoder(w).Encode(list)
+		encode(w, list)
 	}
 }

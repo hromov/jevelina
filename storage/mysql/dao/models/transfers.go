@@ -35,15 +35,15 @@ type Transfer struct {
 func TransferFromDomain(t finances.Transfer) Transfer {
 	return Transfer{
 		ID:          t.ID,
-		ParentID:    OrNil(t.ParentID),
+		ParentID:    OrNil64(t.ParentID),
 		CreatedAt:   t.CreatedAt,
 		CreatedBy:   t.CreatedBy,
 		Completed:   t.Completed,
 		CompletedAt: TimeOrNil(t.CompletedAt),
 		Description: t.Description,
 		CompletedBy: t.CompletedBy,
-		From:        OrNil(t.From),
-		To:          OrNil(t.To),
+		From:        OrNil16(t.From),
+		To:          OrNil16(t.To),
 		Category:    t.Category,
 		Amount:      t.Amount,
 	}
@@ -52,7 +52,7 @@ func TransferFromDomain(t finances.Transfer) Transfer {
 func (t *Transfer) ToDomain() finances.Transfer {
 	return finances.Transfer{
 		ID:          t.ID,
-		ParentID:    Val(t.ParentID),
+		ParentID:    Val64(t.ParentID),
 		CreatedAt:   t.CreatedAt,
 		CreatedBy:   t.CreatedBy,
 		UpdatedAt:   t.UpdatedAt,
@@ -62,8 +62,8 @@ func (t *Transfer) ToDomain() finances.Transfer {
 		CompletedAt: Time(t.CompletedAt),
 		Description: t.Description,
 		CompletedBy: t.CompletedBy,
-		From:        Val(t.From),
-		To:          Val(t.To),
+		From:        Val16(t.From),
+		To:          Val16(t.To),
 		Category:    t.Category,
 		Amount:      t.Amount,
 		Files:       FilesToDomain(t.Files),

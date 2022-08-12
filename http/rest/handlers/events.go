@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -37,6 +36,6 @@ func EventsHandler(es events.Service) func(w http.ResponseWriter, r *http.Reques
 		total := strconv.Itoa(int(eResponse.Total))
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", total)
-		_ = json.NewEncoder(w).Encode(eResponse.Events)
+		encode(w, eResponse.Events)
 	}
 }

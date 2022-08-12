@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 
@@ -24,6 +23,6 @@ func LeadsBySource(as analytics.Service) func(w http.ResponseWriter, r *http.Req
 			return
 		}
 
-		_ = json.NewEncoder(w).Encode(sources)
+		encode(w, sources)
 	}
 }

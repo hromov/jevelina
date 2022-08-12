@@ -25,7 +25,8 @@ func Files(fs files.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, "File Uploading Error: "+err.Error(), http.StatusInternalServerError)
 				return
 			}
-			_ = json.NewEncoder(w).Encode(file)
+			w.WriteHeader(http.StatusCreated)
+			encode(w, file)
 			return
 		case "GET":
 			parentString := r.URL.Query().Get("parent")
@@ -46,7 +47,7 @@ func Files(fs files.Service) func(w http.ResponseWriter, r *http.Request) {
 				http.Error(w, http.StatusText(http.StatusInternalServerError),
 					http.StatusInternalServerError)
 			}
-			_ = json.NewEncoder(w).Encode(files)
+			encode(w, files)
 			return
 		}
 	}

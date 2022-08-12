@@ -158,7 +158,7 @@ func Contact(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) {
 					http.StatusInternalServerError)
 				return
 			}
-			_ = json.NewEncoder(w).Encode(contactFromDomain(updated))
+			encode(w, contactFromDomain(updated))
 			return
 		case "DELETE":
 			if err := cs.Delete(r.Context(), id); err != nil {
@@ -218,7 +218,7 @@ func Contacts(cs contacts.Service) func(w http.ResponseWriter, r *http.Request) 
 
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", strconv.FormatInt(contactsResponse.Total, 10))
-
+		w.WriteHeader(http.StatusCreated)
 		encode(w, contacts)
 	}
 }

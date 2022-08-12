@@ -82,7 +82,7 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				}
 				return
 			}
-			_ = json.NewEncoder(w).Encode(leadFromDomain(lead))
+			encode(w, leadFromDomain(lead))
 			return
 		case "PUT":
 			lead := leads.LeadData{}
@@ -111,7 +111,7 @@ func Lead(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 					http.StatusInternalServerError)
 				return
 			}
-			_ = json.NewEncoder(w).Encode(leadFromDomain(updated))
+			encode(w, leadFromDomain(updated))
 			return
 		case "DELETE":
 			if err := ls.Delete(r.Context(), id); err != nil {
@@ -151,7 +151,8 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 
-			_ = json.NewEncoder(w).Encode(leadFromDomain(createdLead))
+			w.WriteHeader(http.StatusCreated)
+			encode(w, leadFromDomain(createdLead))
 			return
 		}
 
@@ -175,6 +176,6 @@ func Leads(ls leads.Service) func(w http.ResponseWriter, r *http.Request) {
 
 		w.Header().Set("Access-Control-Expose-Headers", "X-Total-Count")
 		w.Header().Set("X-Total-Count", strconv.FormatInt(leadsResponse.Total, 10))
-		_ = json.NewEncoder(w).Encode(leads)
+		encode(w, leads)
 	}
 }

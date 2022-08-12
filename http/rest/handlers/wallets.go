@@ -66,7 +66,7 @@ func ChangeWalletState(f finances.Service) func(w http.ResponseWriter, r *http.R
 				http.StatusInternalServerError)
 			return
 		}
-		w.WriteHeader(http.StatusAccepted)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 
@@ -124,7 +124,7 @@ func Wallets(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
 					http.StatusInternalServerError)
 			}
 
-			_ = json.NewEncoder(w).Encode(wallet)
+			encode(w, wallet)
 			return
 		}
 
@@ -134,6 +134,8 @@ func Wallets(f finances.Service) func(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, http.StatusText(http.StatusInternalServerError),
 				http.StatusInternalServerError)
 		}
-		_ = json.NewEncoder(w).Encode(wallets)
+
+		w.WriteHeader(http.StatusCreated)
+		encode(w, wallets)
 	}
 }

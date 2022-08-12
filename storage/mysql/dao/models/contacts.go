@@ -78,8 +78,8 @@ func ContactFromDomain(c contacts.ContactRequest) Contact {
 		IsPerson:      true,
 		Name:          c.Name,
 		SecondName:    c.SecondName,
-		ResponsibleID: OrNil(c.ResponsibleID),
-		CreatedID:     OrNil(c.CreatedID),
+		ResponsibleID: OrNil64(c.ResponsibleID),
+		CreatedID:     OrNil64(c.CreatedID),
 
 		Phone:       c.Phone,
 		SecondPhone: c.SecondPhone,
@@ -91,7 +91,7 @@ func ContactFromDomain(c contacts.ContactRequest) Contact {
 		Address: c.Address,
 
 		Position: c.Position,
-		SourceID: OrNil(c.SourceID),
+		SourceID: OrNil8(c.SourceID),
 
 		Analytics: Analytics(c.Analytics),
 	}
