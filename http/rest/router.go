@@ -30,7 +30,7 @@ func InitRouter(
 	userRoutes.Use(as.UserCheck)
 	UserRoutes(userRoutes, us, cs, ls, ms, ts, fs, fin, es)
 	// TODO: uncoment for prod
-	adminRoutes := r.NewRoute().Subrouter()
+	adminRoutes := userRoutes.NewRoute().Subrouter()
 	adminRoutes.Use(as.AdminCheck)
 	AdminRoutes(r, us, ms, ls, ts, fs, fin, es, als)
 
