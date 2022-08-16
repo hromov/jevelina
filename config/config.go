@@ -17,11 +17,21 @@ type Config struct {
 	Env        Environment
 	Dsn        string
 	BucketName string
+	GCloud     GCloud
+}
+
+type GCloud struct {
+	ProjectID string
+	Service   string
 }
 
 var defaultConfig = Config{
 	Env:        EnvLocal,
 	BucketName: "jevelina",
+	GCloud: GCloud{
+		ProjectID: "vorota-ua",
+		Service:   "default",
+	},
 }
 
 func Get() Config {
