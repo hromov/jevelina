@@ -13,9 +13,11 @@ type Events struct {
 	db *gorm.DB
 }
 
-func NewEvents(db *gorm.DB) *Events {
-	if err := db.AutoMigrate(&models.Event{}); err != nil {
-		log.Println("Can't auto migrate events error: ", err.Error())
+func NewEvents(db *gorm.DB, automigrate bool) *Events {
+	if automigrate {
+		if err := db.AutoMigrate(&models.Event{}); err != nil {
+			log.Println("Can't auto migrate events error: ", err.Error())
+		}
 	}
 	return &Events{db}
 }

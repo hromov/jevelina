@@ -13,9 +13,11 @@ type Files struct {
 	*gorm.DB
 }
 
-func NewFiles(db *gorm.DB) *Files {
-	if err := db.AutoMigrate(&models.File{}); err != nil {
-		log.Printf("misc migration for %s error: %s\n", "files", err.Error())
+func NewFiles(db *gorm.DB, automigrate bool) *Files {
+	if automigrate {
+		if err := db.AutoMigrate(&models.File{}); err != nil {
+			log.Printf("misc migration for %s error: %s\n", "files", err.Error())
+		}
 	}
 	return &Files{db}
 }

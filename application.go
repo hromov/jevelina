@@ -34,7 +34,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	storage, err := mysql.NewStorage(string(dns))
+	storage, err := mysql.NewStorage(string(dns), cfg.AutoMigrate)
 	if err != nil {
 		log.Fatal("Can't init storage error: ", err.Error())
 	}
