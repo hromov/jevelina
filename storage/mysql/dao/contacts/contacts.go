@@ -20,9 +20,11 @@ type Contacts struct {
 	db *gorm.DB
 }
 
-func NewContacts(db *gorm.DB) *Contacts {
-	if err := db.AutoMigrate(&models.Contact{}); err != nil {
-		log.Println("Can't megrate leads error: ", err.Error())
+func NewContacts(db *gorm.DB, automigrate bool) *Contacts {
+	if automigrate {
+		if err := db.AutoMigrate(&models.Contact{}); err != nil {
+			log.Println("Can't megrate leads error: ", err.Error())
+		}
 	}
 	return &Contacts{db}
 }

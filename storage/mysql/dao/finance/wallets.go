@@ -14,13 +14,14 @@ type Finance struct {
 	db *gorm.DB
 }
 
-func NewFinance(db *gorm.DB) *Finance {
-
-	if err := db.AutoMigrate(&models.Wallet{}); err != nil {
-		log.Printf("migration for %s error: %s\n", "wallet", err.Error())
-	}
-	if err := db.AutoMigrate(&models.Transfer{}); err != nil {
-		log.Printf("migration for %s error: %s\n", "transfer", err.Error())
+func NewFinance(db *gorm.DB, automigrate bool) *Finance {
+	if automigrate {
+		if err := db.AutoMigrate(&models.Wallet{}); err != nil {
+			log.Printf("migration for %s error: %s\n", "wallet", err.Error())
+		}
+		if err := db.AutoMigrate(&models.Transfer{}); err != nil {
+			log.Printf("migration for %s error: %s\n", "transfer", err.Error())
+		}
 	}
 	return &Finance{db}
 }

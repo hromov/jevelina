@@ -14,10 +14,11 @@ const (
 )
 
 type Config struct {
-	Env        Environment
-	Dsn        string
-	BucketName string
-	GCloud     GCloud
+	Env         Environment
+	Dsn         string
+	BucketName  string
+	GCloud      GCloud
+	AutoMigrate bool
 }
 
 type GCloud struct {

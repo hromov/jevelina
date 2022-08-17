@@ -15,12 +15,14 @@ type Leads struct {
 	db *gorm.DB
 }
 
-func NewLeads(db *gorm.DB) *Leads {
-	if err := db.AutoMigrate(&models.Lead{}); err != nil {
-		log.Println("Can't megrate leads error: ", err.Error())
-	}
-	if err := db.AutoMigrate(&models.Step{}); err != nil {
-		log.Println("Can't megrate leads error: ", err.Error())
+func NewLeads(db *gorm.DB, automigrate bool) *Leads {
+	if automigrate {
+		if err := db.AutoMigrate(&models.Lead{}); err != nil {
+			log.Println("Can't megrate leads error: ", err.Error())
+		}
+		if err := db.AutoMigrate(&models.Step{}); err != nil {
+			log.Println("Can't megrate leads error: ", err.Error())
+		}
 	}
 	return &Leads{db}
 }
