@@ -58,14 +58,14 @@ func Val8(v *uint8) uint8 {
 	return *v
 }
 
-// func OrNil[V uint8 | uint64 | uint32 | uint16](u V) *V {
+// func OrNil[V constraints.Unsigned](u V) *V {
 // 	if u == 0 {
 // 		return nil
 // 	}
 // 	return &u
 // }
 
-// func Val[V uint8 | uint64 | uint32 | uint16](v *V) V {
+// func Val[V constraints.Unsigned](v *V) V {
 // 	if v == nil {
 // 		return 0
 // 	}
