@@ -20,9 +20,11 @@ type Contacts struct {
 	db *gorm.DB
 }
 
-func NewContacts(db *gorm.DB) *Contacts {
-	if err := db.AutoMigrate(&models.Contact{}); err != nil {
-		log.Println("Can't megrate leads error: ", err.Error())
+func NewContacts(db *gorm.DB, automigrate bool) *Contacts {
+	if automigrate {
+		if err := db.AutoMigrate(&models.Contact{}); err != nil {
+			log.Println("Can't megrate leads error: ", err.Error())
+		}
 	}
 	return &Contacts{db}
 }
@@ -77,7 +79,7 @@ func (c *Contacts) ByPhone(ctx context.Context, phone string) (contacts.Contact,
 		return contacts.Contact{}, errors.New("Phone should be at least 6 char length")
 	}
 	var contact models.Contact
-	if err := c.db.Where(phonesOnly, sql.Named("query", phone)).First(contact).Error; err != nil {
+	if err := c.db.Where(phonesOnly, sql.Named("query", phone)).First(&contact).Error; err != nil {
 		return contacts.Contact{}, err
 	}
 	return contact.ToDomain(), nil

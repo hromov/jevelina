@@ -24,7 +24,7 @@ type Storage struct {
 	*events.Events
 }
 
-func NewStorage(dns string) (*Storage, error) {
+func NewStorage(dns string, automigrate bool) (*Storage, error) {
 	db, err := gorm.Open(mysql.Open(dns), &gorm.Config{
 		SkipDefaultTransaction: true,
 	})
@@ -32,12 +32,12 @@ func NewStorage(dns string) (*Storage, error) {
 		return nil, fmt.Errorf("failed to connect database error: %s", err.Error())
 	}
 	return &Storage{
-		users.NewUsers(db),
-		misc.NewMisc(db),
-		leads.NewLeads(db),
-		contacts.NewContacts(db),
-		files.NewFiles(db),
-		finance.NewFinance(db),
-		events.NewEvents(db),
+		users.NewUsers(db, automigrate),
+		misc.NewMisc(db, automigrate),
+		leads.NewLeads(db, automigrate),
+		contacts.NewContacts(db, automigrate),
+		files.NewFiles(db, automigrate),
+		finance.NewFinance(db, automigrate),
+		events.NewEvents(db, automigrate),
 	}, nil
 }

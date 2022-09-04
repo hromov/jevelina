@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 
+	"cloud.google.com/go/profiler"
 	"github.com/gorilla/handlers"
 	"github.com/hromov/jevelina/config"
 	"github.com/hromov/jevelina/domain/contacts"
@@ -33,7 +34,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	storage, err := mysql.NewStorage(string(dns))
+	storage, err := mysql.NewStorage(string(dns), cfg.AutoMigrate)
 	if err != nil {
 		log.Fatal("Can't init storage error: ", err.Error())
 	}
@@ -65,6 +66,13 @@ func main() {
 	if port == "" {
 		port = "8080"
 		log.Printf("Defaulting to port %s", port)
+	}
+
+	if err := profiler.Start(profiler.Config{
+		ProjectID: cfg.GCloud.ProjectID,
+		Service:   cfg.GCloud.Service,
+	}); err != nil {
+		log.Println("profiling init error: ", err.Error())
 	}
 
 	log.Printf("Listening on port %s", port)

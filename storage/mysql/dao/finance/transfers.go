@@ -39,6 +39,10 @@ func (f *Finance) CompleteTransfer(ctx context.Context, id uint64, userID uint64
 			return errors.New("Can't complete deleted target")
 		}
 
+		if t.Completed {
+			return errors.New("Transfer already completed")
+		}
+
 		if t.From != nil {
 			var from *models.Wallet
 			if err := tx.First(&from, t.From).Error; err != nil {

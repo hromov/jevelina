@@ -14,13 +14,15 @@ type Users struct {
 	db *gorm.DB
 }
 
-func NewUsers(db *gorm.DB) *Users {
-	if err := db.AutoMigrate(&models.User{}); err != nil {
-		log.Printf("misc migration for %s error: %s\n", "user", err.Error())
-	}
+func NewUsers(db *gorm.DB, automigrate bool) *Users {
+	if automigrate {
+		if err := db.AutoMigrate(&models.User{}); err != nil {
+			log.Printf("misc migration for %s error: %s\n", "user", err.Error())
+		}
 
-	if err := db.AutoMigrate(&models.Role{}); err != nil {
-		log.Printf("misc migration for %s error: %s\n", "role", err.Error())
+		if err := db.AutoMigrate(&models.Role{}); err != nil {
+			log.Printf("misc migration for %s error: %s\n", "role", err.Error())
+		}
 	}
 
 	user := models.User{ID: 1}
