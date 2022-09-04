@@ -44,12 +44,13 @@ func (s *service) CreateForUser(ctx context.Context, order Order, user users.Use
 		return err
 	}
 
-	lead, err := s.ls.Create(ctx, order.ToLeadData(contact.ID, user.ID))
+	respID := contact.Responsible.ID
+	lead, err := s.ls.Create(ctx, order.ToLeadData(contact.ID, respID))
 	if err != nil {
 		return err
 	}
 
-	task := order.ToTaskData(lead.ID, user.ID)
+	task := order.ToTaskData(lead.ID, respID)
 	_, err = s.ts.Create(ctx, task)
 	if err != nil {
 		return err
