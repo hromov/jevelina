@@ -79,7 +79,7 @@ func (c *Contacts) ByPhone(ctx context.Context, phone string) (contacts.Contact,
 		return contacts.Contact{}, errors.New("Phone should be at least 6 char length")
 	}
 	var contact models.Contact
-	if err := c.db.Where(phonesOnly, sql.Named("query", phone)).First(&contact).Error; err != nil {
+	if err := c.db.Unscoped().Preload(clause.Associations).Where(phonesOnly, sql.Named("query", phone)).First(&contact).Error; err != nil {
 		return contacts.Contact{}, err
 	}
 	return contact.ToDomain(), nil
